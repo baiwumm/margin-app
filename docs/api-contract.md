@@ -23,28 +23,31 @@ interface ApiEnvelope<T> {
 
 ## 2. 端点清单（13 个，构建期由 `src/pages/api/v1/**` 落盘为静态文件）
 
+> 体积预算列中「实测」为 M0 全量构建数字（2026-09-28，74 篇）；manifest / titles 两项按实测修订原估算并留余量，端上真实流量以 gzip 后为准（manifest ≈ 4KB、titles ≈ 12KB）。
+
 | 端点 | 内容 | 体积预算（gzip 前） |
 | --- | --- | --- |
-| `GET /api/v1/manifest.json` | 版本与资源清单（结构见 §3.3 Manifest） | < 4 KB |
-| `GET /api/v1/site.json` | 站点配置：标题/描述/作者/**头像（avatar，D39）**/社交链接/导航/**hero 文案（D38）**/`announcement`（单条或 null，D20/D32）/首页 layout 开关/主题令牌 + 色板 | < 6 KB |
-| `GET /api/v1/posts/index.json` | 文章列表元数据（**不含正文**），74 篇全量 | < 80 KB |
-| `GET /api/v1/posts/<slug>.json` | 文章详情（含 Block AST 正文） | 单篇 5–200 KB |
-| `GET /api/v1/galleries/index.json` | 画廊列表（`photoCount` / `cover` / `tags`） | < 4 KB |
-| `GET /api/v1/galleries/<slug>.json` | 画廊详情（`photos: GalleryPhoto[]`，一份文件给全不分片） | 20–200 KB |
-| `GET /api/v1/moments/index.json` | 瞬间全量（9 条 / 16 图，单文件不分片，D20；月份分组由端上按 `pubDatetime` 算） | < 60 KB |
-| `GET /api/v1/tags/index.json` | 标签聚合（blog + galleries = 62 个；含 `count` / `slug` / `color` / `colorDark` / `ink`） | < 12 KB |
-| `GET /api/v1/friends.json` | 友链分组 | < 8 KB |
-| `GET /api/v1/projects.json` | 项目列表（stars/forks 构建期已刷新） | < 8 KB |
-| `GET /api/v1/stats.json` | 数据看板（热力图按 `pubDatetime` 聚合，D34） | < 16 KB |
-| `GET /api/v1/search/titles.json` | 检索第一层：标题/标签/摘要/小标题 + 拼音 | < 40 KB |
-| `GET /api/v1/search/terms.json` | 检索第二层：全文倒排，输入 ≥2 字懒加载（bigram，D21） | 150–400 KB |
+| `GET /api/v1/manifest.json` | 版本与资源清单（结构见 §3.3 Manifest） | ≤ 24 KB（实测 14.5KB；原估 4KB 不含 87 个 resources，见 D45） |
+| `GET /api/v1/site.json` | 站点配置：标题/描述/作者/**头像（avatar，D39）**/社交链接/导航/**hero 文案（D38）**/`announcement`（单条或 null，D20/D32）/首页 layout 开关/主题令牌 + 色板 | < 6 KB（实测 0.8KB） |
+| `GET /api/v1/posts/index.json` | 文章列表元数据（**不含正文**），74 篇全量 | < 80 KB（实测 37.6KB） |
+| `GET /api/v1/posts/<slug>.json` | 文章详情（含 Block AST 正文） | 单篇 ≤ 200 KB（实测 3.8–42.6KB，中位 12KB） |
+| `GET /api/v1/galleries/index.json` | 画廊列表（`photoCount` / `cover` / `tags`） | < 4 KB（实测 3.6KB） |
+| `GET /api/v1/galleries/<slug>.json` | 画廊详情（`photos: GalleryPhoto[]`，一份文件给全不分片） | ≤ 200 KB（实测 ≤ 42.6KB） |
+| `GET /api/v1/moments/index.json` | 瞬间全量（9 条 / 16 图，单文件不分片，D20；月份分组由端上按 `pubDatetime` 算） | < 60 KB（实测 14.6KB） |
+| `GET /api/v1/tags/index.json` | 标签聚合（blog + galleries = 62 个；含 `count` / `slug` / `color` / `colorDark` / `ink`） | < 12 KB（实测 6.6KB） |
+| `GET /api/v1/friends.json` | 友链分组 | < 8 KB（实测 6.5KB） |
+| `GET /api/v1/projects.json` | 项目列表（stars/forks 构建期已刷新） | < 8 KB（实测 1.8KB） |
+| `GET /api/v1/stats.json` | 数据看板（热力图按 `pubDatetime` 聚合，D34） | < 16 KB（实测 3.3KB） |
+| `GET /api/v1/search/titles.json` | 检索第一层：标题/标签/摘要/小标题 + 拼音 | ≤ 48 KB（实测 46.3KB，原估 40KB 不含拼音键全量，见 D45） |
+| `GET /api/v1/search/terms.json` | 检索第二层：全文倒排，输入 ≥2 字懒加载（bigram，D21） | ≤ 400 KB（实测 376KB；正文只索引前 28 段，api-contract §6 授权的收缩手段） |
 
 ## 3. 类型定义
 
 ### 3.1 文章
 
 ```ts
-/** 列表项元数据 —— 不含正文，首页/标签/归档/搜索复用同一结构 */
+/** 列表项元数据 —— 不含正文，首页/标签/归档/搜索复用同一结构。
+ *  列表排序 = pubDatetime 降序（D40）；「默认」tab 同口径。 */
 interface PostMeta {
   slug: string;              // 由 getPath 推导，端上不推算
   path: string;              // 站点相对路径，如 "/posts/r4ACa87S/"
@@ -134,11 +137,13 @@ interface Stats {
 }
 
 interface Resource { name: string; path: string; hash: string; bytes: number }
+// hash = sha256 截断 12 位（M0 实测定档，D45）
 interface Manifest {
   schemaVersion: number; buildId: string; generatedAt: string;
   assetBase: string;                    // 固定 "https://www.baiwumm.com"（D19）
   site: { title: string; author: string; desc: string };
   counts: { posts: number; galleries: number; moments: number; tags: number; images: number };
+  // images = 正文图片引用数（D41 口径；M0 实测 244：MDX 内 JSX 图与远程图不计）
   resources: Resource[];                // 端上按 hash 做细粒度失效
   searchIndex: { titlesPath: string; titlesHash: string; termsPath: string; termsHash: string;
                  termsMinChars: 2; strategy: 'bigram' };
@@ -158,6 +163,13 @@ parseVideoCard(node: MdNode): VideoCardAttrs | null   // { id?, src?, poster?, t
 ```
 
 非指令段落一律返回 `null`；插件本体已改为「parse → TDK/resolve → buildHtml」。等价性已在 M0-0 以同环境双管线逐字节比对证明（research.md §7）。导出层在 Markdown AST 层先摘出指令节点、旁路调 `parse*`，其余节点走 hast 降维（`remarkRemoveTocMarker` / `rehypeExternalLinks` 原样复用）。
+
+**M0 实测行为定档（2026-09-28，全量 74 篇验证）**：
+
+- `linkcard`：站内链填 frontmatter TDK（禁联网）+ `icon` = `/posts/<slug>/index.png`；外链**只填** `href` + 作者手写 `title`（override/note），无手写时标题降级为域名（fetchTdk 不重跑的代价，已记 D45）。
+- `video`：B 站链接自动提取 BV 号；非 B 站 `id`（无 `src`）离线降级为 `linkcard`（b23.tv 短链因禁联网保留原样，端上 M2 处理）。
+- `unknown` 兜底实测 35 处/10 篇：作者手写 `<div class="grid …">` 布局 HTML（成对出现，端上可按 unknown 呈现占位说明）、MDX 文章的 JSX（仅 m7k3q9x2 一篇，4 处）、远程图（1 处）。构建期警告不阻断（api-contract §4 原则）。
+- 块统计实测：p 1070 / h 520 / list 442 / code 365 / img 246 / linkcard 46 / quote 52 / table 29 / music 3 / video 4 / hr 2 / unknown 35。
 
 **禁止联网**：`remarkLinkCard.ts:222 fetchTdk()` 会在构建期发网络请求抓外链 TDK——导出层**不得**重跑（Cloudflare 构建容器耗时/内存更紧，不拿已知不稳定环节赌发布）；linkcard 块只填 `href` + 作者手写标题/备注，已解析的 TDK 从 `music-cache.json` / `video-cache.json` 读。
 
@@ -259,15 +271,18 @@ interface TermIndex {
 
 > **验收口径（D44，2026-09-28）**：workers.dev 已关闭、无预览产物可访问 → 机械性检查（1/3/6）以**构建内断言**执行（导出管线自检，违规 throw 使构建失败，check-run 变红即不合规发不了版）；体验性检查（4/5）与抽样复核在**合并部署后的生产域（www）**执行。workers.dev 探针期的预览 URL 比对法废止（过程记录见 research.md §7）。
 
-1. 13 端点产物全部过 schema 校验 + 体积预算；URL 断言（无 `//_astro/`、无裸域）通过——**构建内断言**，合并后在生产域抽样 curl 复核。
-2. 6 篇含代码/表格/图片/自定义块的文章转换后无 `unknown` 块，单测通过（走 `@astrojs/markdown-remark` 处理链，不新增 unified，D29）。
-3. 三组体积实测：6 篇样文 Block 载荷 gzip 前后（验证 D23 瘦身收益）、`terms.json` bigram 实际体积（对照 400 KB 硬线）、`stats.json` 各字段非空——构建内输出数字，合并后在生产域 curl 复核。
-4. `/_astro/*` 实测回传 `immutable`，且 HTML / JSON 未被误设长缓存——生产域 `curl -I`。
-5. 站点 HTML 产物 diff 字节一致（排除 `_astro`、`/api/v1`、构建脚本写回的 `public/pagefind`）——合并前后各爬一次生产域全站比对（基线 156 页已存档，爬取脚本可复用，research.md §7）。
-6. 10 档标签色 × 明暗两套 × `ink` 的 WCAG 对比度断言全过——构建内断言；校准后的 20 个色值回写本文 §3.2 `Tag` 注释。
+> **进度（2026-09-28 夜，本地开发完成）**：①②③⑥⑦⑧ 的本地部分已全量验证（下方数字为实测）；④⑤ 及生产域抽样复核待 `feat/mp-export` 推送（check-run 构建）与合并部署后执行。
+
+1. ✅ 13 端点产物全部过 schema 校验 + 体积预算（实测数字见 §2 表）；URL 断言（无 `//_astro/`、无裸域）通过——**构建内断言**，合并后在生产域抽样 curl 复核。
+2. ✅ 6 篇样文（三类指令块/代码/表格/图片）转换验证：指令块全部结构化（music 3 / video 4+1 降级 / linkcard 46）、代码 365 块 tokens 化、图片 246 引 244 资产、无未识别指令；作者手写网格 HTML 与 MDX JSX 按契约落 `unknown`（35 处/10 篇，警告清单在构建日志）。
+3. ✅ 三组体积实测：posts/index 37.6KB（D23 瘦身后，D28 无封面已扣）、`terms.json` 376KB（正文前 28 段，<400KB 硬线）、`stats.json` 各字段非空（3.3KB）。
+4. ⬜ `/_astro/*` 实测回传 `immutable`，且 HTML / JSON 未被误设长缓存——生产域 `curl -I`（`_headers` 已追加，待部署验证）。
+5. ⬜ 站点 HTML 产物 diff 字节一致（排除 `_astro`、`/api/v1`、构建脚本写回的 `public/pagefind`）——合并前后各爬一次生产域全站比对（基线 156 页已存档，爬取脚本可复用，research.md §7）。
+6. ✅ 10 档标签色 × 明暗两套 × `ink` 的 WCAG 对比度断言全过（白字方案最低 4.97，构建内断言）；校准后的 20 个色值待 M1 真机校准后回写本文 §3.2 `Tag` 注释。
 
 ## 变更记录
 
+- 2026-09-28（M0 开工夜）：**契约冻结**——§2 预算按全量实测修订（manifest ≤24KB / titles ≤48KB，D45）；§3.3 hash 12 位、counts.images=244 实测口径；§4 补 M0 实测行为定档（linkcard/video 降级、unknown 兜底清单、块统计）；§8 本地验收完成情况标注。D38（hero 字段）/D39（avatar）/D40（排序）/D41（counts 口径）已落类型与实现。
 - 2026-09-28（晚 2）：workers.dev 关闭（D44）——§8 验收口径改为构建内断言 + 生产域复核。
 - 2026-09-28（晚）：M0-0 双探针通过（D42/D43）——§4 parse*Card 签名按实际实现修正（node 入参、非指令段落返回 null），§5 探针 A 标记通过、三条退路不启用。
 - 2026-09-28：自 requirements.md v2.1 §6.2–§6.7 拆出成立；口径未变。
