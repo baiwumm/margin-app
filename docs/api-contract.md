@@ -149,7 +149,15 @@ interface Manifest {
 
 **为什么不用 HTML + mp-html**：① 三个自定义指令 `::link-card` / `::music` / `::video` 在标准 HTML 里没有对应物；② 富文本组件体积大、内联样式毁掉端上主题切换；③ 端上解析 HTML 是纯浪费（构建期有充裕算力做高亮/尺寸/目录）。
 
-**前置重构（M0-0 探针 B 的对象）**：三个 remark 插件的最后一步都把指令节点降级成 HTML 字符串（`remarkVideo.ts:87-89`、`remarkMusic.ts:160`、`remarkLinkCard.ts:429`；`parseAttrs` / `buildHtml` 均未导出）→ 把内联解析逻辑抽成导出函数 `parseLinkCard(attrs, node)` / `parseMusicCard(attrs)` / `parseVideoCard(attrs)`（各约 3–5 行），插件本体改为「调 parse → buildHtml」，**行为必须等价**（验收硬闸门 = 站点 HTML 产物字节不变）。导出层在 Markdown AST 层先摘出指令节点、旁路调 `parse*`，其余节点走 hast 降维（`remarkRemoveTocMarker` / `rehypeExternalLinks` 原样复用）。
+**前置重构（M0-0 探针 B）✅ 已完成（2026-09-28，D43）**：三个插件的解析逻辑已抽成导出函数（**实际签名**，与初稿 `(attrs, node)` 设想不同——以节点为入参可让指令匹配与插件本体严格同源，导出层只需对段落节点逐个调 `parse*`）：
+
+```ts
+parseLinkCard(node: MdNode): LinkCardData | null      // { url, note?, overrideTitle?, overrideDescription? }
+parseMusicCard(node: MdNode): MusicCardAttrs | null   // { id, platform, audio? }（含 platform 白名单兜底）
+parseVideoCard(node: MdNode): VideoCardAttrs | null   // { id?, src?, poster?, title?, ratio? }
+```
+
+非指令段落一律返回 `null`；插件本体已改为「parse → TDK/resolve → buildHtml」。等价性已在 M0-0 以同环境双管线逐字节比对证明（research.md §7）。导出层在 Markdown AST 层先摘出指令节点、旁路调 `parse*`，其余节点走 hast 降维（`remarkRemoveTocMarker` / `rehypeExternalLinks` 原样复用）。
 
 **禁止联网**：`remarkLinkCard.ts:222 fetchTdk()` 会在构建期发网络请求抓外链 TDK——导出层**不得**重跑（Cloudflare 构建容器耗时/内存更紧，不拿已知不稳定环节赌发布）；linkcard 块只填 `href` + 作者手写标题/备注，已解析的 TDK 从 `music-cache.json` / `video-cache.json` 读。
 
@@ -199,7 +207,7 @@ interface CodeToken { v: string; c?: number }
 - 格式随站点产物（webp），**不新增 avif 档**。
 - 体积验收阈值：`thumb` ≤40 KB / `md` ≤120 KB / `src` ≤400 KB——超阈值在 M0 报告点名具体图片，由你决定是否调 `astro.config.ts`（禁改文件，需单独批准）。
 - **avgColor**：构建期用 sharp 对每图做 1×1 采样取平均色。sharp 在 `src/` 0 处使用，属新用法，随探针 A 一并验证 Cloudflare 构建镜像能跑。
-- **探针 A（M0-0）**：全仓 `getImage()` 0 处使用，Endpoint 内调用是否把变体落盘到 `dist/_astro/` **未验证**——不通过走三条退路（按优先级）：① 只引用站点 HTML 已出现的 URL（srcset 反向建表）；② 自定义 Vite 插件 `buildEnd` 时 `emitFile` 补写；③ 导出改 build 后脚本。
+- **探针 A（M0-0）✅ 已通过（D42，2026-09-28）**：Endpoint 内调用 `getImage()` 确认把变体落盘 `dist/_astro/`（CF 构建 69d995d3 返回静态产物路径 `/_astro/<name>.<hash>.webp`），sharp 0.35.4 在构建镜像可跑 → 按 D25 原案推进，三条退路不启用。URL 的 HTTP 200 复核放在 M0 生产部署后于 www 域执行。
 
 ## 6. 检索索引（D3 / D12 / D21）
 
@@ -258,4 +266,5 @@ interface TermIndex {
 
 ## 变更记录
 
+- 2026-09-28（晚）：M0-0 双探针通过（D42/D43）——§4 parse*Card 签名按实际实现修正（node 入参、非指令段落返回 null），§5 探针 A 标记通过、三条退路不启用。
 - 2026-09-28：自 requirements.md v2.1 §6.2–§6.7 拆出成立；口径未变。

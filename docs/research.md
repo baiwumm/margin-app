@@ -65,3 +65,34 @@
 | 个人主体限制（web-view / 类目） | 微信开放社区《域名管理》官方文档（2026-09-28 复核） |
 | 备案详情 / 小程序后台状态 | 工信部查询截图、小程序后台截图（2026-09-28） |
 | 腾讯云核查口径与 D35 答复 | 腾讯云备案官方文档 + 智能客服答复截图（compliance.md §6） |
+
+## 7. M0-0 双探针实测（2026-09-28，决策 D42 / D43）
+
+**执行方式**：margin 仓库临时分支 `probe/mp-export`（基点 1d6c198，6 个提交），Cloudflare Workers Builds 随推送自动构建（`astro check` + `astro build` + pagefind，每次约 3–5 分钟），构建状态经 GitHub check-run「Workers Builds: margin」轮询（其 output 含 Version ID 与 Preview URL：`https://<version前缀8位>-margin.proud-wood-97f5.workers.dev`，另有分支别名 `probe-mp-export-margin.…`）。构建耗时留档：margin 全仓 `git log --oneline | wc -l` = **184**（仅留档，不作决策输入）。
+
+**验证方法论（workers.dev 被墙的替代方案）**：本机网络对 `*.workers.dev` DNS 污染 + SNI 阻断，公共 CORS 代理全部不可用 → 无法本地爬预览产物做全站 diff。改为：① 探针端点在**构建时**把探针 JSON POST 到临时收集器（webhook.site，仅公开站点渲染数据，探针后删除）回传证据；② 探针 B 等价性用「**同一构建内**内嵌 1d6c198 旧插件副本 vs 新插件双管线渲染逐字节比对」证明——环境差异对两侧同时生效完全抵消。生产站（www，本机可达）另做对照。生产站基线：156 个 sitemap 页全量爬取存档（`mp-probe-work/prod/`），确认 = 1d6c198 内容（ICP 页脚 + 最新文章在线）。
+
+**探针 A 实测（CF 构建 Version 69d995d3）**：
+
+| 项 | 结果 |
+| --- | --- |
+| `getImage({src, width:750})` blog 正文图 | 返回静态产物路径 `/_astro/01-1panel-appstore-install.gQGeOO6e_1JSbx4.webp`（原图 1600×759 webp），srcset 描述符 640/750/828/1080/1280/1500w |
+| `getImage({src, width:800})` 画廊图 | 返回 `/_astro/01-panda-telescope.BlJfiB4t_Z1jKIhk.webp`（1600×1200），srcset 640–1600w |
+| sharp（构建镜像内） | 0.35.4 可跑；1×1 均色 blog `#fdfdfd`、gallery `#93adc2`（flatten 白底，即 M0 avgColor 同款用法） |
+| 结论 | Endpoint 内 `getImage()` 变体随构建落盘 `dist/_astro/`（emit 路径 + 构建成功 + dist 全量部署）；URL 的 HTTP 200 点验因 workers.dev 被墙移至 M0 生产部署后在 www 域复核 |
+
+**探针 B 实测（同一次构建）**：
+
+| 项 | 结果 |
+| --- | --- |
+| 同环境 旧插件 vs 新插件（决定性证据） | 三篇样文（link/music/video 各 1 篇）渲染 HTML **逐字节全等**：hjmbkpt6 3345 B、m6qk2v8x 9340 B、v3k8mz7q 9170 B，`equal: true ×3` |
+| `parse*Card` 结构化输出 | hjmbkpt6 1 条 link-card、m6qk2v8x 3 条 music（含 platform 白名单与 audio 透传）、v3k8mz7q 5 条 video（BV/直链/降级全形态），与站点 HTML 节点一一对应；代码围栏内的示例行不误判 |
+| 生产站 vs 本构建对照（环境噪声记录） | hjmbkpt6：唯一差异为 GitHub og 图 URL 内嵌 cache hash（时变），归一化后全等；m6qk2v8x：等长差一处网易云封面 CDN URL（见下）；v3k8z7q：shiki `mdx` 语言高亮差异（见下）。三者均为**既有构建环境行为**，与重构无关（同环境实验已隔离证明） |
+
+**环境噪声三案（M0 导出层设计输入）**：
+
+1. **music/video 数据层缓存路径**：`music.ts`/`video.ts` 用 `import.meta.url` 定位缓存 JSON，bundle 后指向产物位置 → CI 构建内缓存 miss → 回源抓取，网易云封面 CDN URL 轮换 → 同内容两次构建 HTML 不等长不变但 URL 变。M0 的 toBlocks **必须自己读缓存文件**（构建脚本进程内 cwd 可达），不能依赖插件数据层的隐式缓存。
+2. **shiki 语言懒加载**：独立调用 `createMarkdownProcessor`/`createRenderer` 时部分语言（如 `mdx`）高亮回退纯文本；与站点渲染管线共用同一 processor 实例则一致。M0 渲染正文应复用站点管线形态。
+3. **fetchTdk 构建期联网不稳定实锤**：某次 CI 构建中对 `github.com` 的 TDK 抓取失败，链接卡降级渲染 → 支持「导出层禁止联网、linkcard 只填 href+手写文案」的既定决策。
+
+**探针产物清理**：临时端点 `src/pages/api/v1/probe-mp.json.ts`、旧插件内嵌副本 `src/utils/probeLegacyPlugins.ts` 与 probe 分支随验收删除；**重构本体（三插件 parse*Card 导出，提交 d92b8f1）已验证、需进 margin main**——以补丁形式存档于 `docs/archive/probe-mp-export-refactor.patch`，margin 本地另留备份分支 `backup/probe-mp-export`，M0 开工时由用户确认后应用进 main。

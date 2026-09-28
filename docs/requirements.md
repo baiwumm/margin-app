@@ -3,7 +3,7 @@
 | 项 | 内容 |
 | --- | --- |
 | 项目代号 | margin-app |
-| 文档版本 | **v3.0**（2026-09-28）：全文重组——本文只保留**现行结论**，论证与过程记录移入 `archive/`，契约/视觉/合规/决策/依据拆为独立文件（§12 文档地图）。事实与决策口径与 v2.1 等价，另补记 D36 / D37 |
+| 文档版本 | **v3.1**（2026-09-28）：M0-0 双探针通过（D42/D43），R14/R15 关闭，M0 解锁。v3.0 全文重组口径不变，论证与过程记录在 `archive/`，契约/视觉/合规/决策/依据拆为独立文件（§12 文档地图） |
 | 内容源 | `E:\personal-project\margin`（Astro 7 纯静态博客，线上 https://www.baiwumm.com/） |
 | 视觉基准 | `demo/` 5 张图（uni-halo v3.x 实机观感）为唯一基准（D10）；`E:\personal-project\uni-halo`（2.0.10）仅作页面结构参考 |
 | 配套文件 | [api-contract.md](api-contract.md) · [design.md](design.md) · [compliance.md](compliance.md) · [decisions.md](decisions.md) · [research.md](research.md) · [archive/requirements-v2.1.md](archive/requirements-v2.1.md) |
@@ -160,7 +160,7 @@ demo 视觉是低对比、大圆角、暖白底、柠檬绿点缀、悬浮胶囊
 ### 5.3 正文 = Block AST（类型见 api-contract.md §4）
 
 - 三个自定义指令 `::link-card` / `::music` / `::video` 在标准 HTML 无对应物——选 AST 不选「HTML + mp-html」的决定性理由；同时端上主题切换、图片占位防抖、代码 token 上色、TOC 都只有 AST 能干净支撑。
-- **前置重构（探针 B）**：三个 remark 插件把指令节点降级成 HTML 字符串（research.md F5）→ 抽出导出 `parse*Card()`，导出层旁路调用；**验收硬闸门 = 站点 HTML 产物字节不变**。
+- **前置重构（探针 B）✅ 已完成（2026-09-28，D43）**：三插件已抽出导出 `parse*Card(node)`，导出层旁路调用；同环境双管线比对证明 HTML 字节等价。**验收硬闸门 = 站点 HTML 产物字节不变**（M0 全站 diff 照常执行）。
 - **禁止联网**：导出层不重跑外链 TDK 抓取，只读已入库的 `music-cache.json` / `video-cache.json`。
 - 兜底：未识别节点落 `unknown` 块 + 构建期告警清单（警告不阻断发布）。
 
@@ -168,7 +168,7 @@ demo 视觉是低对比、大圆角、暖白底、柠檬绿点缀、悬浮胶囊
 
 - **只选择、不生成（D25）**：从集合自身已有档位按「≤目标宽度的最大可用档」挑，变体零新增（三集合档位不一致，api-contract.md §5）。
 - AssetRef 给绝对 URL + 实际宽度 + `avgColor` 占位色（布局不抖动、加载不白闪）。
-- ⚠️ **M0-0 探针 A 前置**：`getImage()` 在 Endpoint 内是否落盘未验证（全仓 0 处使用）→ 不通过走三条退路（api-contract.md §5）。
+- **M0-0 探针 A ✅ 已通过（2026-09-28，D42）**：Endpoint 内 `getImage()` 确认落盘 `dist/_astro/` 且 sharp 可在 CF 构建镜像运行 → 按 D25 推进，三条退路不启用。
 - **M0 必修**：`public/_headers` 追加 `/_astro/*` → `max-age=31536000, immutable`（只加这一组；JSON 维持 must-revalidate + ETag）。
 
 ### 5.5 检索（D3 / D12 / D21）
@@ -324,7 +324,7 @@ margin-app/
 
 | 里程碑 | 内容 | 验收标准 |
 | --- | --- | --- |
-| **M0-0 可行性探针**（先于一切编码，各 ≤0.5 天） | **探针 A**：临时 Endpoint 对 blog+画廊图调 `getImage()`，Cloudflare 预览构建 curl 验 URL 200 + sharp 可跑；**探针 B**：`parse*Card()` 抽取后三类指令产出结构化 Block 且站点 HTML 字节不变 | A 过 → 按「只选择不生成」推进；不过 → 当场三退路选一并补决策；B 必须给「HTML diff = 空」证据；**不得带未验证前提进 M0-1** |
+| **M0-0 可行性探针** ✅ **双通过（2026-09-28，D42/D43）** | **探针 A**：临时 Endpoint 对 blog+画廊图调 `getImage()` + sharp 1×1 均色，CF 预览构建实证：静态 `/_astro/*` 产物路径返回、sharp 0.35.4 可跑；**探针 B**：`parse*Card(node)` 抽取完成，同构建内嵌旧插件双管线比对三篇样文 HTML 全等（3345/9340/9170 B），parse 结构化 Block 1/3/5 条 | A 过 → 按「只选择不生成」（D25）推进，三退路不启用；B 等价性以同环境逐字节比对证明（全站 diff 因 workers.dev 被墙移至 M0 照常执行）；**无未验证前提进入 M0-1** |
 | **M0 契约与导出管线** | 冻结 schema（api-contract.md）+ 13 端点 + toBlocks + toAssetRef + bigram 索引 + `_headers` + assetBase=www | ① 6 篇样文无 unknown + 单测过；② 预览构建产物过 schema/体积/URL 断言；③ HTML diff 一致；④ `astro check` 0 错误；⑤ `_astro` 回传 immutable 且 JSON 未误设；⑥ 记录构建耗时与 dist 增量；⑦ 三组体积实测（D23 收益 / terms.json / stats）；⑧ WCAG 断言全过 |
 | **M1 打样 + 基座 + 首页** | 6 个打样项（design.md §8）→ Taro 工程 / Tailwind v4+weapp-tw v5 / request+cache / Block 渲染器基础块 / 首页全部模块；**tabBar 路线定案（Q8）** | ① 打样全过=视觉基线；② 首屏 <1.5s、缓存命中 <500ms；③ 首页 6 模块数据正确无白闪（文章卡按无图验收）；④ 真机复核存储配额 + 301 行为写回文档；⑤ 切 tab 回首页滚动位置保留 |
 | **M2 文章详情** | Block 全量块 + TOC + 进度 + 字号/行距/主题 + 代码块 + 图片预览 + 上下篇 + 分享 | ① 10 篇抽样渲染与站点一致（含三类指令块）；② 1000 行代码不卡；③ 分享卡图正确 |
@@ -369,8 +369,8 @@ margin-app/
 | R11 | 接入商核查「解析非腾讯云」 | ✅ 闭环（D35） | 回归 B：接受 + 快照兜底（compliance §6） |
 | R12 | 备案联系方式失效 | ✅ 前置已确认 | 保持可达（compliance §6） |
 | R13 | 改名未变更备案 | ✅ 关闭 | 已发起，审核中（compliance §5） |
-| **R14** | `getImage()` 在 Endpoint 内是否落盘 | **P0** | M0-0 探针 A；三条退路（api-contract §5） |
-| **R15** | 三个 remark 插件降级 HTML 串 | **P0** | M0-0 探针 B；parse* 重构 + diff 闸门 |
+| **R14** | `getImage()` 在 Endpoint 内是否落盘 | ✅ **关闭（D42）** | 探针 A 通过：CF 构建实证静态 `/_astro/*` 落盘 + sharp 可跑 |
+| **R15** | 三个 remark 插件降级 HTML 串 | ✅ **关闭（D43）** | 探针 B 通过：`parse*Card` 抽取 + 同环境字节级等价证明 |
 | R16 | `wx.setStorage` 上限 | P1 | D30 字节预算 + 水位守卫 + M1 真机复核 |
 | R17 | 浅克隆影响热力图/buildId | ✅ 关闭（D34） | — |
 | R18 | 依赖批准 | ✅ 关闭（D29） | AGENTS.md 写回归 M0 |
@@ -408,6 +408,7 @@ M0 冻结 api-contract.md 时把这四条落进类型定义即可，无剩余待
 
 ## 13. 变更记录
 
+- **v3.1（2026-09-28）**：M0-0 双探针通过（D42/D43）——R14/R15 关闭，§5.3/§5.4 前置项消除；探针方法与实测数据见 research.md §7。M0 解锁。
 - **v3.0（2026-09-28）**：全文重组拆分；补记 D36（React 18.3 起步）/ D37（weapp-tailwindcss v5）；契约待补项显式列出（§11.3）。内容口径与 v2.1 等价。
 - v2.1（2026-09-28）：Q1 闭环（D35：A 否决、回归 B）；变更备案发起 / 头像 / 控制台核查三项闭合。
 - v2.0（2026-09-28）：事实层勘误 + M0-0 双探针前置 + 11 项答复固化 D19–D34。
