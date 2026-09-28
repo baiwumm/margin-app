@@ -20,7 +20,7 @@
 - **部署**：`wrangler.jsonc`（14 行）→ Cloudflare Workers Static Assets，static 模式无 adapter；由 Dashboard 连 Git 自动构建，新增 Astro Endpoint 随 `astro build` 自动落盘，**无需新 CI**（现有 6 个 Endpoint 均无 `prerender` 导出）。
 - **构建脚本**：`astro check && astro build && pagefind --site dist && node -e "...cpSync('dist/pagefind','public/pagefind',...)"`——末段把产物写回源码目录 `public/`，导出脚本**不要照抄**。
 - **依赖**：astro 7.3.2、sharp（`src/` 0 处 import，属新用法）、无顶层 `unified`/`remark-*`（独立脚本 import 直接 `ERR_MODULE_NOT_FOUND`）、无 `.npmrc`（pnpm 严格 node_modules）。`AGENTS.md` 硬约束：不升级/不新增依赖须用户批准（pinyin-pro 已批，D29）；禁改 `astro.config.ts` / `content.config.ts` / `Layout.astro` / `src/config.ts`。
-- **margin 本地 build 会随机卡死**（三次复现、进程零 CPU；`astro check` 始终 0 错误）→ 验证策略：本地只跑 `astro check` + 单测，产物真伪以 **Cloudflare 预览构建**为准，不依赖本地完整 build。
+- **margin 本地 build 会随机卡死**（三次复现、进程零 CPU；`astro check` 始终 0 错误）→ 验证策略（D44 定型）：本地只跑 `astro check` + 单测 + dev 冒烟；合并前信号 = 分支构建 check-run（构建内断言，违规即构建失败）；合并后 = 生产域（www）复核。~~产物真伪以 Cloudflare 预览构建为准~~（workers.dev 已于 2026-09-28 关闭，预览产物不再可访问）。
 - 主题常量：`SITE.title="Margin"`、作者「白雾茫茫丶」、`lang=zh-CN`、时区 Asia/Shanghai、`postPerPage=12`。动态数据：`friends.ts`（4 组）、`projects.ts`（7 个，stars/forks 构建期经 GitHub API 刷新）——同需导出 JSON。
 
 ## 2. uni-halo：借鉴 4 条 / 规避 5 条
@@ -96,3 +96,9 @@
 3. **fetchTdk 构建期联网不稳定实锤**：某次 CI 构建中对 `github.com` 的 TDK 抓取失败，链接卡降级渲染 → 支持「导出层禁止联网、linkcard 只填 href+手写文案」的既定决策。
 
 **探针产物清理**：临时端点 `src/pages/api/v1/probe-mp.json.ts`、旧插件内嵌副本 `src/utils/probeLegacyPlugins.ts` 与 probe 分支随验收删除；**重构本体（三插件 parse*Card 导出，提交 d92b8f1）已验证、需进 margin main**——以补丁形式存档于 `docs/archive/probe-mp-export-refactor.patch`，margin 本地另留备份分支 `backup/probe-mp-export`，M0 开工时由用户确认后应用进 main。
+
+**后续变更（2026-09-28 晚，D44）**：用户已**关闭 workers.dev 访问**（站点仅 `www.baiwumm.com` 可达）——上文 Preview URL / 分支别名模式与 webhook 回传自此成为**历史手段**（本节保留作过程记录）。M0 起的验证口径定型为：
+
+1. **合并前**：分支 push → Workers Builds check-run（构建脚本含 `astro check` + 构建 + **构建内断言**——导出端点对 schema/体积预算/URL 规则/缓存头/WCAG 自检，违规 throw 使构建失败）。⚠️ non-production builds 必须保持开启，check-run 是唯一合并前 CI 信号。
+2. **本地**：`pnpm dev` 冒烟看端点 JSON 形态（dev 可用，完整 build 才会卡死）。
+3. **合并后**：生产域复核——curl URL 200 / `/_astro/*` immutable / JSON 抽样；全站 HTML diff 用「合并前后各爬一次 www」（基线 156 页已存档 `mp-probe-work/prod/`，爬取脚本 `mp-probe-work/scripts/crawl.py` 可复用）。

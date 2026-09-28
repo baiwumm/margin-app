@@ -257,14 +257,17 @@ interface TermIndex {
 
 ## 8. M0 冻结 checklist（验收细节对应 requirements.md §9 M0 行）
 
-1. 13 端点产物全部过 schema 校验 + 体积预算；URL 断言（无 `//_astro/`、无裸域）通过。
+> **验收口径（D44，2026-09-28）**：workers.dev 已关闭、无预览产物可访问 → 机械性检查（1/3/6）以**构建内断言**执行（导出管线自检，违规 throw 使构建失败，check-run 变红即不合规发不了版）；体验性检查（4/5）与抽样复核在**合并部署后的生产域（www）**执行。workers.dev 探针期的预览 URL 比对法废止（过程记录见 research.md §7）。
+
+1. 13 端点产物全部过 schema 校验 + 体积预算；URL 断言（无 `//_astro/`、无裸域）通过——**构建内断言**，合并后在生产域抽样 curl 复核。
 2. 6 篇含代码/表格/图片/自定义块的文章转换后无 `unknown` 块，单测通过（走 `@astrojs/markdown-remark` 处理链，不新增 unified，D29）。
-3. 三组体积实测：6 篇样文 Block 载荷 gzip 前后（验证 D23 瘦身收益）、`terms.json` bigram 实际体积（对照 400 KB 硬线）、`stats.json` 各字段非空。
-4. `/_astro/*` 实测回传 `immutable`，且 HTML / JSON 未被误设长缓存。
-5. 站点 HTML 产物 diff 字节一致（排除 `_astro`、`/api/v1`、构建脚本写回的 `public/pagefind`）。
-6. 10 档标签色 × 明暗两套 × `ink` 的 WCAG 对比度断言全过；校准后的 20 个色值回写本文 §3.2 `Tag` 注释。
+3. 三组体积实测：6 篇样文 Block 载荷 gzip 前后（验证 D23 瘦身收益）、`terms.json` bigram 实际体积（对照 400 KB 硬线）、`stats.json` 各字段非空——构建内输出数字，合并后在生产域 curl 复核。
+4. `/_astro/*` 实测回传 `immutable`，且 HTML / JSON 未被误设长缓存——生产域 `curl -I`。
+5. 站点 HTML 产物 diff 字节一致（排除 `_astro`、`/api/v1`、构建脚本写回的 `public/pagefind`）——合并前后各爬一次生产域全站比对（基线 156 页已存档，爬取脚本可复用，research.md §7）。
+6. 10 档标签色 × 明暗两套 × `ink` 的 WCAG 对比度断言全过——构建内断言；校准后的 20 个色值回写本文 §3.2 `Tag` 注释。
 
 ## 变更记录
 
+- 2026-09-28（晚 2）：workers.dev 关闭（D44）——§8 验收口径改为构建内断言 + 生产域复核。
 - 2026-09-28（晚）：M0-0 双探针通过（D42/D43）——§4 parse*Card 签名按实际实现修正（node 入参、非指令段落返回 null），§5 探针 A 标记通过、三条退路不启用。
 - 2026-09-28：自 requirements.md v2.1 §6.2–§6.7 拆出成立；口径未变。
