@@ -99,3 +99,15 @@
 ## Q8 定案（2026-09-29，D52）
 
 用户确认走**路线 A**（真机已验证切 tab 滚动保留）。图标同步定档：线性 PNG 两态（81px，普通 #909399 / 选中 #B8D434——D7F94C 在白胶囊上的可读性微调，视觉基线宣告时可复核），构建内联 base64、自包含零请求。**打样第 3 项闭环**；M1 待办只剩：热启动数值（预览模式 + vConsole）→ 视觉基线宣告（含暗色校准）。
+
+## A1 热启动数据 + 版本比对真机闭环（2026-09-29，预览模式 + vConsole）
+
+**热启动实测（iPhone 16 Pro）**：`[perf +38ms] App.onLaunch` → `[perf +51ms] manifest 缓存命中` → `[perf +52ms] 存储配额 44/10240 KB` → 页面 onReady。manifest 缓存命中 **+51ms（<500ms 达标）**。
+
+**本轮列表数据走了网络的根因（非 bug）**：生产在当日下午更新到用户自己的 margin 提交（89025ce 随机 accent 主题等三笔，buildId 7aaaa53）——设备检测到版本变化 → 清旧键 → 重拉 site/posts/tags。**版本比对 → 清缓存 → 刷新的全链路真机闭环验证成功**（D34 设计的启动流程按预期工作）。
+
+**连带发现并修复**：用户随机 accent 特性（89025ce）在 global.css 引入 5 份 `--accent` 定义，击穿导出层 accentFromCss 的「首/尾」启发式 → 生产 site.json 的 accentDark 错成 #1158d1。已改**确定性解析**（浅/深块各自的 --accent-blue：#1158d1 / #008fec），margin b2c8b18 推送上线。备注：站点 accent 已会话级随机化，导出的 theme 字段 = 默认蓝主题定值；小程序 UI 用 D10 柠檬绿令牌，不依赖该字段。
+
+**待用户**：再开一次小程序（生产 b2c8b18 版 + 无版本变化）——这次 posts/tags/site 应全部缓存命中（Console 无 GET 行）+ `首页首屏数据渲染完成（缓存命中: true）` 的 Nms 即全热启动耗时（<500ms 达标线）。
+
+**M1-b 清理项新增**：`[Event] 21 listeners of WindowInfoChanged` 警告——Taro 运行时切 tab 的监听累积，记录待查（通常无害，M2 时核内存表现）。
