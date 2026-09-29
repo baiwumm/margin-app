@@ -72,3 +72,14 @@
 | 搜索胶囊缺放大镜/关键词高亮块 | 打样毛坯 | ✅ 已加 |
 
 **待真机确认**：数据拉取是否成功（www 域名白名单 + urlCheck:true 下 DevTools 网络请求）；rpx-theme 警告的阴影/模糊类在真机的表现。本轮 commit `295cff1`（未推送）。
+
+## A1 真机验收打点（2026-09-29）
+
+已埋设探针（src/utils/perf.ts + 各层），M5 提审前统一移除：
+- `[perf +Nms] App.onLaunch` —— 启动起点
+- `[perf +Nms] manifest 缓存命中（buildId=…）/ 无本地缓存（冷启动）` —— 缓存命中判定
+- `[perf +Nms] 存储配额: X/Y KB` —— R16 真机配额实测
+- `[perf +Nms] GET <url> -> <状态码> (<耗时>ms)` —— 301 验证（全部应为 www + 200/304，无 301）
+- `[perf +Nms] 首页首屏数据渲染完成（缓存命中: …，文章 N 篇）` —— TTI 近似值
+
+排查中发现：webpack 持久化缓存可能提供过期模块（源码改动后产物未更新）——验证产物时先 rm -rf dist node_modules/.cache 干净重建。探针核验注意：terser 把中文转成 uXXXX 转义，grep 检查需按转义形式。
