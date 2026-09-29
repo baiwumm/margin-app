@@ -1,13 +1,4 @@
-/* 标签页：双列色块卡（design.md §1 标签屏） */
-.page-title-row {
-  display: flex;
-  justify-content: center;
-  margin-bottom: var(--sp-4);
-}
-.page-title {
-  font-size: var(--fs-h1);
-  font-weight: 700;
-}
+/* 标签页：双列色块卡（design.md §1 标签屏；卡文本规格对齐 3.x 分类卡） */
 .tag-grid {
   display: grid;
   grid-template-columns: 341rpx 341rpx;
@@ -16,38 +7,18 @@
 .tag-card {
   border-radius: var(--r-lg);
   padding: var(--sp-3);
-  min-height: 180rpx;
+  min-height: 240rpx;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   gap: 4rpx;
   animation: rise-in 0.4s ease both;
-  box-shadow: var(--sh-card);
 }
 .tag-card-name {
-  font-size: var(--fs-title);
-  font-weight: 600;
+  font-size: var(--fs-sm);
+  font-weight: 700;
 }
 .tag-card-count {
   font-size: var(--fs-cap);
-  opacity: 0.8;
-}
-.empty {
-  padding: var(--sp-5);
-  display: flex;
-  justify-content: center;
-}
-.empty-text {
-  color: var(--c-text-weak);
-  font-size: var(--fs-cap);
-}
-@keyframes rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(24rpx);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  opacity: 0.85;
 }

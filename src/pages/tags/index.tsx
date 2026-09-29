@@ -1,10 +1,12 @@
 import { View, Text } from "@tarojs/components";
 
+import NavBar, { navAlpha } from "@/components/NavBar/NavBar";
 import { useTags } from "@/hooks/useCollection";
 import { useManifest } from "@/hooks/useManifest";
-import { useDidShow } from "@tarojs/taro";
+import { useDidShow, usePageScroll } from "@tarojs/taro";
 import { setSelectedTab } from "@/custom-tab-bar/store";
 import { useTheme } from "@/hooks/useTheme";
+import { useState } from "react";
 import "./tags.scss";
 
 export default function Tags() {
@@ -13,17 +15,18 @@ export default function Tags() {
   useDidShow(() => setSelectedTab(1));
   const { manifest } = useManifest();
   const tags = useTags(manifest?.buildId ?? null);
+  // 导航滚动渐显（0.05 档量化，控制重渲染频率）
+  const [alpha, setAlpha] = useState(0);
+  usePageScroll(p => setAlpha(navAlpha(p.scrollTop)));
 
   return (
     <View className={`page page-bg ${theme === 'dark' ? 'theme-dark' : ''}`}>
-      <View className='page-title-row'>
-        <Text className='page-title'>标签</Text>
-      </View>
+      <NavBar title='标签' alpha={alpha} />
       <View className='tag-grid'>
         {(tags ?? []).map((tag, i) => (
           <View
             key={tag.slug}
-            className='tag-card'
+            className='tag-card card-surface'
             style={{
               backgroundColor: theme === "dark" ? tag.colorDark : tag.color,
               animationDelay: `${Math.min(i * 50, 300)}ms`,

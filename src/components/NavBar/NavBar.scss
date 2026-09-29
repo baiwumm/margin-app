@@ -1,0 +1,58 @@
+/* 固定玻璃导航（对齐 uni-halo 3.x uh-navbar）：
+ * 背景层 = page 底色 + blur，透明度随滚动渐显（暗色自动跟随 --c-bg）。
+ * ⚠️ 构建管线剥 @supports 块（见 tailwind.css 说明），backdrop-filter 裸声明，
+ * 不支持的机型只有底色淡入（导航底 alpha 上限提到 0.9 保证无 blur 时可读）。 */
+.nav-root {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 100;
+}
+.nav-bg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--c-bg);
+  backdrop-filter: blur(20rpx) saturate(160%);
+  -webkit-backdrop-filter: blur(20rpx) saturate(160%);
+}
+.nav-row {
+  position: relative;
+  box-sizing: content-box;
+  height: 92rpx;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0 24rpx;
+}
+.nav-side {
+  min-width: 120rpx;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  flex-shrink: 0;
+}
+.nav-side-right {
+  justify-content: flex-end;
+}
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: var(--fs-title);
+  font-weight: 700;
+  color: var(--c-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.3s;
+}
+.nav-title-white {
+  color: #ffffff;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.25);
+}
+.nav-spacer {
+  /* 高度由内联样式按状态栏高度设置 */
+}

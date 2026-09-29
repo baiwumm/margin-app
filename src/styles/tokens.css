@@ -1,33 +1,61 @@
 /**
- * 设计令牌层 —— 全部数值来自 design.md §2（demo 程序化采样，浅色=最终基线）。
- * 暗色为推导起点（M1 打样第 2 项真机校准）；切换机制：根节点挂 .theme-dark 类，
- * 后续偏好设置强制浅/深也走同一开关（design.md §7：只换根变量，不改类名）。
- * 注意小程序 CSS 硬约束（design.md §6）：不用通配选择器、backdrop-filter 有降级。
+ * 设计令牌层 —— UI 对齐基准 = uni-halo 3.0.0 源码（D53；E:\personal-project\uni-halo
+ * src/style/index.scss + uno.config.ts），demo 截图与源码互证。
+ * 关键升级（对齐 2.x 时代的单色体系）：
+ *  - 双强调色：--c-primary #B9E424（选中态/图标/文字 accent）+ --c-accent #D7F94C（色块高亮底）
+ *  - 玻璃拟态卡片语言：--glass-*（白半透明 + 白描边 + inset 高光 + blur(24rpx) saturate(160%)）
+ *  - 文字走 3.x 灰阶（gray-900/600/500/400）
+ * 暗色为推导起点（uni-halo 3.x 无暗色模式，margin 自研增强保留）；
+ * 切换机制：page 节点 @media prefers-color-scheme + .theme-dark 类（偏好强制留 M2）。
+ * 注意小程序 CSS 硬约束（design.md §6）：rgba 一律逗号写法（wxss 不认 `rgb(255 255 255 / 55%)`
+ * 空格斜杠语法，uni-halo 靠 Uno presetLegacyCompat 转译，margin 是裸 WXSS 必须手写兼容）；
+ * backdrop-filter 全部包 @supports 渐进增强。
  */
 
 page,
 :root,
 .theme-light {
-  /* 品牌 */
-  --c-accent: #d7f94c; /* 柠檬绿，主强调色 */
-  --c-accent-soft: #e0ef93; /* 浅强调，hero 叠加 / 选中底 */
-  --c-accent-ink: #2d2f2e; /* 强调色上的文字 */
+  /* 品牌 —— 双强调色（3.x：--wot-color-theme 主色系 + secondary 高亮系） */
+  --c-primary: #b9e424; /* 主强调：选中态填充 / 图标 / 文字 accent */
+  --c-primary-active: #a7cd20; /* 主色按下态（--wot-primary-7） */
+  --c-primary-soft: #f4fbe0; /* 主色浅底（--wot-primary-1） */
+  --c-primary-ink: #111827; /* 主色块上的文字（gray-900，明暗同值） */
+  --c-accent: #d7f94c; /* 次强调：柠檬绿色块高亮底（3.x secondary） */
+  --c-accent-soft: #e0ef93; /* 浅强调，tabBar 选中块（D52 定案保留） */
+  --c-accent-ink: #111827; /* 强调色块上的文字（gray-900） */
+  /* 高亮块配对（accent-bg 类用）：暗色下底/字反转为「暗橄榄底 + 亮柠檬字」，
+   * 避免 #a8c63a 底 × #d7f94c 字的 1.6:1 低对比（打样第 2 项校准对象） */
+  --c-chip-bg: #d7f94c;
+  --c-chip-ink: #111827;
 
   /* 表面 */
-  --c-bg: #f6f3ee; /* 页面底色（暖白） */
-  --c-surface: #fcfaf8; /* 卡片 */
-  --c-surface-alt: #f2efe6; /* 次级卡片 / 输入框 */
+  --c-bg: #f6f3ee; /* 页面底色（3.x --wot-color-page / bg-page） */
+  --c-surface: #fcfaf8; /* 不透明卡面（代码块 / 骨架等实底场景） */
+  --c-surface-alt: #f2efe6; /* 次级面 / 输入框 / 骨架 */
   --c-border: #ecebeb;
 
-  /* 文字 */
-  --c-text: #2d2f2e;
-  --c-text-sub: #909399;
-  --c-text-weak: #b8b8b8;
+  /* 玻璃拟态（3.x .uh-global-card-glass） */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg-solid: rgba(255, 255, 255, 0.88); /* 供 JS 端按机型降级换实底（管线剥 @supports，CSS 内不可分支） */
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-highlight: rgba(255, 255, 255, 0.75); /* inset 高光 */
+  --glass-backdrop: blur(24rpx) saturate(160%);
 
-  /* 圆角 */
+  /* 文字（3.x UnoCSS 灰阶：gray-900/600/500/400） */
+  --c-text: #111827;
+  --c-text-mid: #4b5563;
+  --c-text-sub: #6b7280;
+  --c-text-weak: #9ca3af;
+
+  /* 分隔线（3.x border-black/5；暗色反转为白系） */
+  --c-sep: rgba(0, 0, 0, 0.05);
+
+  /* 圆角（3.x Uno 默认档换算：md 12 / lg 16 / xl 24 / 2xl 32 / 3xl 48） */
   --r-sm: 12rpx;
-  --r-md: 20rpx;
-  --r-lg: 28rpx;
+  --r-md: 16rpx;
+  --r-lg: 24rpx;
+  --r-xl: 32rpx;
+  --r-2xl: 48rpx;
   --r-full: 999rpx;
 
   /* 间距 */
@@ -39,14 +67,20 @@ page,
   --sp-4: 32rpx;
   --sp-5: 48rpx;
 
-  /* 阴影（暖白底 → 极淡投影 + 描边，避免发灰） */
-  --sh-card: 0 2rpx 24rpx rgba(45, 47, 46, 0.04);
-  --sh-float: 0 8rpx 32rpx rgba(45, 47, 46, 0.1);
+  /* 阴影（3.x 玻璃投影 = inset 高光 + 淡紫环境投影） */
+  --sh-card: inset 0 1rpx 0 var(--glass-highlight),
+    0 8rpx 32rpx rgba(90, 105, 200, 0.14);
+  --sh-card-soft: inset 0 1rpx 0 var(--glass-highlight),
+    0 8rpx 32rpx rgba(90, 105, 200, 0.07);
+  --sh-float: inset 0 1rpx 0 var(--glass-highlight),
+    0 8rpx 32rpx rgba(90, 105, 200, 0.14);
 
-  /* 字号（正文可调，见偏好设置） */
-  --fs-body: 30rpx;
+  /* 字号（正文可调，见偏好设置；sm 对齐 3.x text-2xs 28rpx 小节标题） */
+  --fs-xs: 20rpx;
   --fs-cap: 24rpx;
-  --fs-title: 34rpx;
+  --fs-sm: 28rpx;
+  --fs-body: 30rpx;
+  --fs-title: 32rpx;
   --fs-h1: 40rpx;
   --lh-body: 1.75;
 
@@ -56,43 +90,75 @@ page,
   --font-mono: "Maple Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
     monospace;
 
-  /* 悬浮 tabBar 胶囊底（明暗两态） */
+  /* 悬浮 tabBar 胶囊底（D52 定案，明暗两态） */
   --tabbar-bg: rgba(252, 250, 248, 0.94);
 }
 
 /* 跟随系统暗色（app.json darkmode:true 后 WXSS media 生效）。
  * 变量定义在 page 节点 → 自动继承进 custom-tab-bar 子树。
- * 偏好设置强制浅/深（M2）走 .theme-dark 类覆盖，类优先级高于 page 继承。 */
+ * 偏好设置强制浅/深（M2）走 .theme-dark 类覆盖，类优先级高于 page 继承。
+ * uni-halo 3.x 无暗色模式，以下全部为 margin 推导（打样第 2 项真机校准）：
+ * 玻璃 = 低透明白 + 亮描边；primary 保持亮柠檬（只做小面积，对暗底 ≥10:1）。 */
 @media (prefers-color-scheme: dark) {
   page {
     --c-bg: #1a1b19;
     --c-surface: #232522;
     --c-surface-alt: #2a2c29;
     --c-text: #edefea;
+    --c-text-mid: #c5c9c2;
     --c-text-sub: #9aa09a;
+    --c-text-weak: #6e726c;
+    --c-sep: rgba(255, 255, 255, 0.08);
     --c-border: #33362f;
-    --c-accent: #a8c63a;
+    --c-primary: #b9e424;
+    --c-primary-active: #a7cd20;
+    --c-primary-soft: #35401f;
+    --c-accent: #a8c63a; /* 降明度版柠檬绿，大面积填充用 */
     --c-accent-soft: #35401f;
     --c-accent-ink: #d7f94c;
-    --c-text-weak: #6e726c;
-    --sh-card: 0 2rpx 24rpx rgba(0, 0, 0, 0.35);
-    --sh-float: 0 8rpx 32rpx rgba(0, 0, 0, 0.55);
+    --c-chip-bg: #35401f;
+    --c-chip-ink: #d7f94c;
+    --glass-bg: rgba(255, 255, 255, 0.06);
+    --glass-bg-solid: rgba(30, 32, 29, 0.92);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-highlight: rgba(255, 255, 255, 0.08);
+    --sh-card: inset 0 1rpx 0 rgba(255, 255, 255, 0.08),
+      0 8rpx 32rpx rgba(0, 0, 0, 0.35);
+    --sh-card-soft: inset 0 1rpx 0 rgba(255, 255, 255, 0.08),
+      0 8rpx 32rpx rgba(0, 0, 0, 0.25);
+    --sh-float: inset 0 1rpx 0 rgba(255, 255, 255, 0.08),
+      0 8rpx 32rpx rgba(0, 0, 0, 0.55);
     --tabbar-bg: rgba(35, 37, 34, 0.94);
   }
 }
 
-/* 暗色推导起点（demo 无暗色稿；accent 只做描边/图标/小面积 + 亮字，design §2） */
+/* 暗色推导起点（偏好强制深色预留；数值与 media 块一致） */
 .theme-dark {
   --c-bg: #1a1b19;
   --c-surface: #232522;
   --c-surface-alt: #2a2c29;
   --c-text: #edefea;
+  --c-text-mid: #c5c9c2;
   --c-text-sub: #9aa09a;
-  --c-border: #33362f;
-  --c-accent: #a8c63a; /* 降明度版柠檬绿，大面积填充用 */
-  --c-accent-soft: #35401f; /* 选中底/hero 叠加：暗底 + 亮字 */
-  --c-accent-ink: #d7f94c; /* 强调位文字反用最亮的绿 */
   --c-text-weak: #6e726c;
-  --sh-card: 0 2rpx 24rpx rgba(0, 0, 0, 0.35);
-  --sh-float: 0 8rpx 32rpx rgba(0, 0, 0, 0.55);
+  --c-sep: rgba(255, 255, 255, 0.08);
+  --c-border: #33362f;
+  --c-primary: #b9e424;
+  --c-primary-active: #a7cd20;
+  --c-primary-soft: #35401f;
+  --c-accent: #a8c63a;
+  --c-accent-soft: #35401f;
+  --c-accent-ink: #d7f94c;
+  --c-chip-bg: #35401f;
+  --c-chip-ink: #d7f94c;
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-bg-solid: rgba(30, 32, 29, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-highlight: rgba(255, 255, 255, 0.08);
+  --sh-card: inset 0 1rpx 0 rgba(255, 255, 255, 0.08),
+    0 8rpx 32rpx rgba(0, 0, 0, 0.35);
+  --sh-card-soft: inset 0 1rpx 0 rgba(255, 255, 255, 0.08),
+    0 8rpx 32rpx rgba(0, 0, 0, 0.25);
+  --sh-float: inset 0 1rpx 0 rgba(255, 255, 255, 0.08),
+    0 8rpx 32rpx rgba(0, 0, 0, 0.55);
 }

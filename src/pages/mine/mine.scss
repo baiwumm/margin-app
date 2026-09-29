@@ -1,39 +1,53 @@
-/* 我的页：渐变 hero + 八宫格 + 列表（design.md §1 我的屏） */
+/* 我的页（design.md §1 我的屏，对齐 3.x blogger）：
+ * overlay 导航 + hero 768rpx + 头像 176rpx 白描边 + 玻璃 rounded-3xl 八宫格（彩底块彩字）
+ * + 「其他功能」列表行（图标块 + 副标题 + 箭头）+ 版权行 22rpx */
+
 .mine {
   padding-top: 0;
 }
+
+/* ── Hero（3.x h-96 = 768rpx；D38 背景图占位渐变，文字暂用暗色系保可读）── */
 .mine-hero {
   margin: 0 calc(-1 * var(--sp-page));
-  padding: calc(var(--sp-5) * 2) var(--sp-page) var(--sp-4);
-  background: linear-gradient(160deg, var(--c-accent-soft), var(--c-bg) 75%);
+  height: 768rpx;
+  padding: 0 var(--sp-page);
+  background: linear-gradient(160deg, var(--c-accent-soft), var(--c-bg) 78%);
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: var(--sp-1);
+  box-sizing: border-box;
 }
 .mine-avatar {
-  width: 128rpx;
-  height: 128rpx;
+  width: 176rpx;
+  height: 176rpx;
   border-radius: var(--r-full);
-  border: 4rpx solid var(--c-surface);
+  border: 6rpx solid #ffffff; /* 3.x border-3 白描边 */
   box-shadow: var(--sh-card);
 }
 .mine-name {
-  font-size: var(--fs-title);
+  margin-top: var(--sp-2);
+  font-size: 36rpx;
   font-weight: 700;
   color: var(--c-text);
 }
 .mine-desc {
-  font-size: var(--fs-cap);
+  margin-top: var(--sp-1);
+  font-size: var(--fs-sm);
   color: var(--c-text-sub);
+  text-align: center;
+  padding: 0 80rpx;
 }
+
+/* ── 八宫格（3.x 玻璃 rounded-3xl(48rpx) p-3，图标块 80rpx rounded-xl）── */
 .mine-grid {
   margin-top: var(--sp-4);
-  border-radius: var(--r-lg);
+  border-radius: var(--r-2xl);
   padding: var(--sp-3);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--sp-3);
+  gap: var(--sp-2);
 }
 .mine-grid-item {
   display: flex;
@@ -43,34 +57,63 @@
   padding: var(--sp-2) 0;
 }
 .mine-grid-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: var(--r-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 40rpx;
 }
 .mine-grid-label {
-  font-size: 22rpx;
-  color: var(--c-text-sub);
+  font-size: var(--fs-cap);
+}
+
+/* ── 其他功能列表（3.x 玻璃 rounded-2xl；行 = 图标块 + 标题 + 副标题 + 箭头）── */
+.mine-section {
+  margin-top: var(--sp-5);
 }
 .mine-list {
-  margin-top: var(--sp-gap);
-  border-radius: var(--r-lg);
+  border-radius: var(--r-xl);
   padding: 0 var(--sp-3);
 }
 .mine-list-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: var(--sp-3) 0;
-  border-bottom: 1rpx solid var(--c-border);
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-1);
+  border-bottom: 1rpx solid var(--c-sep);
 }
 .mine-list-item:last-child {
   border-bottom: none;
 }
+.mine-list-icon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  flex-shrink: 0;
+}
 .mine-list-label {
-  font-size: var(--fs-body);
+  font-size: var(--fs-sm);
   color: var(--c-text);
+}
+.mine-list-desc {
+  flex: 1;
+  text-align: right;
+  font-size: var(--fs-cap);
+  color: var(--c-text-weak);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .mine-list-arrow {
   color: var(--c-text-weak);
   font-size: var(--fs-title);
+  flex-shrink: 0;
 }
 .mine-footer {
   padding: var(--sp-4);
@@ -78,6 +121,6 @@
   justify-content: center;
 }
 .mine-footer-text {
-  font-size: 20rpx;
+  font-size: 22rpx; /* 3.x text-11px */
   color: var(--c-text-weak);
 }

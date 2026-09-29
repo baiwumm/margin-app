@@ -25,10 +25,12 @@
   box-shadow: var(--sh-float);
   box-sizing: border-box;
 }
-@supports (backdrop-filter: blur(20px)) {
-  .float-tabbar-inner {
-    backdrop-filter: blur(20px);
-  }
+/* 毛玻璃：裸声明（⚠️ 本项目构建管线会整块剥掉 @supports，D53 记录——
+ * 原写法 @supports (backdrop-filter) 里的 blur 从未进过产物；
+ * 裸声明在支持的机型生效、不支持的自动忽略，胶囊底 0.94 不透明观感几乎无差）。 */
+.float-tabbar-inner {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 .float-tab {
   width: 96rpx;

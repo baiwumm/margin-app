@@ -6,3 +6,54 @@ page {
   font-family: var(--font-body);
   color: var(--c-text);
 }
+
+/* ── 跨页共享件（小节标题 / 空态）────────────────────────────────── */
+/* 小节标题：28rpx 半粗 + 柠檬绿垫块（3.x uh-section-title，demo 标志性装饰） */
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: var(--sp-4) 0 var(--sp-3);
+}
+.section-title {
+  position: relative;
+  display: inline-block;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--c-text);
+  z-index: 0;
+}
+.section-title::after {
+  content: "";
+  position: absolute;
+  left: -4rpx;
+  right: -8rpx;
+  bottom: 2rpx;
+  height: 14rpx;
+  background: var(--c-accent);
+  opacity: 0.9;
+  border-radius: var(--r-full);
+  z-index: -1;
+}
+
+.empty {
+  padding: var(--sp-5);
+  display: flex;
+  justify-content: center;
+}
+.empty-text {
+  color: var(--c-text-weak);
+  font-size: var(--fs-cap);
+}
+
+/* 列表入场（design.md §4：逐项错峰上浮） */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(24rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
