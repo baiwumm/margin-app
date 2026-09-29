@@ -117,3 +117,12 @@
 `[perf +34ms] App.onLaunch` → `[perf +56ms] manifest 缓存命中（buildId=b2c8b18-…）` → `[perf +57ms] 存储配额 44/10240` → 页面 onReady。ETag 回验 304（228ms）。
 
 **判读（A1 全绿）**：① manifest 缓存命中 +51ms ✅；② 本次是「版本切换后首次打开」（上轮手机已把 b2c8b18 判为变更并清旧键）→ 列表数据按设计重拉（200，218–264ms，发生在 onReady 之后、不阻塞首帧），拉完即入新键——稳态热启动（无版本变化）将不再有这些 GET；③ 图标内联 base64 后 tab bar 零图片请求 ✅。**A1 清单全部达标**。
+
+## 暗色模式实现（2026-09-29，打样第 2 项代码侧完成，用户暗色截图触发）
+
+三层机制：
+1. `app.json darkmode: true` —— WXSS 的 `@media (prefers-color-scheme)` 生效开关；
+2. tokens.css：page 节点挂明暗两套变量（默认浅色 + media 查询暗色）——**变量沿 DOM 继承**，五页内容与 custom-tab-bar 子树全部自动跟随（tab bar 是 Component 与 app.wxss 隔离，但 CSS 变量继承不受隔离影响）；
+3. `useTheme` hook（系统 onThemeChange + 偏好覆盖接口留 M2）——页面 root 挂 `theme-dark` 类（为「偏好强制浅/深」预留，类优先级高于 page 继承），标签色块卡暗色切 `colorDark` 档（契约 Tag 三色用法）。
+
+tab 图标灰色 `#909399` 在暗色胶囊上可读性足够，暂不出生成暗色变体（视觉基线宣告时复核）。
