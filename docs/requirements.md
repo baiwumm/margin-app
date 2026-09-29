@@ -371,7 +371,7 @@ margin-app/
 | R13 | 改名未变更备案 | ✅ 关闭 | 已发起，审核中（compliance §5） |
 | **R14** | `getImage()` 在 Endpoint 内是否落盘 | ✅ **关闭（D42）** | 探针 A 通过：CF 构建实证静态 `/_astro/*` 落盘 + sharp 可跑 |
 | **R15** | 三个 remark 插件降级 HTML 串 | ✅ **关闭（D43）** | 探针 B 通过：`parse*Card` 抽取 + 同环境字节级等价证明 |
-| R16 | `wx.setStorage` 上限 | P1 | D30 字节预算 + 水位守卫 + M1 真机复核 |
+| R16 | `wx.setStorage` 上限 | ✅ **关闭（M1 真机实测）** | iPhone 16 Pro 实测配额 10240 KB（10MB，与 D30 设计边界一致）；46KB 起步、ETag 304 回验正常 |
 | R17 | 浅克隆影响热力图/buildId | ✅ 关闭（D34） | — |
 | R18 | 依赖批准 | ✅ 关闭（D29） | AGENTS.md 写回归 M0 |
 
