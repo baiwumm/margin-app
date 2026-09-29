@@ -174,7 +174,7 @@ export default function Mine() {
                         style={{
                           backgroundColor:
                             d && d.count > 0
-                              ? heatColors[Math.min(4, 1 + Math.floor(Math.log2(d.count + 1)))]
+                              ? heatColors[Math.min(4, Math.ceil(Math.log2(d.count + 1)))]
                               : "transparent",
                         }}
                       />
