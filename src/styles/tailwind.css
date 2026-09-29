@@ -1,56 +1,74 @@
 /* Tailwind v4 入口（CSS-first）。样式生成由 weapp-tailwindcss v5 接管（D37），
- * 不叠加 @tailwindcss/vite 或 @tailwindcss/postcss（weapp-tw README 明确禁止双生成器）。 */
+ * 不叠加 @tailwindcss/vite 或 @tailwindcss/postcss（weapp-tw README 明确禁止双生成器）。
+ * 语义类对齐 margin 卡片语言（细边框 + 低饱和 tint，无玻璃拟态）；色值全部走
+ * tokens.css 令牌（color-mix 已按 design.md §2 预计算落死）。 */
 @import "tailwindcss";
 @import "./tokens.css";
 
 @source "../";
 
-/* 令牌映射为常用语义类（显式书写，不用通配选择器——design.md §6）。
- * card-surface = 3.x 玻璃拟态卡（D53）：半透明白 + 白描边 + inset 高光 + 环境投影。
- * ⚠️ 本项目构建管线会剥掉全部 @supports 块（实测，含 custom-tab-bar 旧写法），
- * 毛玻璃降级不能走 @supports not() 换底色——backdrop-filter 一律裸声明：
- * 不支持的机型自动忽略该属性，半透明白底在纯色页底上观感仍成立（design.md §6 降级形态）。
- * 需要按机型换实底时用 JS 判断（--glass-bg-solid 令牌留给该场景）。 */
+/* ⚠️ 硬约束（D20）：rgba 逗号写法；不写 @supports（构建管线剥块）；
+ * 禁 * 通配与部分伪类；hover 类触屏无意义 → 按压态用 Taro hoverClass 挂载。 */
 .page-bg {
   background-color: var(--c-bg);
 }
-.card-surface {
+
+/* margin 默认卡（Card.astro：border-border/25 + bg-muted/10 + rounded-2xl） */
+.card {
   box-sizing: border-box;
-  background-color: var(--glass-bg);
-  border: 4rpx solid var(--glass-border);
-  box-shadow: var(--sh-card-soft);
-  backdrop-filter: var(--glass-backdrop);
-  -webkit-backdrop-filter: var(--glass-backdrop);
+  border-radius: var(--r-card);
+  border: 1rpx solid var(--c-border-25);
+  background-color: var(--c-muted-10);
 }
-/* 实底卡面（不透名场景：代码块底、骨架屏） */
-.card-solid {
+/* 精选语义卡（border-featured/30 + bg-featured/5 + 常驻辉光） */
+.card-featured {
+  border-color: var(--c-featured-30);
+  background-color: var(--c-featured-5);
+  box-shadow: 0 0 40rpx -10rpx var(--c-featured-15);
+}
+/* 画廊语义卡（border-gallery/20 + bg-gallery/5） */
+.card-gallery {
+  border-color: var(--c-gallery-20);
+  background-color: var(--c-gallery-5);
+}
+/* hero 容器（margin *-hero：surface 底 + accent 12% 描边 + rounded-3xl） */
+.card-hero {
+  box-sizing: border-box;
+  border-radius: var(--r-hero);
+  border: 1rpx solid var(--c-accent-12);
   background-color: var(--c-surface);
-  box-shadow: var(--sh-card-soft);
 }
-.text-main {
-  color: var(--c-text);
+
+/* 按压态（design.md §4：卡片 = accent 30% 描边 + accent 4% 底；行/按钮 = opacity）。
+ * 用法：hoverClass='card-press' / hoverClass='row-press'。声明顺序保证覆盖上方面底。 */
+.card-press {
+  border-color: var(--c-accent-30);
+  background-color: var(--c-accent-4);
+}
+.row-press {
+  opacity: 0.7;
+}
+
+.text-fg {
+  color: var(--c-fg);
 }
 .text-mid {
-  color: var(--c-text-mid);
-}
-.text-sub {
-  color: var(--c-text-sub);
+  color: var(--c-fg-mid);
 }
 .text-weak {
-  color: var(--c-text-weak);
+  color: var(--c-fg-45);
 }
-/* 主强调（3.x bg-primary：选中态填充，文字固定 gray-900） */
-.primary-bg {
-  background-color: var(--c-primary);
-  color: var(--c-primary-ink);
+.accent-text {
+  color: var(--c-accent);
 }
-.primary-text {
-  color: var(--c-primary);
+.featured-text {
+  color: var(--c-featured);
 }
-/* 次强调色块（3.x bg-secondary：柠檬绿高亮底）；明暗两套配对见 tokens --c-chip-* */
-.accent-bg {
-  background-color: var(--c-chip-bg);
-  color: var(--c-chip-ink);
+.gallery-text {
+  color: var(--c-gallery);
+}
+.font-mono {
+  font-family: var(--font-mono);
 }
 .font-body {
   font-family: var(--font-body);

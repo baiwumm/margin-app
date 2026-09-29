@@ -1,52 +1,172 @@
-/* app 全局样式：Tailwind v4 入口 + 设计令牌（tokens.css 已在 tailwind.css 内 @import） */
+/* app 全局样式：Tailwind v4 入口 + 设计令牌（tokens.css 已在 tailwind.css 内 @import）。
+ * 视觉基准 = margin 博客原设计（D1）；硬约束见 design.md §7（D20）。 */
 @import "./styles/tailwind.css";
 
 page {
   background-color: var(--c-bg);
   font-family: var(--font-body);
-  color: var(--c-text);
+  color: var(--c-fg);
+  font-size: var(--fs-body);
 }
 
-/* ── 跨页共享件（小节标题 / 空态）────────────────────────────────── */
-/* 小节标题：28rpx 半粗 + 柠檬绿垫块（3.x uh-section-title，demo 标志性装饰） */
+/* ── 页面容器 + 装饰层（margin Layout.astro site-backdrop 同族）──────
+ * 网格 = accent 实色 1px 格线、50px 网格、层透明度 3.5%，径向 mask 渐隐
+ * （不支持 mask 的机型自动降级为均匀网格，design.md §6）；
+ * 噪点 = 构建期预渲染 PNG 平铺（feTurbulence 同款观感，WXSS 不赌 SVG data-URI）。
+ * 内容一律包在 .page-body（z-index 1）里，装饰层 z-index 0 不拦截事件。 */
+.page {
+  position: relative;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+.bg-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60vh;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background-image: linear-gradient(var(--c-accent) 1px, transparent 1px),
+    linear-gradient(90deg, var(--c-accent) 1px, transparent 1px);
+  background-size: 100rpx 100rpx;
+  opacity: 0.035;
+  -webkit-mask-image: radial-gradient(
+    ellipse 100% 60% at 50% 0%,
+    black 15%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 100% 60% at 50% 0%,
+    black 15%,
+    transparent 100%
+  );
+}
+.bg-noise {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0.06;
+}
+/* 噪点图为打包 PNG（<Image> 引用；WXSS 内联 base64 受体积红线约束） */
+.bg-noise-img {
+  width: 100%;
+  height: 100%;
+}
+.page-body {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── glow 渐变标题（margin .hero-title shimmer 135° 六停渐变）────────
+ * 降级 = 不支持 background-clip:text 的机型显示纯 fg（color 先行声明，§6）。 */
+.glow-text {
+  color: var(--c-fg);
+  background: linear-gradient(
+    135deg,
+    var(--c-accent) 0%,
+    var(--c-accent-mix) 20%,
+    var(--c-fg) 35%,
+    var(--c-fg) 65%,
+    var(--c-accent-mix) 80%,
+    var(--c-accent) 100%
+  );
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 6s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0%,
+  100% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+}
+
+/* ── 小节标题（margin FEATURED/RECENT 语言：大写 accent + 横线 + 可选计数）── */
 .section-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin: 40rpx 0 var(--sp-3);
+  gap: 24rpx;
+  margin: var(--sp-section) 0 var(--sp-gap);
 }
 .section-title {
-  position: relative;
-  display: inline-block;
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--c-text);
-  z-index: 0;
-}
-.section-title::after {
-  content: "";
-  position: absolute;
-  left: -4rpx;
-  right: -8rpx;
-  bottom: 2rpx;
-  height: 14rpx;
-  background: var(--c-accent);
-  opacity: 0.9;
-  border-radius: var(--r-full);
-  z-index: -1;
-}
-
-.empty {
-  padding: var(--sp-5);
+  flex-shrink: 0;
   display: flex;
-  justify-content: center;
-}
-.empty-text {
-  color: var(--c-text-weak);
+  align-items: center;
+  gap: 8rpx;
   font-size: var(--fs-cap);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-accent);
+}
+.section-line {
+  flex: 1;
+  height: 1rpx;
+  background: var(--c-border-20);
+}
+.section-count {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cap);
+  color: var(--c-accent-40);
+  user-select: none;
 }
 
-/* 列表入场（design.md §4：逐项错峰上浮） */
+/* ── 空态（margin EmptyState：虚线框容器 + 可选图标位 + 标题/描述）── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 128rpx 64rpx;
+  text-align: center;
+  border-radius: var(--r-hero);
+  border: 2rpx dashed var(--c-border-40);
+}
+.empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 40rpx;
+  margin-bottom: var(--sp-3);
+  color: var(--c-accent);
+  background-color: var(--c-accent-8);
+  box-shadow: 0 0 0 1rpx var(--c-accent-15);
+  animation: empty-float 4s ease-in-out infinite alternate;
+}
+@keyframes empty-float {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-16rpx);
+  }
+}
+.empty-title {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: var(--c-fg);
+  margin-bottom: var(--sp-1);
+}
+.empty-desc {
+  font-size: var(--fs-body);
+  color: var(--c-fg-mid);
+}
+
+/* 列表入场（design.md §4：逐项错峰上浮，delay = index × 50ms 封顶 300ms） */
 @keyframes rise-in {
   from {
     opacity: 0;
