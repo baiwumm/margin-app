@@ -27,3 +27,5 @@ coverage/
 yarn.lock
 package-lock.json
 project.private.config.json
+# 本地调试产物（dist 快照模拟）
+test/fixtures/

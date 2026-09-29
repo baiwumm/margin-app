@@ -47,3 +47,4 @@
 | 2 | `custom-tab-bar/index: n[e] is not a function` | custom-tab-bar 组件内使用 `useDidShow`——页面级 hook 在无页面实例的组件上下文崩溃 | 移除组件内 useDidShow，改 **store 订阅模式**（`custom-tab-bar/store.ts` 单例 + 五页面各自 useDidShow 广播选中态）；产物复验 0 处 useDidShow | 实现模式修正（D50 补充：页面 → store → 组件单向同步） |
 
 提交（本地未推送）：`ed3f28a`（M1-a 全量）→ `9bebe71`（React 18.3.1 回退）→ `e9dce81`（tabBar store 模式）。
+| 3 | `custom-tab-bar/index: n[e] is not a function`（修复 #2 后仍在）+ `Page pages/home/index has not been registered yet` | **`src/custom-tab-bar/` 缺 `index.config.ts`** → 产物 json 为 `{}`、无 `component: true`，微信不把 custom-tab-bar 按组件实例化，Taro 运行时 Component 包装在错误上下文执行并连锁中断启动序列（页面注册失败是同一根因的下游症状）。Node 模拟求值（app→page→tabbar 同序）排除了 chunk 依赖图问题——产物模块注册表完整 | 补 `index.config.ts`（`component: true`），产物 json 复验 `{"component":true}`；useDidShow→store 改造（修复 #2）保留（正确实现模式） | 修复 #2 属必要但不充分；#3 才是崩溃主因 |
