@@ -129,3 +129,29 @@ tab 图标灰色 `#909399` 在暗色胶囊上可读性足够，暂不出生成�
 ## tabBar 重制（2026-09-29，用户对照 demo 反馈驱动）
 
 原实现（宽条 640rpx + 中文标签 + 整项高亮）与 demo 特写不符。重制为：**纯图标窄胶囊**（inline-flex shrink-to-fit，约 460rpx）、**无文字**、**选中项 = 浅柠檬绿圆角方块（96rpx，24rpx 圆角）内深墨图标**；暗色 = 胶囊深底、选中块暗橄榄、图标亮柠檬。图标三态重生成（15 枚：normal 灰 / active 浅色模式深墨 / active-dark 暗色模式亮柠檬），构建内联 base64。
+
+## UI 全量重新对齐 uni-halo 3.0.0（2026-09-29，D53；打样 1-5 项待复验）
+
+用户把本地 `E:\personal-project\uni-halo` 从 2.0.10 拉到 **3.0.0**（unibest 4.4.1 + wot-ui-v2），此前「只有页面结构可参考」的限制解除，UI 全部重写对齐（demo 截图与源码互证，源码为准）。
+
+**令牌层（tokens.css / tailwind.css）**：
+- 双强调色：`--c-primary #B9E424`（选中态/图标/文字 accent）+ `--c-accent #D7F94C`（高亮块底）；`.primary-bg` / `.primary-text` 语义类新增。
+- 玻璃拟态：`--glass-*` 五令牌 + `.card-surface` 全量玻璃化（白 55% + 白描边 4rpx + inset 高光 + blur(24rpx) saturate(160%) + 淡紫投影）。
+- 文字 3.x 灰阶（#111827/#4B5563/#6B7280/#9CA3AF）+ `--c-sep`；圆角对齐 Uno 档（--r-lg 28→24、--r-md 20→16，新增 --r-xl 32 / --r-2xl 48）。
+- 暗色自研推导保留：玻璃暗色变体 + `--c-chip-bg/ink`（暗橄榄底×亮柠檬字）修复暗色高亮块 1.6:1 低对比。
+
+**结构层**：
+- 新增 `src/components/NavBar/`：固定玻璃导航（page 底色 + blur 随滚动渐显，`min(scrollY/360, 0.9)`，0.05 档量化）；标签/图库/瞬间/我的四页接线（替代原内容流内标题），我的页 overlay 变体（白字→正色）。顺带修复标签/图库页此前无状态栏顶部留白的问题。
+- 首页：hero 512rpx 无圆角 + 底部融底渐变；搜索玻璃胶囊叠 hero 下缘（-48rpx、80% 宽）；公告三段式（😄 + 红标 + 内容 + 全部›）；快捷导航 104rpx 彩底玻璃块 + 彩色标签；「热门标签」补小节标题（3.x 精选分类同款槽位）；tabs 右置玻璃分段控件；文章卡 28rpx 标题 + 26rpx 摘要 + 柠檬 tag chips（`# ` 前缀）。
+- 瞬间：月份选择器重构为 6 月翻页玻璃卡（窗口半年对齐、数据边界钳制、「本月」快捷钮接通）；卡内方头像 72rpx（换真头像 URL）+ 中文日期格式 + 26rpx 正文 + 1/2/3 列动态图网格（单图 336rpx/多图 192rpx）+ tag chips + 分隔线操作栏。
+- 我的：hero 768rpx + 头像 176rpx 白描边；八宫格玻璃 rounded-3xl + 彩底图标块 + 彩色标签；其他功能列表行加图标块/副标题/箭头；版权 22rpx。
+- 图库：筛选胶囊 `画廊名(照片数)` 格式 + primary 激活；图片卡 304rpx 玻璃框 + 底部渐变命名浮层。
+- app.config.ts 原生兜底 tabBar 色值对齐 3.x（#303133/#B9E424/#ffffff）。
+
+**关键实测发现（写进 design.md §6）**：
+1. **构建管线剥掉全部 `@supports` 块**——enhancement 与降级规则一起消失。D52 tabBar 的 blur 增强其实从未进过产物（用户真机看到的一直是不带 blur 的形态且已接受）。改为裸声明 `backdrop-filter`（不支持机型自动忽略），nav alpha 上限提到 0.9 补偿无 blur 机型。
+2. WXSS 不认 `rgb(255 255 255 / 55%)` 空格斜杠语法（uni-halo 靠 Uno presetLegacyCompat 转译）——margin 裸 WXSS 一律逗号写法。
+
+**验证**：`taro build weapp` 编译通过（11.7s）；22 单测全绿；产物抽查——`.card-surface` 玻璃声明、`--c-chip-*` 明暗两套、nav/month-cal/hero-fade 等新类均在 dist 对应 chunk。
+
+**待用户（复验清单）**：真机重走打样第 1/2 项（浅色令牌与 demo + uni-halo 3.x 真机互证、暗色 chip 配对校准）；第 4/5 项（341rpx 网格、6 月翻页选择器边界）；NavBar 滚动渐显与 overlay 变体真机过一遍。视觉基线宣告在此之后。

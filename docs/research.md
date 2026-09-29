@@ -29,9 +29,11 @@
 
 **规避**：① 技术栈过时（Vue2 + HBuilderX + tm-vuetify 109 组件）；② `pages.json` 样板重复、`navigationStyle` 混用；③ 死代码与硬编码（三处 `BASE_API`、1500 行未引用组件、`v-if="false"` 隐藏的深色按钮、缺失死链）；④ 分页状态位各页各写 → 抽统一 `usePagination`；⑤ 错误码依赖后端旧形态 + 正则抠参数 → 显式约定响应结构。
 
+> ⚠️ 上述为 **2.x 时代的评估**（2026-09-28）。本地已更新 3.0.0（D53）：换栈 Vue3 + unibest 4.4.1 + wot-ui-v2，工程面大幅翻新，规避项 ①②⑤ 大部分已失效；借鉴四条仍然成立，且 3.x 的玻璃拟态视觉系统成为 margin 的对齐基准（见 §9）。
+
 ## 3. demo 图身份
 
-5 张图是 **uni-halo v3.x 实机截图**，非为本项目设计——品牌位与文案（UniHalo 发布公告、小莫唐尼、恋爱日记/投票中心）必须全部替换（D9）。本地仓库是 2.0.10，配色（粉 `#f79ea3` / Material 蓝 `#03a9f4`）与 demo 完全不同（全库无 `#D7F94C`）→ **页面结构参考本地，视觉令牌只认 demo**。设计令牌全部程序化采样（像素直方图 / 众数色 / 几何测量），非肉眼估计。
+5 张图是 **uni-halo v3.x 实机截图**，非为本项目设计——品牌位与文案（UniHalo 发布公告、小莫唐尼、恋爱日记/投票中心）必须全部替换（D9）。~~本地仓库是 2.0.10，配色与 demo 完全不同 → 页面结构参考本地，视觉令牌只认 demo~~ **D53 起失效**：本地已拉到 3.0.0 源码，demo 与源码同源，**UI 对齐以源码为准、截图裁决视觉细节**（早期程序化采样令牌被源码值取代，见 design.md §2）。
 
 ## 4. 关键数字口径
 
@@ -116,3 +118,21 @@
 **档位终验（D46）**：生产 AssetRef 宽度实测 = blog 640/750/1280、画廊照片 400/800/1600、画廊封面 800/800/1600、瞬间 400/800/800，全部 ⊆ 站点已渲染档位。变体文件名含内容 hash + 变换参数 hash，与站点 `<Image>` 同参数产物同文件（去重成立）。
 
 **验收结论**：api-contract.md §8 六项全过（⑤ 带记录在案的有界例外）；M0 关闭，M1 可开工。
+
+## 9. uni-halo 3.0.0 视觉规格事实（F9，2026-09-29 D53 源码实测）
+
+本地 `E:\personal-project\uni-halo` @ main（3.0.0，unibest 4.4.1 + wot-ui-v2）。全部读自源码：
+
+- **主色系**（`src/style/index.scss:7-35`）：`--wot-color-theme #B9E424`（primary）、`--wot-primary-7 #A7CD20`（active）、`--wot-primary-1/2 #F4FBE0/#EBFABF`（浅底）；secondary = `#D7F94C`（`uno.config.ts` fallback，源码未定义 `--wot-color-secondary`）；页面底 = `#f6f3ee`（`bg-page` fallback）。globalStyle backgroundColor 却是 `#F8F8F8`（pages.config.ts，实际被各页 `bg-page` 覆盖）。
+- **文字灰阶** = UnoCSS 默认调色板：gray-900 `#111827` / gray-600 `#4b5563` / gray-500 `#6b7280` / gray-400 `#9ca3af`；边框混用 `border-black/5`、gray-100/200/300。
+- **玻璃拟态**（`index.scss:40-72` `.uh-global-card-glass`，全站卡片/弹窗/导航/tabbar 复用）：`rgb(255 255 255 / 55%)` 底 + `4rpx solid rgb(255 255 255 / 65%)` 白描边 + `inset 0 1rpx 0 rgb(255 255 255 / 75%)` 高光 + `0 8rpx 32rpx rgb(90 105 200 / 14%)` 淡紫投影 + `blur(24rpx) saturate(160%)`；`@supports not` 兜底白 88%。配套 `.uh-shadow-xs`（7% 投影）等。
+- **圆角**：无自定义 token，Uno 默认档——卡片 `rounded-xl`(12px=24rpx)、胶囊 `rounded-full`、筛选胶囊/弹窗 `rounded-2xl`(16px=32rpx)、我的宫格卡 `rounded-3xl`(24px=48rpx)、小件 `rounded-lg`(8px=16rpx)。
+- **tabbar**（`src/tabbar/`）：自定义玻璃胶囊（`custom:true`），占位 h-56px、胶囊 `fixed bottom-0 w-full px-12`（左右 48px）`rounded-full p-1`；item `flex-1` **等宽**、PNG 图标 `w-7 h-7`（28px）无文字（`useTitle=false`）、选中 = 图标变色 `--wot-color-theme` + item 叠加 `uh-global-card-glass` 玻璃高亮；未激活 `#333`；点击 `uni.vibrateShort()`。5 tab：home/category/gallery/moments/blogger。原生兜底字段 color `#303133` / selectedColor `#B9E424` / bg `#ffffff`。
+- **首页结构**（`home.vue`）：banner swiper（h-64=512rpx，标题胶囊 `rgba(215,249,76,0.9)` + blur + 日期白字 + 底部融底渐变）→ 搜索胶囊（叠 banner 底 `translateY(-1.5rem)`、80% 宽、placeholder「哈喽，想看些什么 {内容} 呢~」chip `bg-secondary`）→ 公告三段（emoji + 红色「公告」 + 垂直 swiper + 「全部→」）→ **今日一言**（`uh-home-hitokoto`，f19a128 新增，带配置开关）→ 快捷导航（`grid-cols-5`，彩底玻璃块 h-13 w-13=104rpx rounded-2xl + 彩色标签）→ **精选分类**（左大 `grid-row-span-2` + 右两小拼图，图 + 黑渐变 + 白字）→ 最新推荐（`uh-section-title` + 右置分段玻璃控件 text-10px，激活 `bg-secondary`）+ 文章列表单/双列可切换（`uh-article-card` 四种布局默认 image_top）。
+- **月份选择器**（`uh-month-calendar`）：玻璃卡 `rounded-2xl p-2`，左右箭头步长 6 个月，每格月名 `text-3xs`(26rpx) + 年份副行，选中 `bg-primary`。
+- **我的页**（`blogger.vue`）：hero `h-96`(768rpx) 背景图 + 头像 `h-22`(176rpx) 圆形 border-3 白描边 + 白字昵称/简介 + 波浪图 + 底部融底渐变；宫格卡玻璃 `rounded-3xl p-3` `grid-cols-4`，图标块 `h-10 w-10`(80rpx) `rounded-xl` inline 彩底；列表行图标块 64rpx + 副标题 gray-400 + 箭头；版权 `text-11px`(22rpx)。统计卡仅 featureMode=list 显示（demo 为 grid 模式未显示）。
+- **导航**（`uh-navbar`）：fixed，statusBar + 46px 行，滚动渐显 `rgba(255,255,255, min(scrollY/360, 0.80))` + `blur(4rpx)`，阈值 0.5 切文字白→gray-900；tab 页无返回键；`uh-mine-navbar` 左侧扫码钮。
+- **悬浮按钮组**（`uh-global-actions`）：`fixed bottom-18 right-3` 堆叠回顶/设置/头像，`h-11 w-11`(88rpx) 玻璃圆钮，图标 `text-primary`。
+- **字体**：零自定义正文字体（系统栈）；仅 iconfont/emoji 字体。
+- **⚠️ 无暗色模式**：uno.config 未配 dark、无 `.dark` 切换代码、无 prefers-color-scheme 媒体查询；8 处 `dark:` 工具类为死代码。margin 暗色为自研推导。
+- **工程注意**：Uno `presetLegacyCompat` 负责把 `rgb(空格/斜杠)` 转译成逗号写法——margin 裸 WXSS 无此层，必须手写 `rgba(255, 255, 255, 0.55)`。

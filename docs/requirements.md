@@ -3,9 +3,9 @@
 | 项 | 内容 |
 | --- | --- |
 | 项目代号 | margin-app |
-| 文档版本 | **v3.5**（2026-09-29）：M1-a 基座与打样代码完成（D48-D50），待真机。M0 完成验收（D45-D47）。v3.3 本地开发；v3.2 workers.dev 关闭；v3.1 M0-0 双探针通过；v3.0 全文重组口径不变，论证与过程记录在 `archive/` |
+| 文档版本 | **v3.6**（2026-09-29）：UI 全量重新对齐 uni-halo 3.0.0 源码（D53，双色主色 + 玻璃拟态 + 固定 NavBar；五页重写、打样 1-5 项待复验）。M1-a 基础上完成；M0 验收（D45-D47）不变 |
 | 内容源 | `E:\personal-project\margin`（Astro 7 纯静态博客，线上 https://www.baiwumm.com/） |
-| 视觉基准 | `demo/` 5 张图（uni-halo v3.x 实机观感）为唯一基准（D10）；`E:\personal-project\uni-halo`（2.0.10）仅作页面结构参考 |
+| 视觉基准 | **uni-halo 3.0.0 源码**（`E:\personal-project\uni-halo`，D53）+ `demo/` 5 张图（3.x 实机截图）互证（D10 修订）；2.0.10 时代「只参考结构」口径作废 |
 | 配套文件 | [api-contract.md](api-contract.md) · [design.md](design.md) · [compliance.md](compliance.md) · [decisions.md](decisions.md) · [research.md](research.md) · [archive/requirements-v2.1.md](archive/requirements-v2.1.md) |
 
 ## 0. 一句话
