@@ -1,126 +1,146 @@
-/* 我的页（design.md §1 我的屏，对齐 3.x blogger）：
- * overlay 导航 + hero 768rpx + 头像 176rpx 白描边 + 玻璃 rounded-3xl 八宫格（彩底块彩字）
- * + 「其他功能」列表行（图标块 + 副标题 + 箭头）+ 版权行 22rpx */
+/* 我的页（margin AboutLayout / SiteStats / ContributionCalendar 同构）：
+ * hero 头像 accent 描边圆环 + glow 昵称；统计卡 = border 25% + muted 10% 底
+ * mono accent 大数；热力图 = accent 强度分级小方格周列横滚（强度色走内联
+ * accentRgba，跟随五套轮换）；功能行 = surface-2 底圆角行。 */
 
 .mine {
-  padding-top: 0;
+  padding: 0 var(--sp-page) 140rpx;
 }
 
-/* ── Hero（3.x h-96 = 768rpx；D38 背景图占位渐变，文字暂用暗色系保可读）── */
+/* ── hero ─────────────────────────────────────────────────────── */
 .mine-hero {
-  margin: 0 calc(-1 * var(--sp-page));
-  height: 768rpx;
-  padding: 0 var(--sp-page);
-  background: linear-gradient(160deg, var(--c-accent-soft), var(--c-bg) 78%);
+  padding-top: var(--sp-3);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: var(--sp-1);
-  box-sizing: border-box;
+}
+.mine-avatar-ring {
+  padding: 6rpx;
+  border: 2rpx solid var(--c-accent-40);
+  border-radius: var(--r-full);
 }
 .mine-avatar {
   width: 176rpx;
   height: 176rpx;
   border-radius: var(--r-full);
-  border: 6rpx solid #ffffff; /* 3.x border-3 白描边 */
-  box-shadow: var(--sh-card);
+  display: block;
 }
 .mine-name {
-  margin-top: var(--sp-2);
-  font-size: 36rpx;
+  margin-top: var(--sp-3);
+  font-size: 40rpx;
   font-weight: 700;
-  color: var(--c-text);
 }
 .mine-desc {
   margin-top: var(--sp-1);
   font-size: var(--fs-sm);
-  color: var(--c-text-sub);
+  color: var(--c-fg-75);
   text-align: center;
   padding: 0 80rpx;
 }
-
-/* ── 八宫格（3.x 玻璃 rounded-3xl(48rpx) p-3，图标块 80rpx rounded-xl）── */
-.mine-grid {
-  margin-top: var(--sp-4);
-  border-radius: var(--r-2xl);
-  padding: var(--sp-3);
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--sp-2);
+.mine-socials {
+  margin-top: var(--sp-3);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-3);
 }
-.mine-grid-item {
+.mine-social {
+  font-size: var(--fs-sm);
+  color: var(--c-fg-mid);
+  border-bottom: 2rpx dashed var(--c-fg-45);
+  padding-bottom: 4rpx;
+}
+
+/* ── 统计卡（margin SiteStats：2 列移动端取 3 列窄格）──────────────── */
+.mine-stats {
+  margin-top: var(--sp-4);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-1);
+}
+.mine-stat {
+  border-radius: var(--r-card);
+  border: 1rpx solid var(--c-border-25);
+  background-color: var(--c-muted-10);
+  padding: var(--sp-3) var(--sp-1);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--sp-1);
-  padding: var(--sp-2) 0;
 }
-.mine-grid-icon {
-  width: 80rpx;
-  height: 80rpx;
-  border-radius: var(--r-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.mine-stat-num {
+  font-family: var(--font-mono);
   font-size: 40rpx;
+  font-weight: 700;
+  color: var(--c-accent);
 }
-.mine-grid-label {
+.mine-stat-label {
+  margin-top: 8rpx;
   font-size: var(--fs-cap);
+  color: var(--c-fg-mid);
 }
 
-/* ── 其他功能列表（3.x 玻璃 rounded-2xl；行 = 图标块 + 标题 + 副标题 + 箭头）── */
-.mine-section {
-  margin-top: var(--sp-5);
+/* ── 贡献日历（heat 网格横滚；格 18rpx 间距 4rpx）────────────────── */
+.mine-heat {
+  padding: var(--sp-2);
 }
-.mine-list {
-  border-radius: var(--r-xl);
-  padding: 0 var(--sp-3);
-}
-.mine-list-item {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  padding: var(--sp-3) var(--sp-1);
-  border-bottom: 1rpx solid var(--c-sep);
-}
-.mine-list-item:last-child {
-  border-bottom: none;
-}
-.mine-list-icon {
-  width: 64rpx;
-  height: 64rpx;
-  border-radius: var(--r-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32rpx;
-  flex-shrink: 0;
-}
-.mine-list-label {
-  font-size: var(--fs-sm);
-  color: var(--c-text);
-}
-.mine-list-desc {
-  flex: 1;
-  text-align: right;
-  font-size: var(--fs-cap);
-  color: var(--c-text-weak);
-  overflow: hidden;
-  text-overflow: ellipsis;
+.heat-scroll {
+  width: 100%;
   white-space: nowrap;
 }
-.mine-list-arrow {
-  color: var(--c-text-weak);
-  font-size: var(--fs-title);
-  flex-shrink: 0;
+.heat-grid {
+  display: inline-flex;
+  gap: 4rpx;
 }
+.heat-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+.heat-cell {
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 4rpx;
+  background-color: var(--c-fg-6);
+}
+.heat-empty {
+  display: block;
+  padding: var(--sp-3);
+  font-size: var(--fs-cap);
+  color: var(--c-fg-45);
+  text-align: center;
+}
+
+/* ── 功能列表行（surface-2 底圆角行）────────────────────────────── */
+.mine-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.mine-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: var(--r-sm);
+  background-color: var(--c-surface-2); /* fg 2% 底圆角行（design §3） */
+  padding: var(--sp-3);
+}
+.mine-row-label {
+  font-size: var(--fs-body);
+  color: var(--c-fg);
+}
+.mine-row-arrow {
+  font-size: 34rpx;
+  color: var(--c-fg-45);
+}
+
+/* ── 版权行 ───────────────────────────────────────────────────── */
 .mine-footer {
-  padding: var(--sp-4);
+  padding: var(--sp-4) 0 var(--sp-2);
   display: flex;
   justify-content: center;
 }
 .mine-footer-text {
-  font-size: 22rpx; /* 3.x text-11px */
-  color: var(--c-text-weak);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cap);
+  color: var(--c-fg-45);
 }

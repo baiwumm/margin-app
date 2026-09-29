@@ -1,72 +1,77 @@
+/**
+ * 首页（design.md §3 首屏结构，margin index.astro 同构）：
+ * 终端徽章（~/ready-to-go $）→ glow 渐变大标题 → 描述行 → 作者 + 社交行
+ * （虚线下划线，点击复制链接 = D8 外链口径）→ FEATURED（★ + featured 琥珀
+ * tint 卡）→ RECENT（[n/m] 等宽计数 + 纯文字卡）→ 「查看全部文章」outline
+ * CTA。无 banner 图、无搜索胶囊、无公告条（margin 首页无对应物，Q 待定）；
+ * 文章卡无图（站点 showCoverImages:false 一致）。
+ * 数据接线不动：useManifest/useSiteData/usePostsIndex 原样；端上切片上拉加载。
+ */
 import { View, Text } from "@tarojs/components";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useDidShow, usePageScroll, useReachBottom } from "@tarojs/taro";
 
-import { usePostsIndex, useSiteData, useTags } from "@/hooks/useCollection";
+import NavBar, { navAlpha } from "@/components/NavBar/NavBar";
+import PageBackdrop from "@/components/deco/PageBackdrop";
+import TerminalBadge from "@/components/deco/TerminalBadge";
+import SectionTitle from "@/components/deco/SectionTitle";
+import { usePostsIndex, useSiteData } from "@/hooks/useCollection";
 import { useManifest } from "@/hooks/useManifest";
+import { useRootClass } from "@/hooks/useTheme";
+import { setSelectedTab } from "@/custom-tab-bar/store";
 import { perfLog } from "@/utils/perf";
 import type { PostMeta } from "@/types/api";
-import { useDidShow } from "@tarojs/taro";
-import { setSelectedTab } from "@/custom-tab-bar/store";
-import { useTheme } from "@/hooks/useTheme";
+import Taro from "@tarojs/taro";
 import "./home.scss";
 
-/** D40：默认 = pubDatetime 降序（posts/index 本身即该序，tabs 里显式重排保险） */
-type TabKey = "default" | "featured" | "newest" | "oldest";
-
-const TABS: { key: TabKey; label: string }[] = [
-  { key: "default", label: "默认" },
-  { key: "featured", label: "置顶" },
-  { key: "newest", label: "最新" },
-  { key: "oldest", label: "最旧" },
-];
-
-/** 快捷导航（3.x 彩底块 + 彩色标签；margin 数据无此项配置，端上静态定义） */
-const QUICK_NAV = [
-  { icon: "📚", label: "归档", bg: "#FFE9C8", color: "#F59E0B" },
-  { icon: "🏷️", label: "标签", bg: "#FBD9E5", color: "#F472B6" },
-  { icon: "🖼️", label: "图库", bg: "#CDEDE9", color: "#14B8A6" },
-  { icon: "⚡", label: "瞬间", bg: "#DDE1FF", color: "#6366F1" },
-  { icon: "🔗", label: "友链", bg: "#D8F2DF", color: "#10B981" },
-];
-
-const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
-/** demo 日期文案格式：「2026年09月29日 星期日」 */
-function formatHomeDate(d: Date): string {
-  return `${d.getFullYear()}年${String(d.getMonth() + 1).padStart(2, "0")}月${String(
-    d.getDate()
-  ).padStart(2, "0")}日 星期${WEEKDAYS[d.getDay()]}`;
-}
-
-function sortPosts(posts: PostMeta[], tab: TabKey): PostMeta[] {
-  const byTime = (a: PostMeta, b: PostMeta) =>
-    new Date(b.pubDatetime).getTime() - new Date(a.pubDatetime).getTime();
-  const list = [...posts];
-  switch (tab) {
-    case "featured":
-      return list.sort((a, b) => Number(b.featured) - Number(a.featured) || byTime(a, b));
-    case "newest":
-      return list.sort(byTime);
-    case "oldest":
-      return list.sort((a, b) => byTime(b, a));
-    default:
-      return list.sort(byTime); // D40
-  }
-}
+/** RECENT 初始片量 = margin SITE.postPerIndex */
+const PAGE_SIZE = 6;
 
 function formatDate(iso: string): string {
   return iso.slice(0, 10);
 }
 
+function PostCard({ post, featured }: { post: PostMeta; featured: boolean }) {
+  return (
+    <View
+      className={`post-card card ${featured ? "card-featured" : ""}`}
+      hoverClass='card-press'
+      hoverStayTime={80}
+    >
+      <Text className='post-card-title'>{post.title}</Text>
+      <View className='post-card-meta'>
+        <Text className='post-card-date'>{formatDate(post.pubDatetime)}</Text>
+        <Text className='post-card-time'>{post.readingTime} 分钟</Text>
+      </View>
+      <Text className='post-card-desc'>{post.description}</Text>
+      {post.tags.length > 0 ? (
+        <View className='post-card-tags'>
+          {post.tags.slice(0, 4).map(tag => (
+            <Text
+              key={tag}
+              className={`post-card-tag ${featured ? "post-card-tag-featured" : ""}`}
+            >
+              <Text className='post-card-tag-hash'># </Text>
+              {tag}
+            </Text>
+          ))}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 export default function Home() {
-  const theme = useTheme();
-  // 同步悬浮 tabBar 选中态（组件内不可用页面级 hook）
+  const rootCls = useRootClass();
+  // 同步 tabBar 选中态（组件内不可用页面级 hook）
   useDidShow(() => setSelectedTab(0));
   const { manifest, loading, cacheHit } = useManifest();
   const buildId = manifest?.buildId ?? null;
   const site = useSiteData(buildId);
   const posts = usePostsIndex(buildId);
-  const tags = useTags(buildId);
-  const [tab, setTab] = useState<TabKey>("default");
+  // 导航滚动渐显（0.05 档量化，控制重渲染频率）
+  const [alpha, setAlpha] = useState(0);
+  usePageScroll(p => setAlpha(navAlpha(p.scrollTop)));
 
   // A1：首屏数据渲染完成打点（首个列表数据到达即视为可交互）
   const paintedRef = useRef(false);
@@ -79,135 +84,116 @@ export default function Home() {
     }
   }, [posts, cacheHit]);
 
-  const sorted = useMemo(() => (posts ? sortPosts(posts, tab).slice(0, 20) : []), [posts, tab]);
-  const hotTags = useMemo(() => (tags ?? []).slice(0, 5), [tags]);
+  /** FEATURED / RECENT 分流 = margin index.astro（featured 置前，其余按时间序） */
+  const { featured, recent } = useMemo(() => {
+    const byTime = (a: PostMeta, b: PostMeta) =>
+      new Date(b.pubDatetime).getTime() - new Date(a.pubDatetime).getTime();
+    const list = [...(posts ?? [])].sort(byTime);
+    return {
+      featured: list.filter(p => p.featured),
+      recent: list.filter(p => !p.featured),
+    };
+  }, [posts]);
 
-  // D32：announcement = null 整条隐藏不占位
-  const announcement = site?.announcement ?? null;
+  const [limit, setLimit] = useState(PAGE_SIZE);
+  useReachBottom(() => setLimit(n => Math.min(n + PAGE_SIZE, recent.length)));
+  const recentSlice = useMemo(() => recent.slice(0, limit), [recent, limit]);
+
+  const copyLink = (url: string) => {
+    // D8 外链口径：个人主体无 web-view，外链一律复制剪贴板
+    void Taro.setClipboardData({ data: url });
+  };
 
   if (loading && !site) {
-    return (
-      <View className={`page page-bg ${theme === 'dark' ? 'theme-dark' : ''}`}>
-        <View className='skeleton-hero' />
-        <View className='skeleton-block card-surface' />
-      </View>
-    );
+    return <View className={`page page-bg ${rootCls}`} />;
   }
 
   return (
-    <View className={`page page-bg ${theme === 'dark' ? 'theme-dark' : ''}`}>
-      {/* ① Hero（D38 图 M1 定稿；3.x 结构：全出血无圆角 + 底部融底渐变） */}
-      <View className='hero'>
-        <View className='hero-inner'>
-          <View className='hero-badge accent-bg'>
-            <Text className='hero-badge-text'>{site?.hero ?? site?.desc ?? "Margin"}</Text>
-          </View>
-          <Text className='hero-date'>{formatHomeDate(new Date())}</Text>
-        </View>
-        <View className='hero-fade' />
-      </View>
-
-      {/* ② 搜索胶囊（3.x：叠 hero 下缘、居中 80% 宽玻璃胶囊） */}
-      <View className='search-pill card-surface'>
-        <Text className='search-pill-icon'>🔍</Text>
-        <Text className='search-pill-text'>
-          哈喽，想看些什么 <Text className='search-pill-hl'>内容</Text> 呢~
-        </Text>
-      </View>
-
-      {/* ③ 公告条（null 整条隐藏，D32；3.x 三段式：公告标 + 内容 + 全部） */}
-      {announcement ? (
-        <View className='notice card-surface'>
-          <Text className='notice-emoji'>😄</Text>
-          <Text className='notice-badge'>公告</Text>
-          <Text className='notice-text'>{announcement}</Text>
-          <Text className='notice-more'>全部 ›</Text>
-        </View>
-      ) : null}
-
-      {/* ④ 快捷导航（3.x：彩底玻璃块 + 彩色标签，5 列网格） */}
-      <View className='section-head'>
-        <Text className='section-title'>快捷导航</Text>
-      </View>
-      <View className='quick-nav'>
-        {QUICK_NAV.map(item => (
-          <View key={item.label} className='quick-nav-item'>
-            <View
-              className='quick-nav-icon card-surface'
-              style={{ backgroundColor: item.bg }}
-            >
-              <Text>{item.icon}</Text>
-            </View>
-            <Text className='quick-nav-label' style={{ color: item.color }}>
-              {item.label}
+    <View className={`page page-bg ${rootCls}`}>
+      <PageBackdrop />
+      <NavBar alpha={alpha} />
+      <View className='page-body home'>
+        {/* ① Hero：终端徽章 + glow 标题 + 描述 + 作者/社交行 */}
+        <View className='home-hero'>
+          <TerminalBadge path='/ready-to-go' />
+          <Text className='home-title glow-text'>
+            {site?.title ?? "Margin"}
+          </Text>
+          <Text className='home-desc'>{site?.desc ?? ""}</Text>
+          <View className='home-author-row'>
+            <Text className='home-author'>
+              Written by{" "}
+              <Text className='home-author-name'>{site?.author ?? ""}</Text>
             </Text>
           </View>
-        ))}
-      </View>
-
-      {/* ⑤ 热门标签（3.x 精选分类同款槽位：左跨行大卡 + 右两小卡拼图；
-          margin 无分类数据，按 D45 深底色块渲染标签） */}
-      <View className='section-head'>
-        <Text className='section-title'>热门标签</Text>
-      </View>
-      <View className='tag-grid'>
-        {hotTags.map((tag, i) => (
-          <View
-            key={tag.slug}
-            className={`tag-card card-surface ${i === 0 ? "tag-card-tall" : ""}`}
-            style={{ backgroundColor: tag.color, animationDelay: `${Math.min(i * 50, 300)}ms` }}
-          >
-            <Text className='tag-card-name' style={{ color: tag.ink }}>
-              {tag.name}
-            </Text>
-            <Text className='tag-card-count' style={{ color: tag.ink }}>
-              共 {tag.count} 篇笔记
-            </Text>
-          </View>
-        ))}
-      </View>
-
-      {/* ⑥ 最新推荐（D28 文章卡无图；3.x：标题左 + 分段切换右置玻璃容器） */}
-      <View className='section-head'>
-        <Text className='section-title'>最新推荐</Text>
-        <View className='post-tabs card-surface'>
-          {TABS.map(t => (
-            <View
-              key={t.key}
-              className={`post-tab ${tab === t.key ? "post-tab-active accent-bg" : ""}`}
-              onClick={() => setTab(t.key)}
-            >
-              <Text className='post-tab-label'>{t.label}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
-      <View className='post-list'>
-        {sorted.map((post, i) => (
-          <View
-            key={post.slug}
-            className='post-card card-surface'
-            style={{ animationDelay: `${Math.min(i * 50, 300)}ms` }}
-          >
-            <Text className='post-card-title'>{post.title}</Text>
-            <Text className='post-card-desc'>{post.description}</Text>
-            <View className='post-card-meta'>
-              {post.tags.slice(0, 2).map(tag => (
-                <Text key={tag} className='post-card-tag'>
-                  # {tag}
+          {site?.socials && site.socials.length > 0 ? (
+            <View className='home-socials'>
+              {site.socials.map(s => (
+                <Text
+                  key={s.name}
+                  className='home-social'
+                  onClick={() => copyLink(s.url)}
+                >
+                  {s.name}
                 </Text>
               ))}
-              <Text className='post-card-date'>
-                {formatDate(post.pubDatetime)} · {post.readingTime} 分钟
-              </Text>
+            </View>
+          ) : null}
+        </View>
+
+        {/* ⑤ FEATURED 小节（featured 琥珀 tint 卡） */}
+        {featured.length > 0 ? (
+          <View className='home-section'>
+            <SectionTitle title='Featured' star />
+            <View className='post-list'>
+              {featured.map(post => (
+                <PostCard key={post.slug} post={post} featured />
+              ))}
             </View>
           </View>
-        ))}
-        {sorted.length === 0 && posts ? (
-          <View className='empty'>
-            <Text className='empty-text'>呜呜，没有更多数据了~</Text>
-          </View>
         ) : null}
+
+        {/* ⑥ RECENT 小节（[n/m] 计数 + 纯文字卡 + 上拉切片） */}
+        <View className='home-section'>
+          <SectionTitle
+            title='Recent'
+            count={`[${recentSlice.length}/${recent.length}]`}
+          />
+          <View className='post-list'>
+            {recentSlice.map((post, i) => (
+              <View
+                key={post.slug}
+                style={{
+                  animation: `rise-in 0.4s ease both`,
+                  animationDelay: `${Math.min(i * 50, 300)}ms`,
+                }}
+              >
+                <PostCard post={post} featured={false} />
+              </View>
+            ))}
+          </View>
+          {recent.length === 0 && posts ? (
+            <View className='empty'>
+              <Text className='empty-title'>这里还什么都没有</Text>
+              <Text className='empty-desc'>文章正在路上，敬请期待。</Text>
+            </View>
+          ) : null}
+
+          {/* ⑦ outline CTA → 归档（M4 二级页就绪前提示） */}
+          <View className='home-cta-row'>
+            <View
+              className='home-cta'
+              hoverClass='home-cta-press'
+              hoverStayTime={80}
+              onClick={() =>
+                void Taro.showToast({ title: "归档即将上线", icon: "none" })
+              }
+            >
+              <Text className='home-cta-text'>查看全部文章</Text>
+              <Text className='home-cta-arrow'>→</Text>
+            </View>
+          </View>
+        </View>
       </View>
     </View>
   );

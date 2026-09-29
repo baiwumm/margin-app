@@ -1,17 +1,27 @@
+/**
+ * 瞬间页（design.md §3 瞬间屏，margin moments/index.astro + MomentCard 同构）：
+ * aurora hero（/moments $ ls -la + 动态/图片统计）+ 月份导航（端上组件：
+ * 细边框容器 + 左右箭头 + 6 个月份格，选中 = accent 底）+ 瞬间卡
+ * （日期头 + 正文 1.85 行距 + 1/2/3 列方图网格 + 弱化 tag）。
+ * 数据接线不动：getMoments 回调原样；月份窗口/钳制逻辑原样（端上聚合）。
+ * 发布入口一期隐藏（D8）；点赞/收藏行不做（margin 卡无此物，likes 契约 null）；
+ * featured ✦精选角标不做（契约 Moment 无 featured 字段，端点未导出）。
+ */
 import { Image, View, Text } from "@tarojs/components";
 import { useEffect, useMemo, useState } from "react";
+import { useDidShow, usePageScroll } from "@tarojs/taro";
 
 import NavBar, { navAlpha } from "@/components/NavBar/NavBar";
+import PageBackdrop from "@/components/deco/PageBackdrop";
+import AuroraHero from "@/components/deco/AuroraHero";
 import { getMoments } from "@/services/api/collections";
-import { useSiteData } from "@/hooks/useCollection";
 import { useManifest } from "@/hooks/useManifest";
-import type { Moment } from "@/types/api";
-import { useDidShow, usePageScroll } from "@tarojs/taro";
+import { useRootClass } from "@/hooks/useTheme";
 import { setSelectedTab } from "@/custom-tab-bar/store";
-import { useTheme } from "@/hooks/useTheme";
+import type { Moment } from "@/types/api";
 import "./moment.scss";
 
-/** 月份键（端上聚合，D20/D34：按 pubDatetime） */
+/** 月份键（端上聚合，按 pubDatetime） */
 const monthKey = (iso: string) => iso.slice(0, 7); // "2026-09"
 
 function addMonths(key: string, n: number): string {
@@ -20,28 +30,25 @@ function addMonths(key: string, n: number): string {
   return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, "0")}`;
 }
 
-/** 6 月一屏的窗口起点（1-6 月 → 当年 1 月；7-12 月 → 当年 7 月，demo 同款对齐） */
+/** 6 月一屏的窗口起点（1-6 月 → 当年 1 月；7-12 月 → 当年 7 月） */
 function windowStartFor(key: string): string {
   const y = Number(key.slice(0, 4));
   return Number(key.slice(5, 7)) <= 6 ? `${y}-01` : `${y}-07`;
 }
 
-const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
+/** margin MomentCard 日期格式：YYYY年M月D日 */
 function formatMomentDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso.slice(0, 10);
-  return `${d.getFullYear()}年${String(d.getMonth() + 1).padStart(2, "0")}月${String(
-    d.getDate()
-  ).padStart(2, "0")}日 星期${WEEKDAYS[d.getDay()]}`;
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
 export default function MomentPage() {
-  const theme = useTheme();
-  // 同步悬浮 tabBar 选中态（组件内不可用页面级 hook）
+  const rootCls = useRootClass();
+  // 同步 tabBar 选中态（组件内不可用页面级 hook）
   useDidShow(() => setSelectedTab(3));
   const { manifest } = useManifest();
   const buildId = manifest?.buildId ?? null;
-  const site = useSiteData(buildId);
   const [moments, setMoments] = useState<Moment[] | null>(null);
   const [month, setMonth] = useState<string>("");
   const [winStart, setWinStart] = useState<string>("");
@@ -86,124 +93,116 @@ export default function MomentPage() {
     setWinStart(next);
   };
 
-  /** 「本月」快捷钮：选中当月并对齐窗口 */
-  const goThisMonth = () => {
-    const now = new Date();
-    const key = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-    setMonth(key);
-    setWinStart(windowStartFor(key));
-  };
-
   const visible = useMemo(
     () => (moments ?? []).filter(m => monthKey(m.pubDatetime) === month),
     [moments, month]
   );
 
+  const totalImages = useMemo(
+    () => (moments ?? []).reduce((sum, m) => sum + m.images.length, 0),
+    [moments]
+  );
+
   return (
-    <View className={`page page-bg ${theme === 'dark' ? 'theme-dark' : ''}`}>
-      {/* 导航行：左「年份 + 本月」（3.x bg-primary 小方钮）+ 居中标题 */}
-      <NavBar
-        title='我的日常'
-        alpha={alpha}
-        left={
-          <>
-            <View className='moment-cap primary-bg'>
-              <Text className='moment-cap-text'>{month.slice(0, 4) || String(new Date().getFullYear())}</Text>
-            </View>
-            <View className='moment-cap primary-bg' onClick={goThisMonth}>
-              <Text className='moment-cap-text'>本月</Text>
-            </View>
-          </>
-        }
-      />
+    <View className={`page page-bg ${rootCls}`}>
+      <PageBackdrop />
+      <NavBar alpha={alpha} />
+      <View className='page-body moment'>
+        <AuroraHero
+          path='/moments'
+          trail='ls -la'
+          title='瞬间'
+          desc='随手记录的日常动态，像朋友圈一样。'
+          badges={[
+            `${moments?.length ?? 0} 条动态`,
+            ...(totalImages > 0 ? [`${totalImages} 张图片`] : []),
+          ]}
+        />
 
-      {/* 月份选择器（3.x uh-month-calendar：玻璃卡 6 个月一屏 + 左右翻页） */}
-      <View className='month-cal card-surface'>
-        <View
-          className={`month-cal-arrow ${winStart <= bounds.min ? "month-cal-arrow-off" : ""}`}
-          onClick={() => shiftWindow(-1)}
-        >
-          <Text>‹</Text>
-        </View>
-        <View className='month-cal-cells'>
-          {cells.map(m => (
-            <View
-              key={m}
-              className={`month-cal-cell ${month === m ? "month-cal-cell-active primary-bg" : ""}`}
-              onClick={() => setMonth(m)}
-            >
-              <Text className='month-cal-name'>{Number(m.slice(5, 7))}月</Text>
-              <Text className='month-cal-year'>{m.slice(0, 4)}</Text>
-            </View>
-          ))}
-        </View>
-        <View
-          className={`month-cal-arrow ${winStart >= bounds.max ? "month-cal-arrow-off" : ""}`}
-          onClick={() => shiftWindow(1)}
-        >
-          <Text>›</Text>
-        </View>
-      </View>
-
-      {/* 瞬间卡片 */}
-      <View className='moment-list'>
-        {visible.map((m, i) => (
+        {/* 月份导航（端上组件：细边框容器 + 左右箭头 + 月份格，选中 accent 底） */}
+        <View className='month-nav'>
           <View
-            key={m.id}
-            className='moment-card card-surface'
-            style={{ animationDelay: `${Math.min(i * 50, 300)}ms` }}
+            className={`month-nav-arrow ${winStart <= bounds.min ? "month-nav-arrow-off" : ""}`}
+            hoverClass='row-press'
+            onClick={() => shiftWindow(-1)}
           >
-            <View className='moment-head'>
-              <Image
-                className='moment-avatar'
-                src='https://www.baiwumm.com/avatar.png'
-                mode='aspectFill'
-              />
-              <View className='moment-head-text'>
-                <Text className='moment-name'>{site?.author ?? "白雾茫茫丶"}</Text>
+            <Text>‹</Text>
+          </View>
+          <View className='month-nav-cells'>
+            {cells.map(m => (
+              <View
+                key={m}
+                className={`month-nav-cell ${month === m ? "month-nav-cell-active" : ""}`}
+                onClick={() => setMonth(m)}
+              >
+                <Text className='month-nav-name'>{Number(m.slice(5, 7))}月</Text>
+                <Text className='month-nav-year'>{m.slice(0, 4)}</Text>
+              </View>
+            ))}
+          </View>
+          <View
+            className={`month-nav-arrow ${winStart >= bounds.max ? "month-nav-arrow-off" : ""}`}
+            hoverClass='row-press'
+            onClick={() => shiftWindow(1)}
+          >
+            <Text>›</Text>
+          </View>
+        </View>
+
+        {/* 瞬间卡（margin MomentCard：日期头 + 正文 + 图组 + 弱化 tag） */}
+        <View className='moment-list'>
+          {visible.map((m, i) => (
+            <View
+              key={m.id}
+              className='moment-card'
+              hoverClass='card-press'
+              hoverStayTime={80}
+              style={{
+                animation: "rise-in 0.4s ease both",
+                animationDelay: `${Math.min(i * 50, 300)}ms`,
+              }}
+            >
+              <View className='moment-header'>
                 <Text className='moment-date'>{formatMomentDate(m.pubDatetime)}</Text>
               </View>
+              <Text className='moment-text'>{m.text}</Text>
+              {m.images.length > 0 ? (
+                <View
+                  className={`moment-images ${m.images.length === 1 ? "moment-images-single" : ""}`}
+                  style={{
+                    gridTemplateColumns: `repeat(${Math.min(m.images.length, 3)}, 1fr)`,
+                  }}
+                >
+                  {m.images.slice(0, 9).map((img, idx) => (
+                    <View key={idx} className='moment-image-cell'>
+                      {/* 瞬间图 thumb 档（档位仅 400/800） */}
+                      <MomentImage url={img.thumb} color={img.avgColor} />
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+              {m.tags.length > 0 ? (
+                <View className='moment-tags'>
+                  {m.tags.map(tag => (
+                    <Text key={tag} className='moment-tag'>
+                      <Text className='moment-tag-hash'># </Text>
+                      {tag}
+                    </Text>
+                  ))}
+                </View>
+              ) : null}
             </View>
-            <Text className='moment-text'>{m.text}</Text>
-            {m.images.length > 0 ? (
-              <View
-                className='moment-images'
-                style={{ gridTemplateColumns: `repeat(${Math.min(m.images.length, 3)}, 1fr)` }}
-              >
-                {m.images.slice(0, 9).map((img, idx) => (
-                  <View
-                    key={idx}
-                    className={`moment-image-cell ${m.images.length === 1 ? "moment-image-single" : ""}`}
-                  >
-                    {/* 瞬间图 thumb 档（档位仅 400/800，D25/F7） */}
-                    <MomentImage url={img.thumb} color={img.avgColor} />
-                  </View>
-                ))}
-              </View>
-            ) : null}
-            {m.tags.length > 0 ? (
-              <View className='moment-tags'>
-                {m.tags.map(tag => (
-                  <Text key={tag} className='moment-tag'>
-                    # {tag}
-                  </Text>
-                ))}
-              </View>
-            ) : null}
-            <View className='moment-foot'>
-              <Text className='moment-foot-item'>♡ 点赞</Text>
-              <Text className='moment-foot-item'>☆ 收藏</Text>
+          ))}
+          {moments && visible.length === 0 ? (
+            <View className='empty'>
+              <Text className='empty-title'>这个月还没有动态</Text>
+              <Text className='empty-desc'>换个月份看看，或敬请期待新动态。</Text>
             </View>
-          </View>
-        ))}
-        {moments && visible.length === 0 ? (
-          <View className='empty'>
-            <Text className='empty-text'>呜呜，没有更多数据了~</Text>
-          </View>
-        ) : null}
-      </View>
+          ) : null}
+        </View>
 
-      {/* 发布入口：一期隐藏（个人主体 UGC 风险，D2/§6.3） */}
+        {/* 发布入口：一期隐藏（个人主体 UGC 风险，D8） */}
+      </View>
     </View>
   );
 }

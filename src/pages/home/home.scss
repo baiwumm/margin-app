@@ -1,250 +1,162 @@
-/* 首页样式 —— 对齐 uni-halo 3.x（D53，对照 demo/首页.png 互证）：
- * Hero 全出血无圆角 + 底部融底渐变 / 搜索玻璃胶囊叠 hero 下缘 / 公告三段式 /
- * 小节标题柠檬绿垫块（app.scss 共享）/ 快捷导航彩底玻璃块 / 热门标签拼图卡 /
- * tabs 右置分段控件（选中柠檬绿块）/ 文章卡玻璃 + 柠檬 chips（D28 无图） */
+/* 首页样式（design.md §3 首屏结构，margin index.astro 同构）：
+ * hero 终端徽章 + glow 大标题 + 描述 fg75 + 作者/社交虚线行；
+ * 卡片语言在 tailwind.css（card/card-featured），此处只做排版。 */
 
-.page {
-  padding: 0 var(--sp-page) calc(var(--sp-5) * 3); /* 顶部 0（hero 全出血），底部给悬浮 tabBar */
-  min-height: 100vh;
-  box-sizing: border-box;
+.home {
+  padding: 0 var(--sp-page) 140rpx; /* 底部给固定 tabBar 留白 */
 }
 
-/* ── Hero（D38 图 M1 定稿；3.x banner h-64=512rpx、无圆角、底部融底渐变）── */
-.hero {
-  position: relative;
-  margin: 0 calc(-1 * var(--sp-page));
-  height: 512rpx;
-  background: linear-gradient(150deg, #cfe36f 0%, #e4f39b 45%, #f3f8d6 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-top: env(safe-area-inset-top, 0px);
-  box-sizing: border-box;
-}
-.hero-inner {
+/* ── Hero ─────────────────────────────────────────────────────── */
+.home-hero {
+  padding-top: var(--sp-3);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--sp-2);
-  transform: translateY(-40rpx); /* demo：胶囊偏上，日期随后 */
+  align-items: flex-start;
 }
-.hero-badge {
-  border-radius: var(--r-full);
-  padding: 12rpx 32rpx;
-  box-shadow: var(--sh-float);
-}
-.hero-badge-text {
-  font-size: var(--fs-sm);
+.home-title {
+  margin-top: var(--sp-2);
+  font-size: var(--fs-hero); /* text-5xl @375 */
   font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
 }
-.hero-date {
-  color: #ffffff;
-  font-size: var(--fs-cap);
-  font-weight: 600;
-  text-shadow: 0 2rpx 12rpx rgba(45, 47, 46, 0.35);
-}
-.hero-fade {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 48rpx;
-  background: linear-gradient(to bottom, rgba(246, 243, 238, 0), var(--c-bg));
-}
-
-/* ── 搜索胶囊（3.x：叠 hero 下缘 -1.5rem，居中 80% 宽玻璃胶囊）─────── */
-.search-pill {
-  width: 80%;
-  margin: -48rpx auto var(--sp-gap);
-  border-radius: var(--r-full);
-  padding: 20rpx 32rpx;
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  position: relative;
-  z-index: 1;
-}
-.search-pill-icon {
-  font-size: 28rpx;
-}
-.search-pill-text {
-  color: var(--c-text-mid);
+.home-desc {
+  margin-top: var(--sp-4);
   font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--c-fg-75); /* margin opacity-75 */
 }
-.search-pill-hl {
-  color: var(--c-chip-ink);
-  font-weight: 600;
-  background: var(--c-chip-bg);
-  border-radius: var(--r-sm);
-  padding: 2rpx 12rpx;
-}
-
-/* ── 公告条（有数据才显示，D32；3.x 三段式）───────────────────────── */
-.notice {
-  border-radius: var(--r-lg);
-  padding: 20rpx 24rpx;
-  margin-bottom: var(--sp-1);
+.home-author-row {
+  margin-top: var(--sp-4);
   display: flex;
   align-items: center;
-  gap: 12rpx;
 }
-.notice-emoji {
-  font-size: 32rpx;
-}
-.notice-badge {
-  color: #f87171;
-  font-weight: 700;
-  font-size: var(--fs-cap);
-  flex-shrink: 0;
-}
-.notice-text {
-  flex: 1;
-  font-size: var(--fs-cap);
-  color: var(--c-text-mid);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.notice-more {
-  color: var(--c-text-weak);
-  font-size: var(--fs-cap);
-  flex-shrink: 0;
-}
-
-/* 小节标题样式在 app.scss（section-head / section-title，跨页共享） */
-
-/* ── 快捷导航（3.x：5 列网格 + 彩底玻璃块 104rpx + 彩色标签）───────── */
-.quick-nav {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: var(--sp-4);
-  margin-bottom: var(--sp-1);
-}
-.quick-nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12rpx;
-}
-.quick-nav-icon {
-  width: 112rpx;
-  height: 112rpx;
-  border-radius: var(--r-xl);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 56rpx;
-}
-.quick-nav-label {
-  font-size: var(--fs-cap);
-}
-
-/* ── 热门标签拼图（打样第 4 项：341rpx 双列 + 左跨行大卡；D45 深底色块）─ */
-.tag-grid {
-  display: grid;
-  grid-template-columns: 341rpx 341rpx;
-  gap: var(--sp-gap);
-  margin-bottom: var(--sp-1);
-}
-.tag-card {
-  border-radius: var(--r-lg);
-  padding: var(--sp-3);
-  min-height: 240rpx;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 4rpx;
-  animation: rise-in 0.4s ease both;
-}
-.tag-card-tall {
-  grid-row: span 2;
-  justify-content: center;
-}
-.tag-card-name {
+.home-author {
   font-size: var(--fs-sm);
-  font-weight: 700;
+  color: var(--c-fg-50);
 }
-.tag-card-count {
-  font-size: var(--fs-cap);
-  opacity: 0.85;
+.home-author-name {
+  font-weight: 500;
+  color: var(--c-fg);
+  border-bottom: 2rpx dashed var(--c-fg-45); /* margin 虚线下划线链接 */
+  padding-bottom: 4rpx;
+}
+.home-socials {
+  margin-top: var(--sp-3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+.home-social {
+  font-size: var(--fs-sm);
+  color: var(--c-fg-mid);
+  border-bottom: 2rpx dashed var(--c-fg-45);
+  padding-bottom: 4rpx;
 }
 
-/* ── 最新推荐：分段控件右置（3.x 玻璃容器 + 选中柠檬绿块）──────────── */
-.post-tabs {
-  display: flex;
-  gap: 4rpx;
-  border-radius: var(--r-md);
-  padding: 4rpx;
+/* ── 小节（标题在 SectionTitle 组件）──────────────────────────── */
+.home-section {
+  margin-top: var(--sp-2);
 }
-.post-tab {
-  border-radius: var(--r-sm);
-  padding: 6rpx 20rpx;
-}
-.post-tab-label {
-  font-size: var(--fs-cap);
-  color: var(--c-text-sub);
-}
-.post-tab-active .post-tab-label {
-  color: var(--c-chip-ink);
-  font-weight: 600;
-}
+
 .post-list {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-3);
+  gap: var(--sp-gap);
 }
 
-/* ── 文章卡（D28：纯文字卡 + 3.x 排版规格）────────────────────────── */
+/* ── 文章卡（margin Card.astro：标题 → meta → 描述 → tag pills）── */
 .post-card {
-  border-radius: var(--r-lg);
   padding: var(--sp-3);
   animation: rise-in 0.4s ease both;
 }
 .post-card-title {
-  display: block;
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  color: var(--c-text);
+  font-size: var(--fs-card);
+  font-weight: 600;
+  color: var(--c-fg);
   line-height: 1.4;
-}
-.post-card-desc {
-  display: block;
-  margin-top: var(--sp-1);
-  font-size: 26rpx;
-  color: var(--c-text-mid);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
 }
 .post-card-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  gap: var(--sp-3);
+  margin-top: 12rpx;
+}
+.post-card-date {
+  font-size: var(--fs-sm);
+  color: var(--c-fg-mid);
+  font-family: var(--font-mono);
+}
+.post-card-time {
+  font-size: var(--fs-sm);
+  color: var(--c-fg-55);
+}
+.post-card-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: var(--sp-1);
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--c-fg-75); /* margin text-foreground/75 */
+}
+.post-card-tags {
+  display: flex;
+  flex-wrap: wrap;
   gap: 12rpx;
   margin-top: var(--sp-2);
 }
 .post-card-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--r-full);
+  padding: 4rpx 20rpx;
   font-size: var(--fs-cap);
-  color: var(--c-chip-ink);
-  background-color: var(--c-chip-bg);
-  border-radius: var(--r-lg);
-  padding: 4rpx 16rpx;
+  font-weight: 500;
+  border: 1rpx solid var(--c-border-30);
+  background-color: var(--c-muted-15);
+  color: var(--c-fg-mid);
 }
-.post-card-date {
-  margin-left: auto;
-  font-size: var(--fs-cap);
-  color: var(--c-text-sub);
+.post-card-tag-featured {
+  border-color: var(--c-featured-25);
+  background-color: var(--c-featured-8);
+  color: var(--c-featured); /* margin text-featured/80，端上用实色保对比 */
+}
+.post-card-tag-hash {
+  opacity: 0.6;
 }
 
-/* ── 空态 / 骨架 ─────────────────────────────────────────────────── */
-.skeleton-hero {
-  height: 512rpx;
-  background: var(--c-surface-alt);
-  margin: 0 calc(-1 * var(--sp-page)) var(--sp-gap);
+/* ── outline CTA（margin LinkButton：accent 10% 底 + accent 20% 描边）── */
+.home-cta-row {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--sp-4);
+  margin-bottom: var(--sp-2);
 }
-.skeleton-block {
-  height: 200rpx;
-  border-radius: var(--r-lg);
-  background: var(--c-surface-alt);
+.home-cta {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  border-radius: var(--r-sm);
+  border: 1rpx solid var(--c-accent-20);
+  background-color: var(--c-accent-10);
+  padding: 20rpx 40rpx;
+}
+.home-cta-press {
+  opacity: 0.7;
+  background-color: var(--c-accent-20);
+}
+.home-cta-text {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--c-accent);
+}
+.home-cta-arrow {
+  font-size: var(--fs-sm);
+  color: var(--c-accent);
 }

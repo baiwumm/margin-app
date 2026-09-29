@@ -1,147 +1,136 @@
-/* 瞬间页（design.md §1 瞬间屏，对齐 3.x moments + uh-month-calendar）：
- * 导航行「年/本月」primary 小方钮（NavBar left 槽）+ 玻璃 6 月翻页选择器 +
- * 瞬间卡（方头像 72rpx / 日期中文格式 / 动态列图网格 / 分隔线操作栏） */
+/* 瞬间页（margin MomentCard.astro 同构）：月份导航 = 细边框容器（border 30%
+ * + muted 10% 底 + rounded-2xl）；瞬间卡 = border 35% + muted 12% 底 +
+ * rounded-2xl，日期小字头、正文 1.85 行距、方图圆角网格、弱化 accent tag。 */
 
-/* ── 导航行左槽：年 / 本月小方钮（3.x !bg-primary rounded-lg px-1.5 py-1）── */
-.moment-cap {
-  border-radius: var(--r-md);
-  padding: 8rpx 20rpx;
-}
-.moment-cap-text {
-  font-size: var(--fs-cap);
+.moment {
+  padding: 0 var(--sp-page) 140rpx;
 }
 
-/* ── 月份选择器（3.x uh-month-calendar：玻璃 rounded-2xl p-2，6 月一屏）── */
-.month-cal {
-  border-radius: var(--r-xl);
-  padding: var(--sp-2);
+/* ── 月份导航（端上组件；选中 = accent 底 + accent 字）────────────── */
+.month-nav {
   display: flex;
   align-items: center;
+  border-radius: var(--r-card);
+  border: 1rpx solid var(--c-border-30);
+  background-color: var(--c-muted-10);
+  padding: var(--sp-1);
   margin-bottom: var(--sp-gap);
 }
-.month-cal-arrow {
+.month-nav-arrow {
   width: 56rpx;
   height: 96rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 40rpx;
-  color: var(--c-text-sub);
+  color: var(--c-fg-mid);
   flex-shrink: 0;
 }
-.month-cal-arrow-off {
+.month-nav-arrow-off {
   opacity: 0.3;
 }
-.month-cal-cells {
+.month-nav-cells {
   flex: 1;
   display: flex;
-  gap: var(--sp-1);
+  gap: 4rpx;
 }
-.month-cal-cell {
+.month-nav-cell {
   flex: 1;
-  border-radius: var(--r-md);
+  border-radius: var(--r-sm);
   padding: var(--sp-1) 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2rpx;
 }
-.month-cal-name {
+.month-nav-cell-active {
+  background-color: var(--c-accent-10);
+  border: 1rpx solid var(--c-accent-30);
+}
+.month-nav-name {
+  font-family: var(--font-mono);
   font-size: 26rpx;
   font-weight: 600;
-  color: var(--c-text-mid);
+  color: var(--c-fg-mid);
 }
-.month-cal-year {
-  font-size: var(--fs-xs);
-  color: var(--c-text-weak);
+.month-nav-year {
+  font-family: var(--font-mono);
+  font-size: 20rpx;
+  color: var(--c-fg-45);
 }
-.month-cal-cell-active .month-cal-name,
-.month-cal-cell-active .month-cal-year {
-  color: var(--c-primary-ink);
+.month-nav-cell-active .month-nav-name,
+.month-nav-cell-active .month-nav-year {
+  color: var(--c-accent);
 }
 
-/* ── 瞬间卡 ─────────────────────────────────────────────────────── */
+/* ── 瞬间卡（margin MomentCard：border 35% + muted 12% 底 + blur 降级忽略）── */
 .moment-list {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-3);
+  gap: var(--sp-gap);
 }
 .moment-card {
-  border-radius: var(--r-lg);
-  padding: var(--sp-3);
+  border-radius: var(--r-card);
+  border: 1rpx solid var(--c-border-35);
+  background-color: var(--c-muted-12);
+  padding: 36rpx 36rpx 40rpx;
   animation: rise-in 0.4s ease both;
 }
-.moment-head {
+.moment-header {
   display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  margin-bottom: var(--sp-2);
-}
-.moment-avatar {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: var(--r-lg); /* 3.x 默认方头像 rounded-xl */
-  background: var(--c-primary-soft);
-}
-.moment-head-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4rpx;
-}
-.moment-name {
-  font-size: 26rpx;
-  font-weight: 700;
-  color: var(--c-text);
+  align-items: baseline;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
 }
 .moment-date {
+  font-family: var(--font-mono);
   font-size: var(--fs-cap);
-  color: var(--c-text-weak);
+  letter-spacing: 0.08em;
+  color: var(--c-fg-45);
 }
 .moment-text {
   display: block;
-  font-size: 26rpx;
-  color: var(--c-text);
-  line-height: 1.6;
-  white-space: pre-wrap;
+  font-size: var(--fs-body); /* margin 0.9375rem ≈ 正文 */
+  line-height: var(--lh-loose);
+  color: var(--c-fg);
+  white-space: pre-line;
+  word-break: break-word;
 }
+
+/* ── 图组（1 图全宽方圆角；2/3 列方形网格）──────────────────────── */
 .moment-images {
   display: grid;
-  gap: var(--sp-2);
-  margin-top: var(--sp-2); /* 列数随图数 1/2/3（内联 gridTemplateColumns） */
+  gap: var(--sp-1);
+  margin-top: var(--sp-3);
 }
 .moment-image-cell {
-  border-radius: var(--r-md);
+  border-radius: var(--r-sm);
   overflow: hidden;
-  height: 192rpx; /* 3.x 多图 h-24 */
+  height: 192rpx;
+  background-color: var(--c-fg-4);
 }
-.moment-image-single {
-  height: 336rpx; /* 3.x 单图 h-42 */
+.moment-images-single .moment-image-cell {
+  height: 336rpx;
+  border-radius: var(--r-md);
 }
 .moment-image {
   width: 100%;
   height: 100%;
 }
+
+/* ── 弱化 tag（margin：无边框无底，仅 accent 62% 色）──────────────── */
 .moment-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp-2);
-  margin-top: var(--sp-2);
+  gap: var(--sp-1);
+  margin-top: var(--sp-3);
 }
 .moment-tag {
   font-size: var(--fs-cap);
-  color: var(--c-chip-ink);
-  background-color: var(--c-chip-bg);
-  border-radius: var(--r-lg);
-  padding: 4rpx 16rpx;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--c-accent-60);
 }
-.moment-foot {
-  display: flex;
-  gap: var(--sp-4);
-  margin-top: var(--sp-2);
-  padding-top: var(--sp-2);
-  border-top: 1rpx solid var(--c-sep);
-}
-.moment-foot-item {
-  font-size: var(--fs-cap);
-  color: var(--c-text-sub);
+.moment-tag-hash {
+  opacity: 0.7;
 }

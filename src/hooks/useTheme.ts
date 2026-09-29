@@ -8,6 +8,12 @@
 import Taro, { onThemeChange } from "@tarojs/taro";
 import { useEffect, useState } from "react";
 
+import {
+  getAccent,
+  subscribeAccent,
+  type AccentKey,
+} from "@/config/accent";
+
 export type Theme = "light" | "dark";
 export type ThemePreference = "system" | Theme;
 
@@ -64,4 +70,23 @@ export function useTheme(): Theme {
   }, []);
 
   return theme;
+}
+
+/** 当前 accent（D5：模块级状态，默认 blue；M2 偏好页接 setAccent 持久化） */
+export function useAccent(): AccentKey {
+  const [accent, setAccentState] = useState<AccentKey>(getAccent());
+
+  useEffect(() => subscribeAccent(setAccentState), []);
+
+  return accent;
+}
+
+/** 页面 root 类名：`theme-dark`（偏好强制/系统暗色）+ `accent-<key>`（blue 免挂），
+ * 对应 tokens.css 的变量组（design.md §10 步骤 9）。 */
+export function useRootClass(): string {
+  const theme = useTheme();
+  const accent = useAccent();
+  return `${theme === "dark" ? "theme-dark" : ""} ${
+    accent === "blue" ? "" : `accent-${accent}`
+  }`.trim();
 }

@@ -1,24 +1,81 @@
-/* 标签页：双列色块卡（design.md §1 标签屏；卡文本规格对齐 3.x 分类卡） */
+/* 标签页（margin tags/index.astro tag-card 同构）：surface-2 底 + fg 6% 描边
+ * + rounded-2xl 双列网格；计数 accent 大字 + 大写小标签 + accent 渐变强度条。 */
+
+.tags {
+  padding: 0 var(--sp-page) 140rpx; /* 底部给固定 tabBar 留白 */
+}
+
 .tag-grid {
   display: grid;
-  grid-template-columns: 341rpx 341rpx;
+  grid-template-columns: 1fr 1fr;
   gap: var(--sp-gap);
 }
 .tag-card {
-  border-radius: var(--r-lg);
-  padding: var(--sp-3);
-  min-height: 240rpx;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  gap: 4rpx;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border-radius: var(--r-card);
+  background-color: var(--c-surface-2); /* margin fg 2% 混 bg */
+  border: 1rpx solid var(--c-fg-6);
+  overflow: hidden;
   animation: rise-in 0.4s ease both;
 }
+.tag-card-press {
+  border-color: var(--c-accent-30);
+  background-color: var(--c-accent-4);
+}
+
+.tag-card-content {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  min-width: 0;
+}
+.tag-card-hash {
+  flex-shrink: 0;
+  font-size: var(--fs-body);
+  color: var(--c-accent-60);
+}
 .tag-card-name {
-  font-size: var(--fs-sm);
-  font-weight: 700;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--c-fg);
 }
 .tag-card-count {
-  font-size: var(--fs-cap);
-  opacity: 0.85;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.tag-card-count-number {
+  font-family: var(--font-mono);
+  font-size: 32rpx;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--c-accent);
+}
+.tag-card-count-label {
+  font-size: 18rpx;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--c-fg-45);
+}
+
+/* 强度进度条（margin tag-bar：accent→border 渐变填充） */
+.tag-card-bar {
+  height: 4rpx;
+  border-radius: var(--r-full);
+  background-color: var(--c-fg-6);
+  overflow: hidden;
+}
+.tag-card-bar-fill {
+  height: 100%;
+  border-radius: var(--r-full);
+  background: linear-gradient(90deg, var(--c-accent), var(--c-border));
 }
