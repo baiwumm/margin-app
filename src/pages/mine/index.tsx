@@ -18,7 +18,14 @@ import { getStats } from "@/services/api/collections";
 import { useSiteData } from "@/hooks/useCollection";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass, useTheme } from "@/hooks/useTheme";
-import { accentRgba, getAccent } from "@/config/accent";
+import {
+  ACCENT_KEYS,
+  accentHex,
+  accentRgba,
+  getAccent,
+  setAccent,
+  type AccentKey,
+} from "@/config/accent";
 import { setSelectedTab } from "@/custom-tab-bar/store";
 import type { Stats } from "@/types/api";
 import Taro from "@tarojs/taro";
@@ -47,6 +54,7 @@ export default function Mine() {
   const buildId = manifest?.buildId ?? null;
   const site = useSiteData(buildId);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [accent, setAccentState] = useState<AccentKey>(getAccent());
   // 导航滚动渐显（0.05 档量化，控制重渲染频率）
   const [alpha, setAlpha] = useState(0);
   usePageScroll(p => setAlpha(navAlpha(p.scrollTop)));
@@ -194,6 +202,23 @@ export default function Mine() {
               <Text className='mine-row-label'>{row.label}</Text>
               <Text className='mine-row-arrow'>›</Text>
             </View>
+          ))}
+        </View>
+
+        {/* accent 五色圆点（margin accent-dots 形态，即点即换；持久化留 M2） */}
+        <SectionTitle title='Accent' />
+        <View className='accent-dots'>
+          {ACCENT_KEYS.map(k => (
+            <View
+              key={k}
+              className={`accent-dot ${accent === k ? "accent-dot-active" : ""}`}
+              style={{ backgroundColor: accentHex(k, theme) }}
+              hoverClass='row-press'
+              onClick={() => {
+                setAccent(k);
+                setAccentState(k);
+              }}
+            />
           ))}
         </View>
 
