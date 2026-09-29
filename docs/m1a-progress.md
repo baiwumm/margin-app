@@ -111,3 +111,9 @@
 **待用户**：再开一次小程序（生产 b2c8b18 版 + 无版本变化）——这次 posts/tags/site 应全部缓存命中（Console 无 GET 行）+ `首页首屏数据渲染完成（缓存命中: true）` 的 Nms 即全热启动耗时（<500ms 达标线）。
 
 **M1-b 清理项新增**：`[Event] 21 listeners of WindowInfoChanged` 警告——Taro 运行时切 tab 的监听累积，记录待查（通常无害，M2 时核内存表现）。
+
+## 热启动终测（2026-09-29 15:51，预览模式，生产 b2c8b18 版）
+
+`[perf +34ms] App.onLaunch` → `[perf +56ms] manifest 缓存命中（buildId=b2c8b18-…）` → `[perf +57ms] 存储配额 44/10240` → 页面 onReady。ETag 回验 304（228ms）。
+
+**判读**：manifest 命中 +51ms（<500ms ✅）；页面缓存数据即时渲染（onReady 前，无等待）✅；后台列表数据回验走了 GET 200（218–264ms，为 ETag 再验证后的正常重拉，发生在首屏渲染之后，不影响 TTI）。**A1 热启动达标，清单全绿**——(图标内联 base64 后 tab bar 零图片请求亦已验证)。
