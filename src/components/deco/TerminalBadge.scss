@@ -1,0 +1,62 @@
+/* 终端徽章（margin terminal prompt badge）：border 40% 胶囊 + muted 20% 底 +
+ * 等宽小字；ping 圆点双层（animate-ping 同款 scale+opacity）。 */
+.terminal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12rpx;
+  border-radius: var(--r-full);
+  border: 1rpx solid var(--c-border-40);
+  background-color: var(--c-muted-20);
+  padding: 10rpx 24rpx;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cap);
+}
+.terminal-ping {
+  position: relative;
+  width: 16rpx;
+  height: 16rpx;
+  margin-right: 4rpx;
+}
+.terminal-ping-wave {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background-color: var(--c-accent);
+  opacity: 0.6;
+  animation: terminal-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+.terminal-ping-dot {
+  position: relative;
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background-color: var(--c-accent);
+}
+@keyframes terminal-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  75%,
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+.terminal-badge-prefix {
+  color: var(--c-accent);
+}
+.terminal-badge-path {
+  color: var(--c-fg);
+}
+.terminal-badge-suffix {
+  color: var(--c-fg);
+  opacity: 0.4;
+}
+.terminal-badge-trail {
+  color: var(--c-fg);
+  opacity: 0.6;
+}

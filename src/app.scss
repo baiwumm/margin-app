@@ -51,13 +51,11 @@ page {
   bottom: 0;
   z-index: 0;
   pointer-events: none;
-  overflow: hidden;
+  /* 噪点 tile ≈2KB，构建期内联 base64（WXSS 可平铺）；margin site-grain 同观感 */
+  background-image: url("./assets/deco/noise.png");
+  background-size: 240rpx 240rpx;
+  background-repeat: repeat;
   opacity: 0.06;
-}
-/* 噪点图为打包 PNG（<Image> 引用；WXSS 内联 base64 受体积红线约束） */
-.bg-noise-img {
-  width: 100%;
-  height: 100%;
 }
 .page-body {
   position: relative;

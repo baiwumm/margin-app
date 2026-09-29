@@ -1,0 +1,105 @@
+/* aurora hero 容器（margin *-hero 同构）：surface 底 + accent 12% 描边 +
+ * rounded-3xl；光球 = 预渲染 PNG 绝对定位 + transform 位移动画
+ * （margin hero-aurora.css orb-1/2/3 降档：保留位移缩放，无运行时 blur）。 */
+.aurora-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-hero);
+  border: 1rpx solid var(--c-accent-12);
+  background-color: var(--c-surface);
+  padding: 80rpx 64rpx;
+  margin-bottom: var(--sp-4);
+}
+.aurora-orb {
+  position: absolute;
+  pointer-events: none;
+}
+.aurora-orb-1 {
+  width: 600rpx;
+  height: 600rpx;
+  top: -30%;
+  left: -10%;
+  animation: aurora-orb-1 7s ease-in-out infinite alternate;
+}
+.aurora-orb-2 {
+  width: 500rpx;
+  height: 500rpx;
+  top: 10%;
+  right: -5%;
+  animation: aurora-orb-2 9s ease-in-out infinite alternate;
+}
+.aurora-orb-3 {
+  width: 400rpx;
+  height: 400rpx;
+  bottom: -20%;
+  left: 40%;
+  animation: aurora-orb-3 11s ease-in-out infinite alternate;
+}
+@keyframes aurora-orb-1 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(80rpx, 40rpx) scale(1.2);
+  }
+}
+@keyframes aurora-orb-2 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(-60rpx, 60rpx) scale(1.15);
+  }
+}
+@keyframes aurora-orb-3 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(40rpx, -50rpx) scale(1.1);
+  }
+}
+
+.aurora-hero-body {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.aurora-hero-title {
+  margin-top: var(--sp-2);
+  font-size: 60rpx; /* margin text-3xl @375（移动视口基线） */
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+.aurora-hero-desc {
+  margin-top: var(--sp-2);
+  font-size: var(--fs-body);
+  font-style: italic;
+  color: var(--c-fg-75); /* margin text-foreground/70 同档 */
+  line-height: 1.6;
+}
+.aurora-hero-badges {
+  margin-top: var(--sp-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1);
+}
+
+/* hero-badge（margin .hero-badge：accent 8% 底 + accent 15% 描边胶囊，accent 字） */
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--r-full);
+  padding: 8rpx 24rpx;
+  background-color: var(--c-accent-8);
+  border: 1rpx solid var(--c-accent-15);
+}
+.hero-badge-text {
+  font-size: var(--fs-cap);
+  font-weight: 600;
+  color: var(--c-accent);
+}

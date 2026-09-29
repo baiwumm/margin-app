@@ -1,14 +1,24 @@
 /**
- * 固定玻璃导航栏（对齐 uni-halo 3.x uh-navbar，D53）：
- * 顶部 fixed + 状态栏高度，行高 92rpx，标题居中加粗；
- * 背景随滚动渐显（page 底色 + blur，opacity 由页面 usePageScroll 传入，
- * 用 navAlpha 量化到 0.05 档控制重渲染频率）。
- * overlay 模式（我的页）：无占位、透明盖在 hero 上，标题顶部白字、滚过阈值转正文字色。
+ * 顶栏（margin Header.astro 同族，design.md §3 / §10 步骤 6）：
+ * 居左 logo lockup（mark 56rpx + 字标 40rpx，明暗两版 PNG），
+ * 居右搜索（M4 检索页就绪前占位提示）与主题切换（轻/暗直接翻转偏好，
+ * 恢复跟随系统走 M2 偏好页）；滚动态 bg → surface + 底部发丝线，
+ * 透明度随 navAlpha 渐显（页面 usePageScroll 传入，0.05 档量化控制重渲染）。
+ * 高度 = 状态栏 + 88rpx。
  */
-import { View, Text } from "@tarojs/components";
+import { View, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
-import type { ReactNode } from "react";
+import { setThemePreference, useTheme } from "@/hooks/useTheme";
 import "./NavBar.scss";
+
+import markLight from "@/assets/logo/mark-light.png";
+import markDark from "@/assets/logo/mark-dark.png";
+import wordmarkLight from "@/assets/logo/wordmark-light.png";
+import wordmarkDark from "@/assets/logo/wordmark-dark.png";
+import searchLight from "@/assets/deco/icon-search-light.png";
+import searchDark from "@/assets/deco/icon-search-dark.png";
+import moonLight from "@/assets/deco/icon-moon-light.png";
+import sunDark from "@/assets/deco/icon-sun-dark.png";
 
 const STATUS_BAR = (() => {
   try {
@@ -18,50 +28,69 @@ const STATUS_BAR = (() => {
   }
 })();
 
-/** 滚动渐显 alpha（3.x min(scrollY/360, 0.8)；上限提到 0.9——管线剥 @supports 后
- *  无 blur 机型靠更高的底色透明度保证标题可读），量化到 0.05 档 */
+/** 滚动渐显 alpha（scrollY/360 封顶 1），量化到 0.05 档 */
 export function navAlpha(scrollTop: number): number {
-  const a = Math.min(scrollTop / 360, 0.9);
+  const a = Math.min(scrollTop / 360, 1);
   return Math.round(a * 20) / 20;
 }
 
 interface NavBarProps {
-  title?: string;
-  left?: ReactNode;
-  right?: ReactNode;
-  overlay?: boolean;
   /** navAlpha(scrollTop) 的返回值（页面 usePageScroll 里 setState） */
   alpha?: number;
 }
 
-export default function NavBar({
-  title,
-  left,
-  right,
-  overlay = false,
-  alpha = 0,
-}: NavBarProps) {
-  const solid = alpha > 0.4; // 3.x 阈值：scrollY/360 > 0.5
+export default function NavBar({ alpha = 0 }: NavBarProps) {
+  const theme = useTheme();
+  const dark = theme === "dark";
+
+  const onSearch = () => {
+    // M4 检索页（双层索引）就绪前占位
+    void Taro.showToast({ title: "搜索即将上线", icon: "none" });
+  };
+  const onToggleTheme = () => {
+    setThemePreference(dark ? "light" : "dark");
+  };
+
   return (
     <>
       <View className='nav-root'>
         <View className='nav-bg' style={{ opacity: alpha }} />
         <View className='nav-row' style={{ paddingTop: `${STATUS_BAR}px` }}>
-          <View className='nav-side'>{left}</View>
-          <Text
-            className={`nav-title ${overlay && !solid ? "nav-title-white" : ""}`}
-          >
-            {title}
-          </Text>
-          <View className='nav-side nav-side-right'>{right}</View>
+          <View className='nav-logo'>
+            <Image className='nav-mark' src={dark ? markDark : markLight} />
+            <Image
+              className='nav-wordmark'
+              src={dark ? wordmarkDark : wordmarkLight}
+            />
+          </View>
+          <View className='nav-actions'>
+            <View
+              className='nav-action'
+              hoverClass='row-press'
+              onClick={onSearch}
+            >
+              <Image
+                className='nav-action-icon'
+                src={dark ? searchDark : searchLight}
+              />
+            </View>
+            <View
+              className='nav-action'
+              hoverClass='row-press'
+              onClick={onToggleTheme}
+            >
+              <Image
+                className='nav-action-icon'
+                src={dark ? sunDark : moonLight}
+              />
+            </View>
+          </View>
         </View>
       </View>
-      {!overlay ? (
-        <View
-          className='nav-spacer'
-          style={{ height: `calc(${STATUS_BAR}px + 92rpx)` }}
-        />
-      ) : null}
+      <View
+        className='nav-spacer'
+        style={{ height: `calc(${STATUS_BAR}px + 88rpx)` }}
+      />
     </>
   );
 }
