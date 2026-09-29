@@ -144,3 +144,23 @@
 | 沉浸阅读模式（`r` 键） | 转偏好开关 | M2 |
 | 瞬间发布入口 / 点赞云同步 | 一期隐藏/本地；二期 | D8 |
 | 标签彩色块（旧 D45 色板视觉） | 不用（margin 标签卡 = 细边框 + accent 交互）；契约三色字段保留不消费 | D14 |
+
+## 10. M1-b 执行清单（照此顺序执行；每步含验收）
+
+> 数据接线（services/hooks/useCollection/types/CacheImage/Block 渲染器机制）**全程不动**，只换视图层。所有样式数值以本文档与 margin 源码为准；两条铁律贯穿：**custom-tab-bar 内禁用 CSS 变量做关键视觉（内联 style，D19）**；**rgba 逗号写法、color-mix 预计算、@supports 裸声明（D20）**。
+
+| 步 | 内容 | 要点 | 验收 |
+| --- | --- | --- | --- |
+| 1 | `src/styles/tokens.css` 全量重写 | §2 令牌表落死（主令牌 = margin 原值；预计算值 `--c-surface #ecefe7/#171a21`、`--c-surface-2 #eef1e8/#15181e`、`--c-fg-mid`）；**accent 五套变量组**（`[data-accent="green"]` 等覆盖 `--c-accent/--c-featured/--c-gallery`，轮转表抄 margin global.css `html[data-accent=…]` 块）；暗色 media 块 + `.theme-dark` 类同步 | 四类色（bg/fg/accent/语义）与 margin 线上站一致；tsc/build 过 |
+| 2 | `src/app.scss` 共享件换皮 | `page` 底色/字体栈换 margin；`.section-head` 重做为 §3 的「大写 accent 小节标题 + 横线 + 可选 `[n/m]` 计数」；删除柠檬绿垫块 `::after`；`.empty` 文案改 margin 风格；`rise-in` 动画保留 | 首页小节标题形态 = margin FEATURED/RECENT |
+| 3 | `src/app.config.ts` | `window.navigationBarBackgroundColor` → `#F2F5EC`；tabBar 原生兜底字段（不渲染但要有）：color `#353538`/selectedColor `#1158d1`/backgroundColor `#f2f5ec` | DevTools 无告警 |
+| 4 | 资产管线 | sharp 脚本（可用 margin 仓库 `node_modules/sharp` 经 NODE_PATH 运行，或 devDependency）：① tabbar 图标 5 枚 × {normal fg 55% / active fg 100%} × 明暗 = 20 PNG（81px，字形取 margin `src/assets/icons/Icon*.svg` 同族线性风，home/moment/user 三个缺的字形按同风格补画：24×24、stroke 2、round cap）；② logo `mark.svg`→PNG（accent 蓝 + fg 两版）与 `margin.svg` 字标→PNG（fg 两版）；③ 噪点 tile 200px PNG（feTurbulence 同款参数预渲染）；④ aurora 光球模糊 PNG（radial 渐变预模糊，中性色可两主题共用） | PNG 落 `src/assets/`；单枚 ≤2KB |
+| 5 | `custom-tab-bar/` 换皮 | 形态 = margin 语言**非悬浮胶囊**：全宽 `surface` 底 + 顶部 1px 发丝线（border 20%）+ 5 项等宽；图标 44rpx 上下、无文字；**选中 = accent 8% 圆角底块（12rpx 圆角）+ 图标全色**（margin 移动菜单 active = accent 色 + accent 8% 底的同族映射），未选中 fg 55%；accent 跟随偏好（内联 style 读 accent 配置）；底/线/底块全部 **tsx 内联**，WXSS 只留几何 | 明暗三态正确；切 tab 高亮随动；无 CSS 变量依赖 |
+| 6 | `components/NavBar` 重做 | 居左 logo mark+字标（PNG），居右搜索（→ M4）与主题切换占位；滚动态：bg → `surface` + 底部发丝线；高度 = 状态栏 + 88rpx；mine 页可后接 overlay 变体 | 滚动渐变正确；返回键语义不变 |
+| 7 | 基础组件三件 | `TerminalBadge`（ping 点 + `~ path $` 徽章）、`AuroraHero`（hero 容器：surface 底 + accent 12% 描边 + 48rpx 圆角 + 光球 PNG ×2-3 + 可选位移动画降档）、`SectionTitle`（大写 accent + 横线 + 计数） | 与 margin hero 逐元素对照 |
+| 8 | 五页重写（顺序：home → tags → gallery → moment → mine） | **home**：§3 首页结构（终端徽章 + glow 标题「Margin」+ 描述 + 作者行 + FEATURED featured 琥珀卡 + RECENT `[n/74]` 计数卡 + CTA→归档；删除搜索胶囊/公告条/快捷导航/热门标签/分段 tabs——公告数据保留待定）。**tags**：aurora hero（`~ ls -la $` + Tags + hero-badge 统计 ×2）+ tag 卡双列（surface-2 底 + fg 6% 描边 + 名/计数，按压 accent 30% 描边；**不用彩色块**）。**gallery**：hero + 筛选胶囊（全部 + 画廊名(照片数)，激活 accent 8% 底 + accent 字）+ 画廊卡（cover aspect-video + gallery 紫 tint 描边 + 名称/描述）。**moment**：hero + 月份导航（细边框容器 + 箭头 + 月份格选中 accent 底，端上组件）+ 瞬间卡（日期 + ★ + 正文 + 图网格 + tag pill）。**mine**：头像（accent 描边）+ 昵称/简介 + 社交行 + 统计卡 + 贡献日历（stats heatmap 视图网格）+ 功能列表行（收藏/历史/偏好/联系/免责声明）+ 版权备案行 | 每页对照 margin 对应页移动端视口；数据加载/缓存行为与改造前一致（22 单测保持绿） |
+| 9 | `useTheme` 扩展 accent | 模块级 accent 状态（默认 blue）+ `setAccent()`（持久化留 M2 偏好页）；root 节点挂 `data-accent` 或类名映射 tokens 变量组；tabBar/NavBar 内联色值走同一配置表 | 五套切换全 UI 即时生效 |
+| 10 | 字体管线 | 端上：`loadSiteFont()`（loadFontFace global:true，成功/失败各打点，失败静默）；margin 侧：常用字子集 woff2 → `public/fonts/` + `_headers` 仅对 `/fonts/*` 加 `Access-Control-Allow-Origin: *`（走 margin 仓库评审）；偏好开关 UI 可先落 M2 | 打样第 5 项过 |
+| 11 | 打样验证 | design.md §8 六项全过 → 视觉基线宣告；真机复核滚动保留/存储/TTI 无回退 | §8 表全绿 |
+
+**占位与待定**：首页 `announcement` 条在 margin 首页无对应物——暂不渲染，数据字段保留（Q 待用户决定是否做成 margin 风格终端徽章行）；技能跑马灯/MBTI 等关于页重装饰项属 M4「关于」页范围，不阻塞 M1-b。
