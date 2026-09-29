@@ -90,9 +90,8 @@ page,
   --font-mono: "Maple Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
     monospace;
 
-  /* 悬浮 tabBar 胶囊（D54：近实底白，显式兜底 + 变量覆盖；阴影明暗分档） */
-  --tabbar-bg: rgba(255, 255, 255, 0.92);
-  --sh-tabbar: 0 8rpx 32rpx rgba(45, 47, 46, 0.14);
+  /* 悬浮 tabBar 胶囊底/阴影已改 tsx 内联（D55：custom-tab-bar 组件边界
+   * WXSS 变量不可达，tokens 里的 tabbar 变量移除） */
 }
 
 /* 跟随系统暗色（app.json darkmode:true 后 WXSS media 生效）。
@@ -129,8 +128,6 @@ page,
       0 8rpx 32rpx rgba(0, 0, 0, 0.25);
     --sh-float: inset 0 1rpx 0 rgba(255, 255, 255, 0.08),
       0 8rpx 32rpx rgba(0, 0, 0, 0.55);
-    --tabbar-bg: rgba(30, 32, 29, 0.92);
-    --sh-tabbar: 0 8rpx 32rpx rgba(0, 0, 0, 0.5);
   }
 }
 
@@ -163,6 +160,4 @@ page,
     0 8rpx 32rpx rgba(0, 0, 0, 0.25);
   --sh-float: inset 0 1rpx 0 rgba(255, 255, 255, 0.08),
     0 8rpx 32rpx rgba(0, 0, 0, 0.55);
-  --tabbar-bg: rgba(30, 32, 29, 0.92);
-  --sh-tabbar: 0 8rpx 32rpx rgba(0, 0, 0, 0.5);
 }

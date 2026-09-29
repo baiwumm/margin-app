@@ -54,13 +54,33 @@ export default function CustomTabBar() {
     void Taro.switchTab({ url: TABS[idx].path });
   };
 
+  /* 底色/描边/阴影/选中块全部内联（D55）：WXSS 的 CSS 变量在 custom-tab-bar
+   * 组件边界不保证可达（浅色令牌块无 :host 选择器，var 落空时按规范整条
+   * background 作废回透明——D53/D54 两轮截图透明即此），内联是确定性通道。 */
+  const glass =
+    theme === "dark"
+      ? {
+          backgroundColor: "rgba(30, 32, 29, 0.92)",
+          border: "1rpx solid rgba(255, 255, 255, 0.12)",
+          boxShadow:
+            "inset 0 1rpx 0 rgba(255, 255, 255, 0.08), 0 8rpx 32rpx rgba(0, 0, 0, 0.5)",
+        }
+      : {
+          backgroundColor: "rgba(255, 255, 255, 0.92)",
+          border: "1rpx solid rgba(255, 255, 255, 0.9)",
+          boxShadow:
+            "inset 0 1rpx 0 rgba(255, 255, 255, 0.8), 0 8rpx 32rpx rgba(45, 47, 46, 0.16)",
+        };
+  const activeBg = theme === "dark" ? "#35401F" : "#E0EF93";
+
   return (
     <View className='float-tabbar'>
-      <View className='float-tabbar-inner'>
+      <View className='float-tabbar-inner' style={glass}>
         {TABS.map((tab, idx) => (
           <View
             key={tab.path}
             className={`float-tab ${selected === idx ? "float-tab-active" : ""}`}
+            style={selected === idx ? { backgroundColor: activeBg } : undefined}
             onClick={() => switchTo(idx)}
           >
             <Image
