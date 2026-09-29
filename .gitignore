@@ -26,3 +26,4 @@ coverage/
 # 误生成的它包管理器锁文件
 yarn.lock
 package-lock.json
+project.private.config.json
