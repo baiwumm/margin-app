@@ -289,7 +289,7 @@ margin-app/
 | --- | --- | --- |
 | **M0 契约与导出管线** | 冻结 schema + 13 端点 + toBlocks + toAssetRef + bigram 索引 + `_headers` | ✅ **完成并生产验收（2026-09-29，D17）** |
 | **M1-a 基建 + 真机验收** | Taro 工程 / Tailwind v4+weapp-tw / request+cache+manifest（22 单测）/ Block 渲染器基础块 / 五页骨架 / custom-tab-bar | ✅ **完成 + A1 真机全绿（D18）**：TTI ≈880ms、缓存命中 <500ms、切 tab 滚动保留、存储实测 10MB 配额 |
-| **M1-b UI 按 margin 基准重做（进行中）** | tokens 全量换 margin 令牌（含 accent 五套）；五页视图层重写；tabBar/图标/NavBar 换 margin 皮；装饰层（网格/噪点/aurora/glow）；字体 loadFontFace 管线 | 打样 6 项（design.md §8）全过 = 视觉基线；再进 M2 |
+| **M1-b UI 按 margin 基准重做（代码侧完成）** | tokens 全量换 margin 令牌（含 accent 五套）；五页视图层重写；tabBar/图标/NavBar 换 margin 皮；装饰层（网格/噪点/aurora/glow）；字体 loadFontFace 管线 | ✅ **代码侧完成（2026-09-29，D25）**：§10 十一步走完（步骤 10 字体子集按批示跳过，等宽栈兜底）；grep 判据零命中、build + 22 单测绿。⏳ **打样 6 项（design.md §8）待 DevTools/真机对照 margin 线上站**，全过 = 视觉基线，再进 M2 |
 | **M2 文章详情** | Block 全量块 + TOC + 进度 + 字号/行距/主题 + 代码块（margin shiki 双主题）+ 图片预览 + 上下篇 + 分享 + 阅读模式（偏好开关） | ① 10 篇抽样渲染与站点一致（含三类指令块）；② 1000 行代码不卡；③ 分享卡图正确 |
 | **M3 图库与瞬间** | 画廊列表/详情/图片浏览；瞬间年月导航/卡片/图组/视频音乐块 | ① 75+16 图全可浏览；② 月份切换计数正确；③ 大图手势顺畅 |
 | **M4 检索、归档与个人中心** | 搜索（双层+拼音+高亮+历史）、归档、标签详情、友链、项目、关于（**备案号展示**）、数据看板 | ① 一层 <40KB 即时、二层 ≤400KB、拼音首字母命中；② 偏好全生效持久化；③ 主包 ≤1.5MB；④ 备案号可见可复制 |

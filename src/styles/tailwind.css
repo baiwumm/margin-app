@@ -1,4 +1,4 @@
-/* Tailwind v4 入口（CSS-first）。样式生成由 weapp-tailwindcss v5 接管（D37），
+/* Tailwind v4 入口（CSS-first）。样式生成由 weapp-tailwindcss v5 接管，
  * 不叠加 @tailwindcss/vite 或 @tailwindcss/postcss（weapp-tw README 明确禁止双生成器）。
  * 语义类对齐 margin 卡片语言（细边框 + 低饱和 tint，无玻璃拟态）；色值全部走
  * tokens.css 令牌（color-mix 已按 design.md §2 预计算落死）。 */

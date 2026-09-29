@@ -34,7 +34,7 @@ function BlockView({ block, index }: { block: Block; index: number }) {
         </View>
       );
     case "img": {
-      // a = assets 下标（D23 瘦身）；图片本身由 PostDetail.assets 提供给组件树，
+      // a = assets 下标（契约瘦身）；图片本身由 PostDetail.assets 提供给组件树，
       // 这里通过 BlockImages 上下文取（见 BlockImage）。
       return <BlockImage assetIndex={block.a} alt={block.alt} index={index} />;
     }

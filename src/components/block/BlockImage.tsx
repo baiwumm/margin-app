@@ -1,5 +1,5 @@
 /**
- * img 块：a = assets 下标（D23）；assets 由渲染层用 React Context 下发。
+ * img 块：a = assets 下标（契约瘦身）；assets 由渲染层用 React Context 下发。
  */
 import { createContext, useContext } from "react";
 import { View } from "@tarojs/components";

@@ -1,7 +1,7 @@
 /**
  * CodeBlock：构建期 Shiki 预高亮 tokens 上色（零运行时解析）。
  * - 配色表由 manifest 下发（机制留接口：BLOCK_CODE_COLORS，M0 时为空表 → 退化为单色）；
- * - 文本由 tokens join 复原（D23：不存纯文本），复制用 tokens 拼接；
+ * - 文本由 tokens join 复原（不存纯文本），复制用 tokens 拼接；
  * - 行号 + 语言角标 + file 徽章 + 换行/滚动（M2 接偏好）。
  */
 import { Text, View } from "@tarojs/components";
