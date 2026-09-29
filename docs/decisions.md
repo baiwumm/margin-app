@@ -1,62 +1,29 @@
 # Margin 小程序 · 决策记录
 
-> **规则**：出现新的分叉时在表尾追加并递增编号，**不回改**其他文档的既有结论。论证过程与背景见 `archive/requirements-v2.1.md` 对应章节。
-> **依据分层**：D1–D18 用户逐条确认；D19–D27 技术选型授权决策（2026-09-28「按你觉得最佳的方案更新文档」）；D28–D34 用户 2026-09-28 逐条答复固化；D35–D37 v3.0 评审补记（技术选型层，同 D19–D27 授权口径）。
+> **规则**：出现新的分叉时在表尾追加并递增编号，**不回改**既有行；论证过程写进 research.md 或对应专项文件的引用章节。
+> **重建说明（2026-09-29）**：UI 方向转向 margin 原设计（D1）后本文档组整体重建，旧版文档（requirements v1.0–v3.6、决策旧编号 D1–D55、archive 快照、demo/ 截图）全部作废删除，**完整历史以 git 历史为准**。新表自 D1 起重新编号：D1–D7 为本轮转向决策，D8 起为重建时仍然有效的历史结论浓缩（口径不变，仅换编号）。
 
 | # | 决策项 | 结论（现行口径） |
 | --- | --- | --- |
-| **D1** | 域名与备案 | `baiwumm.com` 已 ICP 备案（粤ICP备2023007649号，个人），API 与图片同域分发 |
-| **D2** | 小程序主体 | 个人（已微信认证 2026-07-02；认证 ≠ 变更主体，`web-view` 仍不可用）。据此收敛：外链只能复制剪贴板、一期全只读、类目避开资讯/社区 |
-| **D3** | 检索方案 | 自建双层索引、端上本地检索；否决 Pagefind / Algolia / Meilisearch / 云开发正则 |
-| **D4** | 分类模块 | 取消。第二个 tab = 标签（设计化色块卡），与 margin「只有 tags」的内容模型对齐 |
-| **D5** | 框架 | Taro 4（React + TypeScript），不再讨论；已否决 uni-app（Vue3）与微信原生。数据层与 Block 渲染器框架无关 |
-| **D6** | 音乐 / 视频块 | 一期降级为「卡片 + 复制链接 / 封面 + 跳转」，不追求站内播放 |
-| **D7** | 点赞 / 收藏 | 一期纯本地；云同步放二期 |
-| **D8** | 端 | 一期只做微信小程序；跨端能力保留不展开 |
-| **D9** | demo 品牌与文案 | 全部替换为 margin（品牌 Margin / 作者 白雾茫茫丶），导航项按需求文档 §6.3 重映射 |
-| **D10** | 视觉基准 | 以 demo 图为唯一基准（暖白 `#F6F3EE` + 柠檬绿 `#D7F94C` + 大圆角 + 悬浮胶囊）；margin 站点终端风装饰不进小程序 |
-| **D11** | 标签页卡片 | 设计化色块卡「标签名 + N 篇」（取色机制后被 D22 修订） |
-| **D12** | 检索深度 | 双层全做：第一层随首屏（< 40 KB）即时出结果；第二层全文倒排懒加载（≤ 400 KB） |
-| **D13** | 图片分发 | 一期走 `baiwumm.com` 同域，接受国内 TTFB 200–400ms；`assetBase` 保持可配 |
-| **D14** | 小程序载体 | 复用现有 AppID `wxab2feaffc36b3190`（变更信息 + 覆盖代码），不注销重注册（注销 ≈ 14 天不可逆 + 重走备案 1–20 工作日） |
-| **D15** | 名称 / 简称 | 名称 = `白雾茫茫丶`（同主体公众号已占用，唯一性零风险），简称 = `白雾茫茫`；改名次数剩 0 |
-| **D16** | 保存图片到相册 | 一期要做。后台配《用户隐私保护指引》声明 `saveImageToPhotosAlbum`；拒绝授权后走 `wx.openSetting` 引导（容错不能省） |
-| **D17** | 图片分发域名 | 放弃 `cdn.baiwumm.com`，一期到后续全程同域（不维护对象存储桶）；配套补 `/_astro/*` 的 immutable 缓存头 |
-| **D18** | 服务类目 | `工具 > 备忘录`（后台实际配置）；文案定位「个人技术笔记记录」 |
-| **D19** | `assetBase` | = `https://www.baiwumm.com`（无尾斜杠）。实测裸域所有路径 301 → www；配套两条域名已进三类白名单 |
-| **D20** | 端点收敛到 13 个 | 取消 moments 月分片（9 条不分片，端上按 `pubDatetime` 聚合）、公告并入 `site.json`、一期不做公告列表/详情页（无内容源，空壳页是提审减分项） |
-| **D21** | 检索切词 | bigram 滑窗替代 `Intl.Segmenter`（实测把「微信/小程序/优化」等全切单字）；建索引与端上共用同一纯函数 |
-| **D22** | 标签配色 | 构建期直接下发 `color` / `colorDark` / `ink` 三色值（端上零 hash 零计算）；取色依据 = 按 count 降序的序号 % 10（非 hash，避免新增标签打乱全局配色） |
-| **D23** | Block 载荷瘦身 | `img` 引 `assets` 下标不内嵌 AssetRef；`code` 只发 tokens（纯文本由 tokens join 复原）。节省比例 M0 实测 |
-| **D24** | 契约版本策略 | 变更走 `/api/v1` 与 `/api/v2` 目录并存（不覆盖式）；端上对 schemaVersion 不匹配软降级，不弹「请更新」 |
-| **D25** | 图片策略 | 只选择、不生成：按「≤目标宽度的最大可用档」取站点已有变体（三集合档位不一致，固定三档不成立），变体零新增 |
-| **D26** | 列表不分页 | 全部列表端点一次给全量；`usePagination` 降级为纯端上切片。将来超 400 KB 硬线再引入 `?cursor=` |
-| **D27** | 图库筛选 | 胶囊 = 「全部」+ 3 个画廊名 + `photoCount`；不做照片级 tag 筛选（tags 挂在画廊级，做不出照片粒度） |
-| **D28** | 文章卡不出图 | 「文章去掉封面图，博客定位就是没有封面图」——封面链路整条作废，`PostMeta.cover` 一期不下发。列表页每屏约 480 KB 图片请求归零，本期最大首屏收益。与 demo 有图卡是有意偏离，视觉重量靠排版 |
-| **D29** | 依赖批准 | 加 `pinyin-pro`（devDependency，构建期专用）；不加 `unified`（走 `@astrojs/markdown-remark`）。⚠️ 例外须写回 margin 的 `AGENTS.md:393-400`（M0 执行项） |
-| **D30** | 存储与缓存 | 正文 4 MB 按字节预算（不按篇数）+ 离线快照与 prefs 不参与淘汰 + 70%/90% 双水位守卫；实际配额 M1 真机复核，代码读 `getStorageInfo` 不写死 |
-| **D31** | 标签色板 | 公式生成（10 档、色相每 36°、S/L 固定）+ 构建期 WCAG 对比度断言；真机校准挂 M1 打样第 2 项，校准后色值写进 api-contract.md |
-| **D32** | 公告与免责声明 | 一期 `announcement = null` 整条隐藏；免责声明由我起草、用户审核（Q3，初稿见 compliance.md §11） |
-| **D33** | 线上旧版 | 已开「暂停服务」（空壳风险消除）。⚠️ 新版上线前记得取消暂停 |
-| **D34** | 热力图数据源 | 按文章 `pubDatetime` 聚合，不读 git 历史（语义 = 本月发布几篇；浅克隆风险随之消除）。`buildId` 主键 = 内容 hash，short sha 仅可读标签 |
-| **D35** | 备案接入商核查（Q1 闭环） | 腾讯云客服答复判定「仅新增一个不承载业务的境内子域名，无法保证核查通过」→ 占位子域式 A 方案否决，处置回归 B（接受风险 + 端上快照兜底）。⚠️ 客服建议的「取消腾讯云接入」不可照做（= 放弃备案）。答复全文与升级路径见 compliance.md §6 |
-| **D36** | React 版本口径 | Taro 4 主线默认 React 18，React 19 依赖 react-reconciler 升级、官方未宣布完整支持 → **以 React 18.3 起步**，M1 工程基座第一步用最小脚手架验证 19 可行后再升 |
-| **D37** | Tailwind 工具链 | 选 Tailwind CSS v4 必须配 **weapp-tailwindcss v5**（v5 才支持 v4）；版本写死进 M1 基座依赖清单 |
-| **D38** | 首页 Hero 图来源 | 一期**打包进 app `src/assets/`**（品牌视觉、零请求、不占合法域名名额）；`site.json` 只新增 `hero` 文案字段（胶囊公告/日期文案）。具体用哪张图 M1 视觉打样时定稿 |
-| **D39** | 作者头像 | = margin `public/avatar.png`（512×512 PNG，线上即 `https://www.baiwumm.com/avatar.png`）。一期**双轨**：打包进 app 零请求使用（打包时可压 webp 减包体，145 KB 原图偏重）+ `site.json.avatar` 下发线上 URL；将来头像常换时端上切线上字段，不改契约 |
-| **D40** | 首页 tabs「默认」排序 | = `pubDatetime` 降序 |
-| **D41** | `counts.images` 口径 | 按**正文图片引用数**统计（当前 249，与各篇 `PostDetail.assets` 导出口径一致），非文件数（228） |
-| **D42** | M0-0 探针 A：Endpoint 内 `getImage()` 落盘 | **通过（2026-09-28，CF 构建 Version 69d995d3）**。临时端点内 `getImage()` 对 blog 正文图（abb988gt/01-1panel-appstore-install.webp，请求 750w）与画廊图（changsha/01-panda-telescope.webp，请求 800w）均返回**静态产物路径** `/_astro/<name>.<hash>.webp`，变体随构建落盘 `dist/_astro/`；sharp 0.35.4 在 CF 构建镜像可跑，1×1 均色 #fdfdfd / #93adc2（即 toAssetRef.avgColor 同款用法）。→ D25「只选择、不生成」按原案推进，api-contract §5 三条退路不启用。URL 的 HTTP 200 点验因 workers.dev 被墙改在 M0 生产部署后于 www 域复核（证据链：emit 路径 + 构建成功 + dist 全量部署） |
-| **D43** | M0-0 探针 B：`parse*Card` 重构行为等价 | **通过（2026-09-28）**。三插件抽出导出 `parseLinkCard/parseMusicCard/parseVideoCard(node)`（非指令段落返回 null，签名与 api-contract §4 同步），本体改为「parse → TDK/resolve → buildHtml」。验收证据：**同一 CF 构建内**内嵌 1d6c198 旧插件副本做双管线逐字节比对，link/music/video 各 1 篇真实样文 HTML **全等**（3345/9340/9170 字节）——环境差异（shiki 语言加载、music/video 缓存路径、外链时变数据）对两侧同时生效完全抵消，任何差异即重构引入，实测为零。parse 结构化输出（1/3/5 条）与站点 HTML 一一对应。全站字节 diff 因 workers.dev 被墙无法本地执行，以同环境等价 + 生产站对照（排除 og-hash/封面 URL 时变）替代，M0 全站 diff（api-contract §8.5）照常执行。顺手实锤：本构建 fetchTdk 对 github 抓取失败一次（外链抓取不稳定，支持导出层禁联网决策） |
-| **D44** | workers.dev 关闭与验证口径定型 | 2026-09-28 用户**关闭 margin 的 workers.dev 访问**，站点仅经 `www.baiwumm.com` 可达（与 R1 收敛方向一致；Workers Builds 构建与生产部署不受影响）。影响 = 分支预览产物不再有可访问 URL。**验证口径定型**：合并前 = 分支构建 check-run（`astro check` + 构建 + **构建内断言**：schema/体积/URL/缓存头/WCAG 违规即构建失败）+ 本地 `pnpm dev` 冒烟；合并后 = 生产域复核（curl URL 200 / immutable / JSON 抽样 + 全站 HTML diff，基线 156 页已存档）。⚠️ Workers Builds 的 non-production builds 必须保持开启（check-run 是唯一合并前 CI 信号）；探针期的 workers.dev 预览 URL 与 webhook 回传为一次性手段，已随探针关闭/删除 |
-| **D45** | M0 实测修订与定档（契约冻结依据） | 2026-09-28 夜，`feat/mp-export` 分支全量实装后以 74 篇实测校准契约：① **预算修订** manifest 4KB→24KB（resources 含 87 文件）、titles 40KB→48KB（拼音键全量），实测 14.5KB / 46.3KB；② **terms 收缩**正文只索引前 28 段（实测 376KB ≤400KB）；③ **资源 hash 12 位**（sha256 截断，manifest 体积减半）；④ **标签色板** = 白字深底（color hsl(h,45%,32%) / colorDark hsl(h,40%,22%) / ink #ffffff，全档 WCAG ≥4.97，构建内断言）；⑤ **counts.images = 246**（引用数口径生产实测；本地早期冒烟值 244 系 fjvvy2hf 图片计数 bug 修复前数据；249 为估算值，差额 = MDX 内远程图走 unknown 不计等）；⑥ **linkcard 外链标题降级为域名**（导出层禁联网的代价，作者手写 title/note 优先）；⑦ **unknown 兜底实测** = 35 处/10 篇（手写网格 HTML、MDX JSX、远程图），警告不阻断。全部数字见 api-contract.md §2/§4/§8 |
-| **D46** | AssetRef 档位按集合定档 | 推送前自查发现初版实现用「固定三档 400/800/1600」请求所有图——正是 D25 明确否决的形态（blog 站点档位是 640/750/828/1080/1280/1541，请求 400 会**新增变体**）。修正为按 research.md F7 实测的站点集合选档：blog 640/750/1280、画廊照片 400/800/1600、画廊封面 800/800/1600、瞬间 400/800/800；thumb 目标 ≤400 而 blog 无该档 → 按「≤目标宽度的最大可用档」回落到最小档并如实写实际宽度（api-contract §1）。请求宽 ⊆ 站点已渲染 srcset → **变体零新增由构造保证**；请求宽 > 原图宽时 Astro 不放大（= 站点小图原始档）。api-contract §5 表同步（blog thumb 行 400 → 回落 640）。契约 §3.3 的 counts.images 注释同步修正为 246 |
-| **D47** | M0 生产验收与 HTML diff 例外（astro.images 样式层） | 2026-09-29，`feat/mp-export` 合并 main（71831bc）部署生产后验收**通过**：13 端点全 200、buildId=71831bc-9bf4b88413de、`/_astro/*` 回传 `immutable` 且 HTML/JSON 保持 must-revalidate、变体 URL 200（探针 A 的 D42 复核闭环）、裸域 0。**HTML diff 未达字节一致，记录有界例外**：每页多一个 `@layer astro.images` 内联样式块（~1.8KB）+ Footer.css 因 chunk 重组换 hash。机制 = 端点引入 `astro:assets` 使其样式副作用进入公共模块图（`layout:"none"` 已试、不能阻止，Astro 内部 API 绕过违背 R8 故不采用）。**惰性已证明**：全站 0 个 `full-width` 元素（`width:100%` 规则永不命中）；342 个 constrained 元素的 `height:auto`/`max-width:100%` 与 Tailwind preflight 的 `img{max-width:100%;height:auto}` 完全冗余；object-fit 在 height:auto（盒比例=图片比例）下几何无效。视觉零变化，字节增量 ≈ 全站 gzip 后 ~15KB。`data-astro-image` 属性本身旧 build 就有（36 处/有图页），旧 build 是「属性无 CSS」的半生效状态。D25 档位随 D46 定档后由构造保证零新增（请求宽 ⊆ F7 实测站点集合） |
-| **D48** | 编译器回退 webpack5 + trustPolicy 项目级 off | M1-a 搭建时按 §4.1 选 Vite 遇双重阻塞：① 用户 pnpm 12.6 全局 `trustPolicy: no-downgrade` 对 vite/semver 等历史代发版本一律「possible package takeover」拦截（无包级白名单可行性），② `@tarojs/vite-runner@4.2.1` peer vite ^4 与 weapp-tailwindcss v5 peer vite ≥5.2 冲突。保守回退 **webpack5 + babel**（Taro 4 默认最稳、weapp-tw webpack 插件最成熟）；项目级 `pnpm-workspace.yaml` 设 `trustPolicy: off`（不动用户全局配置；新工程依赖均官方来源）。§4.1 的「Vite + SWC」意向下修为「编译器以工程可行为准」，数据契约与渲染器不受影响；vite 迁移留待后续单独验证 |
-| **D49** | React 19 编译级通过（D36 第一步） | Taro 4.2.1 + react/react-dom **19.3.0** `taro build weapp` 编译成功（2026-09-29）。按 D36 口径：保留 19 起步，「真机运行确认」挂起（DevTools 导入 + 真机复核时定）；失败则回退 18.3 |
-| **D50** | tabBar 双路线搭法（Q8 不定案） | app.config 按 **Q8 倾向路线 A** 搭建（`tabBar.custom: true` + `src/custom-tab-bar/`，保留 switchTab 语义与页面缓存，onShow 同步选中态）；路线 B（页面内自绘）不另建工程——若打样定案切 B，改造点集中在删除 custom-tab-bar 与各页内嵌组件，路由结构不变。毛玻璃降级形态已内置（@supports 渐进增强） |
-| **D51** | React 19 运行时验证失败，回退 18.3.1（D49 后续） | 用户 DevTools 实测（2026-09-29）：React 19.3.0 编译虽过（D49），运行时报 `Cannot read property 'ReactCurrentBatchConfig' of undefined`——根因 = **React 19 改了内部 API 导出名**（`__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED` → `__CLIENT_INTERNALS_...`），Taro 4.2.1 内置 react-reconciler 为 React 18 系，读到 undefined。已回退 **react/react-dom 18.3.1**（D36 默认路径），产物抽查旧内部名在位、新名不存在，build + 22 单测复绿。→ **React 19 关闭，待 Taro 升级 react-reconciler 支持后再验**（届时按 D36 路径重新走一遍编译+运行双验证）。D36「18.3 起步」结论维持不变 |
-| **D52** | Q8 定案：tabBar 走路线 A | 用户确认（2026-09-29，真机验证「切 tab 滚动保留」后）：**路线 A（tabBar.custom + custom-tab-bar 组件，switchTab 语义、页面缓存）**；路线 B 的页面重建/滚动丢失是内容型产品体感硬伤，且 A 已实现并真机验证。**图标方案随之定档**：线性 PNG 两态（src/assets/tabbar/ 81px，普通 #909399 / 选中 #B8D434——D7F94C 白底可读性的打样微调，M1 视觉基线宣告时可复核），构建内联 base64（自包含零请求）。demo 对齐的悬浮胶囊 + 毛玻璃降级形态维持 |
-| **D53** | UI 对齐基准升级 uni-halo 3.0.0 源码 | 用户把本地 uni-halo 从 2.0.10 拉到 **3.0.0**（unibest 4.4.1 + wot-ui-v2，`E:\personal-project\uni-halo`）后 UI 全量重新对齐（2026-09-29）：① **双强调色**取代单色体系——primary `#B9E424`（选中态填充/图标/文字 accent，active `#A7CD20`、浅底 `#F4FBE0`）+ secondary `#D7F94C`（柠檬绿高亮块）；② 卡片语言 = 3.x **玻璃拟态**（白 55% + 白描边 4rpx + inset 高光 + `blur(24rpx) saturate(160%)` + 淡紫投影）；③ 文字走 3.x 灰阶（#111827/#4B5563/#6B7280/#9CA3AF）；④ 圆角对齐 Uno 档（12/16/24/32/48rpx）；⑤ 新增**固定玻璃 NavBar 组件**（滚动渐显 page 底色+blur，标签/图库/瞬间/我的四页接线，我的页 overlay 变体白字→正色）；⑥ 瞬间页月份选择器重构为 **6 月翻页玻璃卡**（窗口半年对齐、边界钳制、「本月」快捷钮）；⑦ 首页对齐：搜索胶囊叠 hero 下缘、公告三段式、快捷导航彩底块、小节标题绿垫块、分段控件右置。**实测发现构建管线剥掉全部 `@supports` 块**（连 D52 tabBar 的 blur 增强也从未进过产物）→ 毛玻璃一律裸声明（不支持机型自动忽略），nav alpha 上限提到 0.9 补偿无 blur 机型；顺带实锤 WXSS 不认 `rgb(255 255 255 / 55%)` 空格斜杠语法，rgba 一律逗号写法。暗色保留自研推导（3.x 无暗色）；新增 `--c-chip-bg/ink` 暗色配对修复高亮块 1.6:1 低对比。**有意偏离保留/新增**：D28 纯文字卡、D52 tabBar 形态不变；今日一言未接（外部 API + 域名白名单，挂 Q 待用户）、精选分类槽位用标签数据（契约无分类端点）。design.md 全文同步，打样第 1/2/3/4/5 项需复验 |
-| **D54** | tabBar 重做 + 首页精修（D53 首屏截图复核） | 用户发来 D53 构建首屏截图：tabBar 呈半透明、图标过淡，与 demo 白胶囊不符。① **形态**：白玻璃宽胶囊 ~530rpx 居中（5×88rpx 等距，≈ demo 70% 屏宽），**近实底白 0.92** 用「显式 rgba 兜底在前 + var 覆盖在后」双保险（规避 var 解析异常时整条透明——D53 截图的透明成因未定，双保险无论成因都成立）；**去掉 backdrop-filter**（近实底下无增益）；阴影 `--sh-tabbar` 明暗分档恢复悬浮感。② **图标四态 20 枚**（sharp 按原字形重着色，字形零改动）：浅色 normal/active 统一深墨 #2D2F2E（demo 图标即深色轮廓，选中靠浅绿方块区分，方块高亮保留）；新增 **normal-dark #9AA09A**（暗色未选中，此前复用浅色 normal 在暗底不可读）；active-dark 亮柠檬维持；构建内联 base64。③ **首页精修**：hero 渐变加深（白日期可读）、日期改中文格式「2026年09月29日 星期一」、徽标 28rpx/700、快捷导航块 112rpx + 彩底加饱和、小节标题间距 40rpx。design.md §1/§8/§9 同步；tabBar 不再列入有意偏离（形态已对齐 demo 观感，仅激活色与 3.x 源码细节不同） |
-| **D55** | tabBar 视觉全内联 + 形态对齐 uni-halo（D54 截图仍透明） | D54 后用户截图胶囊**仍然透明**（但墨色图标已生效）。产物核查：`background` 同时写了显式 hsla 与 `var(--tabbar-bg)` 双声明、变量五处全在 dist——排除「变量缺失」；结合**暗色一直正常**（weapp-tailwindcss 只给暗色 `@media` 块补了 `:host` 选择器，浅色令牌块没有），定位：**custom-tab-bar 的 WXSS 里 CSS 变量不保证可达**（组件内容对 page 作用域变量的继承在该环境不成立；var 落空时按 CSS 规范整条 `background` 作废回 initial=透明，显式前声明被无效声明覆盖——D53/D54 两轮透明与此完全吻合）。**修法（确定性）**：底色/描边/阴影/选中块全部改为 **tsx 内联 style**（`useTheme()` 按 theme 算具体值），WXSS 只留几何（558rpx 胶囊 = 750−2×96rpx，uni-halo 容器 `px-12` 口径；5 项 **flex-1 等宽**、padding 8rpx、图标 48rpx）；tokens 移除 `--tabbar-bg/--sh-tabbar`。选中方块内联 `#E0EF93`/`#35401F`。⚠️ 遗留观察项：此前截图选中高亮似停在「图库」位而内容为首页——内联后高亮会显形，若仍错位再查 store 订阅 |
+| **D1** | UI 基准转向 | **唯一视觉基准 = margin 博客原设计**：源码 `E:\personal-project\margin` 为唯一事实（global.css 令牌 + 页面/组件样式），线上站 `https://www.baiwumm.com/` 移动端样式作端上排版参考；无独立设计稿。uni-halo（3.0.0 源码与 demo 截图）不再作为任何基准；其对齐层 UI 代码（五页视图、令牌、tabBar 视觉、20 枚图标、玻璃 NavBar）推翻重做；`demo/` 删除 |
+| **D2** | 转向边界 | 纯端上 UI 层替换：margin 博客仓库、13 个导出端点、API 契约、导出管线、M0 全部验收成果**零影响**；services / 契约类型 / Block 渲染器机制 / 缓存基建 / tabBar 路线 A 机制保留 |
+| **D3** | tab 集合 | 维持五 tab（首页/标签/图库/瞬间/我的）只换视觉；归档、搜索、项目、友链、关于为二级页。切 tab 语义与页面缓存已真机验证，不动结构 |
+| **D4** | 站点字体 | Maple Mono CN **不打包**（中文子集 MB 级，爆主包 1.5MB 红线）。落地 = `wx.loadFontFace` 运行时异步加载子集（www.baiwumm.com 同域 + CORS，不阻塞首屏）+ 系统字体栈兜底（失败静默回落）；做成偏好项「站点字体」，默认系统栈。⚠️ margin 侧需配套：字体子集文件 + `_headers` CORS（挂 margin 仓库流程，M1-b 交付） |
+| **D5** | accent 五色轮换 | **做**（margin 站点特色）：blue/green/purple/orange/rose 五套 accent 做成偏好项，纯 CSS 变量切换，明暗两套数值随主题 |
+| **D6** | LOFI 电台 | **删除**。margin 首页电台流为第三方境外流（`fluxfm.streamabc.net`），downloadFile 合法域名须 ICP 备案、该域无法配置；不为其新增代理服务（违背零后端）。音频播放能力本身可用（InnerAudio/BackgroundAudioManager），将来放自托管音频不受此限 |
+| **D7** | 端上不做的 margin 功能 | 抛弃：快捷键/命令面板/ShortcutsPanel、TTS 朗读（Web Speech 不可用）、giscus 评论（个人主体无 web-view；二期云开发另议）、编辑本文/RSS 跳转（改复制链接）、光标光晕（触屏无对应物）、Pagefind 搜索 UI（换端上双层检索）。转形态保留：阅读模式 → 偏好开关（M2）；贡献日历/统计照做（stats 数据已就绪）。清单详见 design.md §9 |
+| **D8** | 主体与载体 | 个人主体小程序（2026-07-02 已微信认证，认证 ≠ 变更主体，web-view 仍不可用）；复用 AppID `wxab2feaffc36b3190`；名称「白雾茫茫丶」、简称「白雾茫茫」（改名次数剩 0）；服务类目 `工具 > 备忘录`；一期全只读，外链只能复制剪贴板 |
+| **D9** | 域名与分发 | `assetBase = https://www.baiwumm.com`（**无尾斜杠**）；裸域所有路径 301 → www，任何请求不得依赖 301；request / downloadFile 白名单各两条已配；图片全程同域 + `/_astro/*` immutable；不维护独立 CDN/对象存储 |
+| **D10** | 备案 | 网站备案 粤ICP备2023007649号-2 + 公安备案 44030402006402（站点页脚已挂）；**小程序变更备案审核中（2026-09-28 发起，审核期严禁改名）**；接入商核查闭环 = 接受风险 + 端上离线快照兜底（背景与升级路径见 compliance.md §6）；旧版已暂停服务，新版上线前取消 |
+| **D11** | 框架链 | Taro 4.2.1 + **webpack5**（Vite 因 pnpm trustPolicy 与 peer 冲突回退，迁移另验）+ **React 18.3.1**（19 运行时验证失败关闭，待 Taro reconciler 跟进）+ TypeScript strict + Tailwind v4 / weapp-tailwindcss v5 + pnpm；数据契约与 Block 渲染器框架无关 |
+| **D12** | 数据层形态 | 构建期导出 13 端点静态 JSON + Block AST（三个自定义指令 `::link-card/::music/::video` 只有 AST 能表达）；列表全量不分页、端上切片；`schemaVersion` 不匹配软降级，契约变更走 `/api/v1` `/api/v2` 并存；buildId = git short sha（可读标签）+ 内容 hash（主键） |
+| **D13** | 图片管线 | 只选择、不生成：按「≤目标宽度的最大可用档」取站点已有变体；档位按集合定档（blog 640/750/1280、画廊照片 400/800/1600、画廊封面 800/1200/1600、瞬间 400/800），变体零新增由构造保证；AssetRef 带实际宽度 + `avgColor` 占位色 |
+| **D14** | 标签 | blog + galleries 合并去重 62 个（moments 的 2 个不进标签页）；slug 沿用站点 slugify；契约下发 `color/colorDark/ink`（构建期 WCAG 断言全过，最低 4.97）。**margin 对齐下标签卡不用彩色块**（margin 标签卡 = 细边框 + accent 交互），三色字段保留在契约里端上暂不消费，契约不动 |
+| **D15** | 检索 | 自建双层索引、端上本地检索：titles 随首屏（实测 46.3KB）+ terms 输入 ≥2 字懒加载（实测 379KB ≤ 400KB 硬线）；切词 = 中文 bigram 滑窗（`Intl.Segmenter` 实测全切单字，弃用）+ pinyin-pro 拼音（构建期 devDependency，已批准）；建索引与端上共用同一纯函数 |
+| **D16** | 缓存与存储 | 正文 4 MB 按字节 LRU；离线快照与 prefs 不参与淘汰（备案失效唯一兜底）；70%/90% 双水位守卫；真机实测配额 10240 KB（iPhone 16 Pro），代码读 `getStorageInfo` 不写死 |
+| **D17** | M0 状态 | ✅ **完成并生产验收（2026-09-29）**：margin main@71831bc 部署，13 端点全 200、buildId `71831bc-9bf4b88413de`、counts.images = 246、`/_astro/*` immutable、HTML diff = 有界例外（astro.images 样式层注入，惰性已证明，视觉零变化）。契约细节见 api-contract.md |
+| **D18** | M1-a 状态 | ✅ 基建完成 + A1 真机验收全绿（2026-09-29，iPhone 16 Pro/iOS 26.6.2）：TTI ≈880ms、缓存命中 <500ms、切 tab 滚动保留、存储 44–46KB 起步、版本比对→清缓存→刷新闭环。**UI 层按 D1 新基准重做中**（M1-b） |
+| **D19** | tabBar 机制 | 路线 A：`tabBar.custom` + `custom-tab-bar/`，switchTab 语义 + 页面缓存（真机验证通过）。⚠️ **custom-tab-bar 组件内 WXSS 的 page 作用域变量不可达**：`var()` 落空时按 CSS 规范整条声明作废回透明——**该组件内禁用 CSS 变量做关键视觉，全部 tsx 内联 style**（按主题算具体值），WXSS 只留几何 |
+| **D20** | WXSS 硬约束 | ① 构建管线剥掉全部 `@supports` 块 → `backdrop-filter` 一律裸声明（不支持机型自动忽略）；② WXSS 不认 `rgb(255 255 255 / 55%)` 空格斜杠语法 → rgba 一律逗号写法；③ margin 源码大量 `color-mix()/oklab` → 端上**构建期预计算为固定值**；④ 禁 `*` 通配与大部分伪类；⑤ `position: sticky` 安卓不稳，吸顶改 scroll-view + 动态 class |
+| **D21** | A1 打点探针 | 启动链路/缓存/存储打点探针仍在产物中，**M5 提审前移除** |
+| **D22** | 打样纪律 | 先打样再铺量：视觉基线 6 项（design.md §8）全过才宣告基线；对照物 = margin 线上站（真机/DevTools 移动视口），demo 截图已随 D1 删除 |
