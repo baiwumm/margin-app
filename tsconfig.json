@@ -13,9 +13,8 @@
     "noUnusedLocals": false,
     "skipLibCheck": true,
     "types": ["node", "vitest/globals"],
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/", "config/", "types/", "test/"],
