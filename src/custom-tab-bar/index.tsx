@@ -1,9 +1,12 @@
 /**
- * 自定义 tabBar（Q8 定案：路线 A —— tabBar.custom = true，保留 switchTab 语义与
- * 页面缓存；切 tab 滚动位置保留已真机验证）。
- * 形态（D54 对照 demo 复核）：白玻璃胶囊等距 5 图标、无文字；图标 = 深墨线性
- * （浅色 normal/active 同色，选中态靠浅柠檬绿圆角方块区分，同 demo）；
- * 暗色：胶囊深底，未选中灰（normal-dark），选中暗橄榄方块 + 亮柠檬图标。
+ * 自定义 tabBar（D3/D19：tabBar.custom 路线，保留 switchTab 语义与页面缓存）。
+ * 形态（design.md §3/§10 步骤 5）= margin 语言、非悬浮胶囊：全宽 surface 底 +
+ * 顶部发丝线（border 20%）+ 5 项等宽、图标 44rpx 上下无文字；
+ * 选中 = accent 8% 圆角底块（12rpx 圆角）+ 图标全色（fg 100%），未选中 fg 55%
+ * （margin 移动菜单 active = accent 底同族映射）；accent 跟随偏好配置表。
+ * ⚠️ D19：custom-tab-bar 组件内 WXSS 的 CSS 变量不可达（var 落空整条声明作废
+ * 回透明）——底/发丝线/选中底块全部 tsx 内联 style 按主题 + accent 算具体值，
+ * index.scss 只留几何（不用任何 var）。
  * 选中态同步：页面 useDidShow → store.setSelectedTab → 本组件订阅回显。
  */
 import { View, Image } from "@tarojs/components";
@@ -11,92 +14,106 @@ import Taro from "@tarojs/taro";
 import { useEffect, useState } from "react";
 
 import { useTheme } from "@/hooks/useTheme";
+import {
+  accentRgba,
+  getAccent,
+  subscribeAccent,
+  type AccentKey,
+} from "@/config/accent";
 import { getSelectedTab, setSelectedTab, subscribeSelectedTab } from "./store";
 import "./index.scss";
 
-import homeNormal from "../assets/tabbar/home-normal.png";
-import homeActive from "../assets/tabbar/home-active.png";
-import homeActiveDark from "../assets/tabbar/home-active-dark.png";
+import homeNormal from "../assets/tabbar/home-normal-light.png";
+import homeActive from "../assets/tabbar/home-active-light.png";
 import homeNormalDark from "../assets/tabbar/home-normal-dark.png";
-import tagNormal from "../assets/tabbar/tag-normal.png";
-import tagActive from "../assets/tabbar/tag-active.png";
-import tagActiveDark from "../assets/tabbar/tag-active-dark.png";
+import homeActiveDark from "../assets/tabbar/home-active-dark.png";
+import tagNormal from "../assets/tabbar/tag-normal-light.png";
+import tagActive from "../assets/tabbar/tag-active-light.png";
 import tagNormalDark from "../assets/tabbar/tag-normal-dark.png";
-import imageNormal from "../assets/tabbar/image-normal.png";
-import imageActive from "../assets/tabbar/image-active.png";
-import imageActiveDark from "../assets/tabbar/image-active-dark.png";
-import imageNormalDark from "../assets/tabbar/image-normal-dark.png";
-import momentNormal from "../assets/tabbar/moment-normal.png";
-import momentActive from "../assets/tabbar/moment-active.png";
-import momentActiveDark from "../assets/tabbar/moment-active-dark.png";
+import tagActiveDark from "../assets/tabbar/tag-active-dark.png";
+import galleryNormal from "../assets/tabbar/gallery-normal-light.png";
+import galleryActive from "../assets/tabbar/gallery-active-light.png";
+import galleryNormalDark from "../assets/tabbar/gallery-normal-dark.png";
+import galleryActiveDark from "../assets/tabbar/gallery-active-dark.png";
+import momentNormal from "../assets/tabbar/moment-normal-light.png";
+import momentActive from "../assets/tabbar/moment-active-light.png";
 import momentNormalDark from "../assets/tabbar/moment-normal-dark.png";
-import mineNormal from "../assets/tabbar/mine-normal.png";
-import mineActive from "../assets/tabbar/mine-active.png";
-import mineActiveDark from "../assets/tabbar/mine-active-dark.png";
-import mineNormalDark from "../assets/tabbar/mine-normal-dark.png";
+import momentActiveDark from "../assets/tabbar/moment-active-dark.png";
+import userNormal from "../assets/tabbar/user-normal-light.png";
+import userActive from "../assets/tabbar/user-active-light.png";
+import userNormalDark from "../assets/tabbar/user-normal-dark.png";
+import userActiveDark from "../assets/tabbar/user-active-dark.png";
 
 const TABS = [
-  { path: "/pages/home/index", normal: homeNormal, active: homeActive, activeDark: homeActiveDark, normalDark: homeNormalDark },
-  { path: "/pages/tags/index", normal: tagNormal, active: tagActive, activeDark: tagActiveDark, normalDark: tagNormalDark },
-  { path: "/pages/gallery/index", normal: imageNormal, active: imageActive, activeDark: imageActiveDark, normalDark: imageNormalDark },
-  { path: "/pages/moment/index", normal: momentNormal, active: momentActive, activeDark: momentActiveDark, normalDark: momentNormalDark },
-  { path: "/pages/mine/index", normal: mineNormal, active: mineActive, activeDark: mineActiveDark, normalDark: mineNormalDark },
+  { path: "/pages/home/index", normal: homeNormal, active: homeActive, normalDark: homeNormalDark, activeDark: homeActiveDark },
+  { path: "/pages/tags/index", normal: tagNormal, active: tagActive, normalDark: tagNormalDark, activeDark: tagActiveDark },
+  { path: "/pages/gallery/index", normal: galleryNormal, active: galleryActive, normalDark: galleryNormalDark, activeDark: galleryActiveDark },
+  { path: "/pages/moment/index", normal: momentNormal, active: momentActive, normalDark: momentNormalDark, activeDark: momentActiveDark },
+  { path: "/pages/mine/index", normal: userNormal, active: userActive, normalDark: userNormalDark, activeDark: userActiveDark },
 ];
+
+/** margin 令牌内联值（light/dark）：surface 底 + 发丝线（border 20%），
+ * 与 tokens.css 预计算值一致——本组件内不可用 var，故按主题落死 */
+const BAR = {
+  light: {
+    backgroundColor: "#ecefe7", // --c-surface
+    borderTop: "1rpx solid rgba(124, 173, 255, 0.2)", // --c-border-20
+  },
+  dark: {
+    backgroundColor: "#171a21",
+    borderTop: "1rpx solid rgba(34, 100, 227, 0.2)",
+  },
+} as const;
 
 export default function CustomTabBar() {
   const theme = useTheme();
   const [selected, setSelected] = useState(getSelectedTab());
+  const [accent, setAccentState] = useState<AccentKey>(getAccent());
 
   useEffect(() => subscribeSelectedTab(setSelected), []);
+  useEffect(() => subscribeAccent(setAccentState), []);
 
   const switchTo = (idx: number) => {
     setSelectedTab(idx);
     void Taro.switchTab({ url: TABS[idx].path });
   };
 
-  /* 底色/描边/阴影/选中块全部内联（D55）：WXSS 的 CSS 变量在 custom-tab-bar
-   * 组件边界不保证可达（浅色令牌块无 :host 选择器，var 落空时按规范整条
-   * background 作废回透明——D53/D54 两轮截图透明即此），内联是确定性通道。 */
-  const glass =
-    theme === "dark"
-      ? {
-          backgroundColor: "rgba(30, 32, 29, 0.92)",
-          border: "1rpx solid rgba(255, 255, 255, 0.12)",
-          boxShadow:
-            "inset 0 1rpx 0 rgba(255, 255, 255, 0.08), 0 8rpx 32rpx rgba(0, 0, 0, 0.5)",
-        }
-      : {
-          backgroundColor: "rgba(255, 255, 255, 0.92)",
-          border: "1rpx solid rgba(255, 255, 255, 0.9)",
-          boxShadow:
-            "inset 0 1rpx 0 rgba(255, 255, 255, 0.8), 0 8rpx 32rpx rgba(45, 47, 46, 0.16)",
-        };
-  const activeBg = theme === "dark" ? "#35401F" : "#E0EF93";
+  const bar = BAR[theme];
 
   return (
-    <View className='float-tabbar'>
-      <View className='float-tabbar-inner' style={glass}>
-        {TABS.map((tab, idx) => (
-          <View
-            key={tab.path}
-            className={`float-tab ${selected === idx ? "float-tab-active" : ""}`}
-            style={selected === idx ? { backgroundColor: activeBg } : undefined}
-            onClick={() => switchTo(idx)}
-          >
-            <Image
-              className='float-tab-icon'
-              src={
-                selected === idx
-                  ? theme === "dark"
-                    ? tab.activeDark
-                    : tab.active
-                  : theme === "dark"
-                    ? tab.normalDark
-                    : tab.normal
-              }
-            />
-          </View>
-        ))}
+    <View className='tabbar' style={bar}>
+      <View className='tabbar-row'>
+        {TABS.map((tab, idx) => {
+          const isActive = selected === idx;
+          const src =
+            theme === "dark"
+              ? isActive
+                ? tab.activeDark
+                : tab.normalDark
+              : isActive
+                ? tab.active
+                : tab.normal;
+          return (
+            <View
+              key={tab.path}
+              className='tabbar-item'
+              hoverClass='tabbar-press'
+              hoverStayTime={80}
+              onClick={() => switchTo(idx)}
+            >
+              <View
+                className='tabbar-block'
+                style={
+                  isActive
+                    ? { backgroundColor: accentRgba(accent, theme, 0.08) }
+                    : undefined
+                }
+              >
+                <Image className='tabbar-icon' src={src} />
+              </View>
+            </View>
+          );
+        })}
       </View>
     </View>
   );

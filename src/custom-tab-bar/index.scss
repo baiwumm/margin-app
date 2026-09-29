@@ -1,38 +1,38 @@
-/* 悬浮胶囊 tabBar（D55，对齐 uni-halo 3.x tabbar 结构）：
- * 玻璃胶囊 558rpx 居中（= 750 − 2×96rpx，uni-halo 容器 px-12 口径），5 项 flex-1 等宽；
- * 底色/描边/阴影/选中块全部内联在 tsx（按 theme 计算）——WXSS 的 CSS 变量在
- * custom-tab-bar 组件边界不保证可达（浅色令牌块无 :host，var 落空时整条 background
- * 作废回透明，D53/D54 两轮截图即此），这里只保留与变量无关的几何。 */
-.float-tabbar {
+/* 自定义 tabBar 几何（design.md §10 步骤 5）：全宽 5 项等宽、图标 44rpx、
+ * 选中底块 12rpx 圆角。⚠️ D19：本组件内 WXSS 变量不可达——这里不用任何
+ * var/颜色/背景，底色/发丝线/选中底块全部在 index.tsx 内联。 */
+.tabbar {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
   z-index: 100;
-  pointer-events: none;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.tabbar-row {
   display: flex;
-  justify-content: center;
+  align-items: center;
+  height: 100rpx;
 }
-.float-tabbar-inner {
-  pointer-events: auto;
-  display: flex; /* 项等宽（uni-halo flex-1） */
-  width: 558rpx;
-  padding: 8rpx;
-  gap: 4rpx;
-  margin-bottom: 24rpx;
-  border-radius: var(--r-full);
-  box-sizing: border-box;
-}
-.float-tab {
+.tabbar-item {
   flex: 1;
-  height: 88rpx;
-  border-radius: var(--r-full);
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.float-tab-icon {
-  width: 48rpx;
-  height: 48rpx;
+.tabbar-press {
+  opacity: 0.7;
+}
+.tabbar-block {
+  width: 96rpx;
+  height: 64rpx;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tabbar-icon {
+  width: 44rpx;
+  height: 44rpx;
 }
