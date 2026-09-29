@@ -173,3 +173,21 @@ tab 图标灰色 `#909399` 在暗色胶囊上可读性足够，暂不出生成�
 **验证**：build 编译通过；dist 抽查 `.float-tabbar-inner` 显式白底 + 变量双写在位、88rpx item、20 枚 base64 图标内联、normalDark 分支在 JS。
 
 **待用户**：真机复看 tabBar（白胶囊悬浮感 + 图标清晰度 + 暗色三态）与首页观感；打样第 3 项随复核闭环。
+
+## D55：tabBar 仍透明 → 视觉全内联 + 形态对齐 uni-halo（2026-09-29）
+
+D54 后用户复拍截图：胶囊**仍然透明**（墨色图标已生效，证明构建是新的）。
+
+**证据链与根因定位**：
+- dist 核查：`background` 双声明（显式 `hsla(0,0%,100%,.92)` + `var(--tabbar-bg)`）在产物里、`--tabbar-bg` 五处（浅/media 暗/.theme-dark）全在 → 排除「变量缺失/构建丢失」。
+- **暗色 tabBar 从 D52 起一直正常**——weapp-tailwindcss 只给暗色 `@media` 块补了 `:host` 选择器（`page,.tw-root,wx-root-portal-content,:host`），**浅色令牌块没有 `:host`**。
+- 结论：**custom-tab-bar 内 WXSS 的 page 作用域 CSS 变量不保证可达**（组件内容不在 page 继承链的可靠范围内）；`background: var(--tabbar-bg)` 落空时按 CSS 规范属 invalid at computed-value time → 整条 `background` 回 initial（透明），且覆盖掉前面的显式声明——与 D53/D54 两轮「显式+var 双写仍透明」完全吻合。
+
+**修复（确定性通道）**：
+- 底色/描边/阴影/选中块全部改为 **tsx 内联 style**（`useTheme()` 按主题算具体值：浅 `rgba(255,255,255,0.92)` + 白描边 + inset 高光 + 墨色投影；暗 `rgba(30,32,29,0.92)` + 白 12% 描边 + 黑投影；选中方块 `#E0EF93`/`#35401F`）。内联不经过 WXSS 解析与变量解析，任何渲染器都成立。
+- WXSS 只留几何：胶囊 **558rpx**（= 750 − 2×96rpx，uni-halo 容器 `px-12` 口径）、5 项 **flex-1 等宽**、padding 8rpx、项高 88rpx、图标 48rpx。
+- tokens.css 移除 `--tabbar-bg/--sh-tabbar`（tab-bar 禁用 CSS 变量做关键视觉，写入 design.md §9）。
+
+**验证**：build 通过；dist 抽查——wxss 仅剩几何（558rpx/flex/gap/padding），JS 内 `style` 双主题分支与 activeBg 均在。
+
+**⚠️ 遗留观察项**：D53/D54 截图里选中高亮似停在「图库」位而页面内容是首页。内联后高亮会显形——若真机上仍错位，下一轮查 store 订阅（当前 store 初值 0、页面 useDidShow 广播，逻辑上自洽，怀疑与截图时刻的页面实例切换有关）。
