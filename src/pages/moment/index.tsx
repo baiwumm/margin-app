@@ -21,11 +21,11 @@ export default function MomentPage() {
 
   useEffect(() => {
     if (!buildId) return;
-    void getMoments(buildId).then(list => {
-      if (list) {
+    getMoments(buildId, list => {
+      if (list && list.length > 0) {
         setMoments(list);
         // 默认选中最近有数据的月份
-        if (list.length > 0) setMonth(monthKey(list[0].pubDatetime));
+        setMonth(monthKey(list[0].pubDatetime));
       }
     });
   }, [buildId]);

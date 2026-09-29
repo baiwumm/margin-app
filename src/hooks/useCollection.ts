@@ -1,34 +1,48 @@
 /**
- * useCollection：按 buildId 拉取集合数据（cache-first，api/collections.ts）。
+ * 集合数据 hooks：onData 回调模式（首启缓存立即渲染 + 网络到达回填）。
  */
 import { useEffect, useState } from "react";
 
-import { getPostsIndex, getSite, getTags } from "@/services/api/collections";
+import {
+  getGalleriesIndex,
+  getPostsIndex,
+  getSite,
+  getTags,
+  type GallerySummary,
+} from "@/services/api/collections";
 import type { PostMeta, SitePayload, Tag } from "@/types/api";
 
-export function useSiteData(buildId: string | null) {
-  const [site, setSite] = useState<SitePayload | null>(null);
+/** 通用订阅：buildId 变化或组件卸载时安全回填 */
+function useCollectionData<T>(
+  buildId: string | null,
+  loader: (buildId: string, onData: (d: T) => void) => void
+): T | null {
+  const [data, setData] = useState<T | null>(null);
   useEffect(() => {
     if (!buildId) return;
-    void getSite(buildId).then(s => s && setSite(s));
-  }, [buildId]);
-  return site;
+    let alive = true;
+    loader(buildId, d => {
+      if (alive && d) setData(d);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [buildId, loader]);
+  return data;
+}
+
+export function useSiteData(buildId: string | null) {
+  return useCollectionData<SitePayload>(buildId, getSite);
 }
 
 export function usePostsIndex(buildId: string | null) {
-  const [posts, setPosts] = useState<PostMeta[] | null>(null);
-  useEffect(() => {
-    if (!buildId) return;
-    void getPostsIndex(buildId).then(p => p && setPosts(p));
-  }, [buildId]);
-  return posts;
+  return useCollectionData<PostMeta[]>(buildId, getPostsIndex);
 }
 
 export function useTags(buildId: string | null) {
-  const [tags, setTags] = useState<Tag[] | null>(null);
-  useEffect(() => {
-    if (!buildId) return;
-    void getTags(buildId).then(t => t && setTags(t));
-  }, [buildId]);
-  return tags;
+  return useCollectionData<Tag[]>(buildId, getTags);
+}
+
+export function useGalleriesIndex(buildId: string | null) {
+  return useCollectionData<GallerySummary[]>(buildId, getGalleriesIndex);
 }

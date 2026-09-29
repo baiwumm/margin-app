@@ -1,66 +1,131 @@
-/* 首页样式：语义类为主（design.md §7：令牌走 CSS 变量），间距用 Tailwind 风格手写 */
+/* 首页样式 —— 对照 demo/首页.png 精修（M1-a 打样）：
+ * Hero 全出血大图位 + 胶囊公告居中 / 小节标题柠檬绿垫块 / 快捷导航圆角方浅彩底 /
+ * tabs 右置选中柠檬绿块 / 文章卡纯文字（D28）/ 右侧悬浮操作组 */
 
 .page {
-  padding: var(--sp-page);
-  padding-bottom: calc(var(--sp-5) * 3); /* 给悬浮 tabBar 留底 */
+  padding: 0 var(--sp-page) calc(var(--sp-5) * 3); /* 顶部 0（hero 全出血），底部给悬浮 tabBar */
   min-height: 100vh;
   box-sizing: border-box;
 }
 
-/* Hero（图 M1 定稿，先令牌底） */
+/* ── Hero（D38 图 M1 定稿；先渐变占位但结构/比例对齐 demo）──────── */
 .hero {
-  border-radius: var(--r-lg);
-  background: linear-gradient(135deg, var(--c-accent-soft), var(--c-surface-alt));
-  padding: var(--sp-5) var(--sp-4);
-  margin-bottom: var(--sp-gap);
-  position: relative;
+  margin: 0 calc(-1 * var(--sp-page)) var(--sp-gap); /* 全出血 */
+  height: 560rpx;
+  background: linear-gradient(150deg, #cfe8a8 0%, var(--c-accent-soft) 45%, #eef2d8 100%);
+  border-radius: 0 0 36rpx 36rpx; /* 图下缘大圆角 */
+  padding-top: env(safe-area-inset-top, 0px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  transform: translateY(-40rpx); /* demo：胶囊偏上，日期随后 */
 }
 .hero-badge {
-  display: inline-flex;
   border-radius: var(--r-full);
-  padding: 8rpx 24rpx;
+  padding: 14rpx 40rpx;
+  box-shadow: var(--sh-float);
 }
 .hero-badge-text {
-  font-size: var(--fs-cap);
+  font-size: 32rpx;
+  font-weight: 700;
 }
 .hero-date {
-  display: block;
-  margin-top: var(--sp-2);
-  color: var(--c-text-sub);
+  color: #ffffff;
   font-size: var(--fs-cap);
+  font-weight: 600;
+  text-shadow: 0 2rpx 12rpx rgba(45, 47, 46, 0.35);
 }
 
-/* 搜索胶囊 */
+/* ── 搜索胶囊 ─────────────────────────────────────────────────────── */
 .search-pill {
   border-radius: var(--r-full);
-  padding: 20rpx 32rpx;
+  padding: 24rpx 32rpx;
   margin-bottom: var(--sp-gap);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.search-pill-icon {
+  font-size: 28rpx;
 }
 .search-pill-text {
   color: var(--c-text-sub);
-  font-size: var(--fs-cap);
+  font-size: var(--fs-body);
 }
 .search-pill-hl {
   color: var(--c-text);
-  font-weight: 600;
+  font-weight: 700;
+  background: var(--c-accent-soft);
+  border-radius: 6rpx;
+  padding: 2rpx 8rpx;
 }
 
-/* 公告条 */
+/* ── 公告条（有数据才显示，D32）──────────────────────────────────── */
 .notice {
   border-radius: var(--r-md);
-  padding: 16rpx 24rpx;
+  padding: 20rpx 24rpx;
   margin-bottom: var(--sp-gap);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.notice-badge {
+  color: #d75a5a;
+  font-weight: 700;
+  font-size: var(--fs-cap);
 }
 .notice-text {
+  flex: 1;
   font-size: var(--fs-cap);
   color: var(--c-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.notice-more {
+  color: var(--c-text-weak);
+  font-size: var(--fs-cap);
 }
 
-/* 快捷导航 */
+/* ── 小节标题：柠檬绿垫块（demo 标志性装饰）──────────────────────── */
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-3);
+}
+.section-title {
+  position: relative;
+  display: inline-block;
+  font-size: var(--fs-title);
+  font-weight: 700;
+  color: var(--c-text);
+  z-index: 0;
+}
+.section-title::after {
+  content: "";
+  position: absolute;
+  left: -6rpx;
+  right: -6rpx;
+  bottom: 2rpx;
+  height: 16rpx;
+  background: var(--c-accent);
+  opacity: 0.9;
+  border-radius: 6rpx;
+  z-index: -1;
+}
+
+/* ── 快捷导航（圆角方浅彩底 + 彩字）──────────────────────────────── */
 .quick-nav {
   display: flex;
   justify-content: space-between;
-  margin-bottom: var(--sp-4);
+  margin-bottom: var(--sp-5);
 }
 .quick-nav-item {
   display: flex;
@@ -69,38 +134,40 @@
   gap: var(--sp-1);
 }
 .quick-nav-icon {
-  width: 88rpx;
-  height: 88rpx;
-  border-radius: var(--r-full);
+  width: 92rpx;
+  height: 92rpx;
+  border-radius: 28rpx; /* 圆角方（demo 非 full 圆） */
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 40rpx;
+  font-size: 44rpx;
+  box-shadow: var(--sh-card);
 }
 .quick-nav-label {
   font-size: 22rpx;
-  color: var(--c-text-sub);
 }
 
-/* 热门标签错落网格（打样第 4 项：341rpx 双列 + 左跨行大卡） */
+/* ── 热门标签错落网格（打样第 4 项：341rpx 双列 + 左跨行大卡）────── */
 .tag-grid {
   display: grid;
   grid-template-columns: 341rpx 341rpx;
   gap: var(--sp-gap);
-  margin-bottom: var(--sp-4);
+  margin-bottom: var(--sp-5);
 }
 .tag-card {
   border-radius: var(--r-lg);
   padding: var(--sp-3);
-  min-height: 140rpx;
+  min-height: 160rpx;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   gap: 4rpx;
+  animation: rise-in 0.4s ease both;
+  box-shadow: var(--sh-card);
 }
 .tag-card-tall {
   grid-row: span 2;
-  min-height: 300rpx;
+  min-height: 341rpx;
   justify-content: center;
 }
 .tag-card-name {
@@ -112,23 +179,14 @@
   opacity: 0.8;
 }
 
-/* 最新推荐 */
-.section-title-row {
-  margin-bottom: var(--sp-2);
-}
-.section-title {
-  font-size: var(--fs-title);
-  font-weight: 600;
-}
+/* ── 最新推荐：tabs 右置，选中柠檬绿块 ───────────────────────────── */
 .post-tabs {
   display: flex;
-  gap: var(--sp-2);
-  margin-bottom: var(--sp-gap);
+  gap: var(--sp-1);
 }
 .post-tab {
   border-radius: var(--r-full);
-  padding: 8rpx 28rpx;
-  background-color: var(--c-surface-alt);
+  padding: 8rpx 24rpx;
 }
 .post-tab-label {
   font-size: var(--fs-cap);
@@ -136,6 +194,7 @@
 }
 .post-tab-active .post-tab-label {
   color: var(--c-accent-ink);
+  font-weight: 700;
 }
 .post-list {
   display: flex;
@@ -143,7 +202,7 @@
   gap: var(--sp-gap);
 }
 
-/* 文章卡（D28：纯文字卡） */
+/* ── 文章卡（D28：纯文字卡）──────────────────────────────────────── */
 .post-card {
   border-radius: var(--r-lg);
   padding: var(--sp-3);
@@ -184,19 +243,30 @@
   color: var(--c-text-weak);
 }
 
-/* 错峰入场（design.md §4：delay = index × 50ms 封顶 300ms，样式在 style 上） */
-@keyframes rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(24rpx);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* ── 右侧悬浮操作组（回顶 / 设置 / 头像）────────────────────────── */
+.float-actions {
+  position: fixed;
+  right: var(--sp-page);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 220rpx);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  z-index: 99;
+}
+.float-action-btn {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: var(--r-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.float-action-icon {
+  font-size: 36rpx;
+  color: var(--c-text-sub);
 }
 
-/* 空态 */
+/* ── 空态 / 骨架 ─────────────────────────────────────────────────── */
 .empty {
   padding: var(--sp-5);
   display: flex;
@@ -206,16 +276,25 @@
   color: var(--c-text-weak);
   font-size: var(--fs-cap);
 }
-
-/* 骨架 */
 .skeleton-hero {
-  height: 320rpx;
-  border-radius: var(--r-lg);
+  height: 560rpx;
+  border-radius: 0 0 36rpx 36rpx;
   background: var(--c-surface-alt);
-  margin-bottom: var(--sp-gap);
+  margin: 0 calc(-1 * var(--sp-page)) var(--sp-gap);
 }
 .skeleton-block {
   height: 200rpx;
   border-radius: var(--r-lg);
   background: var(--c-surface-alt);
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(24rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

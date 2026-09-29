@@ -2,48 +2,31 @@ import { ScrollView, View, Text } from "@tarojs/components";
 import { useMemo, useState , useEffect } from "react";
 
 import { CacheImage } from "@/components/media/CacheImage";
-import { getGalleriesIndex, getGalleryDetail } from "@/services/api/collections";
+import { getGalleryDetail } from "@/services/api/collections";
+import { useGalleriesIndex } from "@/hooks/useCollection";
 import { useManifest } from "@/hooks/useManifest";
-import type { GalleryPhoto, AssetRef } from "@/types/api";
+import type { GalleryPhoto } from "@/types/api";
 import { useDidShow } from "@tarojs/taro";
 import { setSelectedTab } from "@/custom-tab-bar/store";
 import "./gallery.scss";
-
-interface GallerySummary {
-  slug: string;
-  title: string;
-  photoCount: number;
-}
 
 export default function Gallery() {
   // 同步悬浮 tabBar 选中态（组件内不可用页面级 hook）
   useDidShow(() => setSelectedTab(2));
   const { manifest } = useManifest();
   const buildId = manifest?.buildId ?? null;
-  const [galleries, setGalleries] = useState<GallerySummary[] | null>(null);
+  const galleries = useGalleriesIndex(buildId);
   const [filter, setFilter] = useState<string>("all"); // D27：全部 + 画廊名
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
 
   useEffect(() => {
-    if (!buildId) return;
-    void getGalleriesIndex(buildId).then(list => {
-      if (list) {
-        setGalleries(
-          list.map(g => ({ slug: g.slug, title: g.title, photoCount: g.photoCount }))
-        );
-      }
-    });
-  }, [buildId]);
-
-  useEffect(() => {
-    if (!buildId || filter === "all" || !galleries) {
+    if (!buildId || filter === "all") {
       setPhotos([]);
       return;
     }
-    void getGalleryDetail(buildId, filter).then(g => {
-      setPhotos(g?.photos ?? []);
-    });
-  }, [buildId, filter, galleries]);
+    // 画廊详情懒加载：数据到达回调回填
+    getGalleryDetail(buildId, filter, g => setPhotos(g?.photos ?? []));
+  }, [buildId, filter]);
 
   const pills = useMemo(() => {
     const base: { key: string; label: string }[] = [{ key: "all", label: "全部" }];

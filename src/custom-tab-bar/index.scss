@@ -1,27 +1,33 @@
 /* 悬浮胶囊 tabBar（Q8 路线 A）：
- * 毛玻璃首选 + 不支持时降级半透明白 + 1rpx 描边 + 淡阴影（design.md §6，打样第 6 项） */
+ * 容器 fixed 全宽透明 + safe-area padding（env 失效也不影响胶囊定位），
+ * 胶囊本体 640rpx 居中悬浮；毛玻璃首选，不支持时降级半透明白 + 描边 + 阴影 */
 .float-tabbar {
   position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 16rpx);
-  width: 640rpx;
-  border-radius: var(--r-full);
-  background: rgba(252, 250, 248, 0.92); /* 降级底（无毛玻璃机型） */
-  border: 1rpx solid var(--c-border);
-  box-shadow: var(--sh-float);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   z-index: 100;
-}
-@supports (backdrop-filter: blur(20px)) {
-  .float-tabbar {
-    background: rgba(252, 250, 248, 0.72);
-    backdrop-filter: blur(20px);
-  }
+  pointer-events: none; /* 容器透明区不挡点击 */
 }
 .float-tabbar-inner {
+  pointer-events: auto;
+  margin: 0 auto 20rpx;
+  width: 640rpx;
+  border-radius: var(--r-full);
+  background: rgba(252, 250, 248, 0.94); /* 降级底（无毛玻璃机型） */
+  border: 1rpx solid var(--c-border);
+  box-shadow: var(--sh-float);
   display: flex;
   justify-content: space-around;
   padding: 12rpx 8rpx;
+  box-sizing: border-box;
+}
+@supports (backdrop-filter: blur(20px)) {
+  .float-tabbar-inner {
+    background: rgba(252, 250, 248, 0.72);
+    backdrop-filter: blur(20px);
+  }
 }
 .float-tab {
   display: flex;
