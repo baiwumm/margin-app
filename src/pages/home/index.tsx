@@ -22,12 +22,20 @@ const TABS: { key: TabKey; label: string }[] = [
 
 /** 快捷导航（3.x 彩底块 + 彩色标签；margin 数据无此项配置，端上静态定义） */
 const QUICK_NAV = [
-  { icon: "📚", label: "归档", bg: "#FFF4D6", color: "#F59E0B" },
-  { icon: "🏷️", label: "标签", bg: "#FDE8EE", color: "#F472B6" },
-  { icon: "🖼️", label: "图库", bg: "#D9F2F0", color: "#14B8A6" },
-  { icon: "⚡", label: "瞬间", bg: "#E4E7FF", color: "#6366F1" },
-  { icon: "🔗", label: "友链", bg: "#DFF5E4", color: "#10B981" },
+  { icon: "📚", label: "归档", bg: "#FFE9C8", color: "#F59E0B" },
+  { icon: "🏷️", label: "标签", bg: "#FBD9E5", color: "#F472B6" },
+  { icon: "🖼️", label: "图库", bg: "#CDEDE9", color: "#14B8A6" },
+  { icon: "⚡", label: "瞬间", bg: "#DDE1FF", color: "#6366F1" },
+  { icon: "🔗", label: "友链", bg: "#D8F2DF", color: "#10B981" },
 ];
+
+const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
+/** demo 日期文案格式：「2026年09月29日 星期日」 */
+function formatHomeDate(d: Date): string {
+  return `${d.getFullYear()}年${String(d.getMonth() + 1).padStart(2, "0")}月${String(
+    d.getDate()
+  ).padStart(2, "0")}日 星期${WEEKDAYS[d.getDay()]}`;
+}
 
 function sortPosts(posts: PostMeta[], tab: TabKey): PostMeta[] {
   const byTime = (a: PostMeta, b: PostMeta) =>
@@ -94,7 +102,7 @@ export default function Home() {
           <View className='hero-badge accent-bg'>
             <Text className='hero-badge-text'>{site?.hero ?? site?.desc ?? "Margin"}</Text>
           </View>
-          <Text className='hero-date'>{new Date().toLocaleDateString("zh-CN")}</Text>
+          <Text className='hero-date'>{formatHomeDate(new Date())}</Text>
         </View>
         <View className='hero-fade' />
       </View>

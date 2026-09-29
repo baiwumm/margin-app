@@ -1,7 +1,8 @@
-/* 悬浮胶囊 tabBar（Q8 路线 A，对照 demo 特写）：
- * 纯图标窄胶囊（shrink-to-fit），选中项 = 浅柠檬绿圆角方块（深墨图标）；
- * 暗色：胶囊深底、选中块暗橄榄、图标亮柠檬；毛玻璃降级半透明+描边+阴影。
- * 颜色走 page 继承的 CSS 变量（tokens.css 明暗两态自动跟随系统）。 */
+/* 悬浮胶囊 tabBar（D54 对照 demo 复核）：
+ * 白玻璃胶囊 ~530rpx 居中（5 × 88rpx 等距），近实底白（0.92）+ 描边 + 悬浮投影，
+ * 不加 backdrop-filter（demo 读作实底白胶囊；近实底下 blur 无增益）；
+ * 图标 44rpx 深墨线性，选中 = 浅柠檬绿圆角方块（88rpx，24rpx 圆角）；
+ * 暗色：胶囊深底、选中块暗橄榄、未选中灰图标、选中亮柠檬（颜色走 tokens 变量）。 */
 .float-tabbar {
   position: fixed;
   left: 0;
@@ -15,26 +16,20 @@
 }
 .float-tabbar-inner {
   pointer-events: auto;
-  display: inline-flex; /* shrink-to-fit：胶囊宽随图标收窄 */
-  gap: 12rpx;
+  display: inline-flex; /* shrink-to-fit ≈ 530rpx（demo ~70% 屏宽） */
+  gap: 8rpx;
   margin-bottom: 24rpx;
-  padding: 14rpx 24rpx;
+  padding: 16rpx 20rpx;
   border-radius: var(--r-full);
+  background: rgba(255, 255, 255, 0.92); /* 显式兜底在前，tokens 变量覆盖在后（明暗两态） */
   background: var(--tabbar-bg);
   border: 1rpx solid var(--c-border);
-  box-shadow: var(--sh-float);
+  box-shadow: var(--sh-tabbar);
   box-sizing: border-box;
 }
-/* 毛玻璃：裸声明（⚠️ 本项目构建管线会整块剥掉 @supports，D53 记录——
- * 原写法 @supports (backdrop-filter) 里的 blur 从未进过产物；
- * 裸声明在支持的机型生效、不支持的自动忽略，胶囊底 0.94 不透明观感几乎无差）。 */
-.float-tabbar-inner {
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
 .float-tab {
-  width: 96rpx;
-  height: 96rpx;
+  width: 88rpx;
+  height: 88rpx;
   border-radius: 24rpx; /* 选中高亮块的圆角方（demo 形态） */
   display: flex;
   align-items: center;
@@ -44,6 +39,6 @@
   background-color: var(--c-accent-soft);
 }
 .float-tab-icon {
-  width: 48rpx;
-  height: 48rpx;
+  width: 44rpx;
+  height: 44rpx;
 }

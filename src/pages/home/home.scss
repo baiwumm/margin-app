@@ -14,7 +14,7 @@
   position: relative;
   margin: 0 calc(-1 * var(--sp-page));
   height: 512rpx;
-  background: linear-gradient(150deg, #cfe8a8 0%, var(--c-accent-soft) 45%, #eef2d8 100%);
+  background: linear-gradient(150deg, #cfe36f 0%, #e4f39b 45%, #f3f8d6 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -30,12 +30,12 @@
 }
 .hero-badge {
   border-radius: var(--r-full);
-  padding: 10rpx 28rpx;
+  padding: 12rpx 32rpx;
   box-shadow: var(--sh-float);
 }
 .hero-badge-text {
-  font-size: 26rpx;
-  font-weight: 600;
+  font-size: var(--fs-sm);
+  font-weight: 700;
 }
 .hero-date {
   color: #ffffff;
@@ -127,13 +127,13 @@
   gap: 12rpx;
 }
 .quick-nav-icon {
-  width: 104rpx;
-  height: 104rpx;
+  width: 112rpx;
+  height: 112rpx;
   border-radius: var(--r-xl);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 52rpx;
+  font-size: 56rpx;
 }
 .quick-nav-label {
   font-size: var(--fs-cap);
