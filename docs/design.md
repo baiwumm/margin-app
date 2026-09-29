@@ -163,4 +163,4 @@
 | 10 | 字体管线 | 端上：`loadSiteFont()`（loadFontFace global:true，成功/失败各打点，失败静默）；margin 侧：常用字子集 woff2 → `public/fonts/` + `_headers` 仅对 `/fonts/*` 加 `Access-Control-Allow-Origin: *`（走 margin 仓库评审）；偏好开关 UI 可先落 M2 | 打样第 5 项过 |
 | 11 | 打样验证 | design.md §8 六项全过 → 视觉基线宣告；真机复核滚动保留/存储/TTI 无回退 | §8 表全绿 |
 
-**占位与待定**：首页 `announcement` 条在 margin 首页无对应物——暂不渲染，数据字段保留（Q 待用户决定是否做成 margin 风格终端徽章行）；技能跑马灯/MBTI 等关于页重装饰项属 M4「关于」页范围，不阻塞 M1-b。
+**占位与待定**：首页 `announcement` 条在 margin 首页无对应物——暂不渲染，数据字段保留（Q 待用户决定是否做成 margin 风格终端徽章行）；技能跑马灯/MBTI 等关于页重装饰项属 M4「关于」页范围，不阻塞 M1-b；accent 浅色对比度口径 Q（green 3.14 / orange 3.23 / rose 4.38 < 4.5:1，margin 原值即如此，建议按 requirements §10「装饰性小件 ≥3」口径判）——待用户拍板，处置见 decisions D26。
