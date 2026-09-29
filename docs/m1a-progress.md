@@ -38,3 +38,12 @@
 - **D49** React 19.3.0 编译级通过（后被 D51 运行时否决）
 - **D50** tabBar 路线 A 搭法（Q8 不定案）
 - **D51** React 19 运行时失败回退 18.3.1（2026-09-29 用户实测触发）
+
+## 运行时修复记录（2026-09-29，用户 DevTools 实测驱动）
+
+| # | 报错 | 根因 | 修复 | 决策 |
+| --- | --- | --- | --- | --- |
+| 1 | `app.js: Cannot read property 'ReactCurrentBatchConfig' of undefined` | React 19 改内部 API 导出名，Taro 4.2.1 react-reconciler 为 React 18 系 | 回退 react/react-dom **18.3.1**，产物复验 + 22 单测复绿 | **D51**（React 19 关闭待 Taro 升级） |
+| 2 | `custom-tab-bar/index: n[e] is not a function` | custom-tab-bar 组件内使用 `useDidShow`——页面级 hook 在无页面实例的组件上下文崩溃 | 移除组件内 useDidShow，改 **store 订阅模式**（`custom-tab-bar/store.ts` 单例 + 五页面各自 useDidShow 广播选中态）；产物复验 0 处 useDidShow | 实现模式修正（D50 补充：页面 → store → 组件单向同步） |
+
+提交（本地未推送）：`ed3f28a`（M1-a 全量）→ `9bebe71`（React 18.3.1 回退）→ `e9dce81`（tabBar store 模式）。
