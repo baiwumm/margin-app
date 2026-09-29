@@ -55,6 +55,30 @@ page,
     "Microsoft YaHei", sans-serif;
   --font-mono: "Maple Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
     monospace;
+
+  /* 悬浮 tabBar 胶囊底（明暗两态） */
+  --tabbar-bg: rgba(252, 250, 248, 0.94);
+}
+
+/* 跟随系统暗色（app.json darkmode:true 后 WXSS media 生效）。
+ * 变量定义在 page 节点 → 自动继承进 custom-tab-bar 子树。
+ * 偏好设置强制浅/深（M2）走 .theme-dark 类覆盖，类优先级高于 page 继承。 */
+@media (prefers-color-scheme: dark) {
+  page {
+    --c-bg: #1a1b19;
+    --c-surface: #232522;
+    --c-surface-alt: #2a2c29;
+    --c-text: #edefea;
+    --c-text-sub: #9aa09a;
+    --c-border: #33362f;
+    --c-accent: #a8c63a;
+    --c-accent-soft: #35401f;
+    --c-accent-ink: #d7f94c;
+    --c-text-weak: #6e726c;
+    --sh-card: 0 2rpx 24rpx rgba(0, 0, 0, 0.35);
+    --sh-float: 0 8rpx 32rpx rgba(0, 0, 0, 0.55);
+    --tabbar-bg: rgba(35, 37, 34, 0.94);
+  }
 }
 
 /* 暗色推导起点（demo 无暗色稿；accent 只做描边/图标/小面积 + 亮字，design §2） */

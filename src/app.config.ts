@@ -6,6 +6,7 @@ export default defineAppConfig({
     "pages/moment/index",
     "pages/mine/index",
   ],
+  darkmode: true, // 跟随系统暗色（WXSS @media prefers-color-scheme 生效开关）
   window: {
     backgroundTextStyle: "light",
     navigationBarBackgroundColor: "#F6F3EE",

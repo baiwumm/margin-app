@@ -6,12 +6,14 @@ import { useManifest } from "@/hooks/useManifest";
 import type { Moment } from "@/types/api";
 import { useDidShow } from "@tarojs/taro";
 import { setSelectedTab } from "@/custom-tab-bar/store";
+import { useTheme } from "@/hooks/useTheme";
 import "./moment.scss";
 
 /** 月份键（端上聚合，D20/D34：按 pubDatetime） */
 const monthKey = (iso: string) => iso.slice(0, 7); // "2026-09"
 
 export default function MomentPage() {
+  const theme = useTheme();
   // 同步悬浮 tabBar 选中态（组件内不可用页面级 hook）
   useDidShow(() => setSelectedTab(3));
   const { manifest } = useManifest();
@@ -41,7 +43,7 @@ export default function MomentPage() {
   );
 
   return (
-    <View className='page page-bg'>
+    <View className={`page page-bg ${theme === 'dark' ? 'theme-dark' : ''}`}>
       {/* 左上双胶囊（年/本月）+ 居中标题（design.md §1 瞬间屏） */}
       <View className='moment-header'>
         <View className='moment-caps'>

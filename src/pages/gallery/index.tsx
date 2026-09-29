@@ -8,9 +8,11 @@ import { useManifest } from "@/hooks/useManifest";
 import type { GalleryPhoto } from "@/types/api";
 import { useDidShow } from "@tarojs/taro";
 import { setSelectedTab } from "@/custom-tab-bar/store";
+import { useTheme } from "@/hooks/useTheme";
 import "./gallery.scss";
 
 export default function Gallery() {
+  const theme = useTheme();
   // 同步悬浮 tabBar 选中态（组件内不可用页面级 hook）
   useDidShow(() => setSelectedTab(2));
   const { manifest } = useManifest();
@@ -43,7 +45,7 @@ export default function Gallery() {
   }, [photos]);
 
   return (
-    <View className='page page-bg'>
+    <View className={`page page-bg ${theme === 'dark' ? 'theme-dark' : ''}`}>
       <View className='page-title-row'>
         <Text className='page-title'>图库</Text>
       </View>

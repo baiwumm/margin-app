@@ -4,16 +4,18 @@ import { useTags } from "@/hooks/useCollection";
 import { useManifest } from "@/hooks/useManifest";
 import { useDidShow } from "@tarojs/taro";
 import { setSelectedTab } from "@/custom-tab-bar/store";
+import { useTheme } from "@/hooks/useTheme";
 import "./tags.scss";
 
 export default function Tags() {
+  const theme = useTheme();
   // 同步悬浮 tabBar 选中态（组件内不可用页面级 hook）
   useDidShow(() => setSelectedTab(1));
   const { manifest } = useManifest();
   const tags = useTags(manifest?.buildId ?? null);
 
   return (
-    <View className='page page-bg'>
+    <View className={`page page-bg ${theme === 'dark' ? 'theme-dark' : ''}`}>
       <View className='page-title-row'>
         <Text className='page-title'>标签</Text>
       </View>
@@ -23,7 +25,7 @@ export default function Tags() {
             key={tag.slug}
             className='tag-card'
             style={{
-              backgroundColor: tag.color,
+              backgroundColor: theme === "dark" ? tag.colorDark : tag.color,
               animationDelay: `${Math.min(i * 50, 300)}ms`,
             }}
           >

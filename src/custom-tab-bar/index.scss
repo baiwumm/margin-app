@@ -1,6 +1,7 @@
 /* 悬浮胶囊 tabBar（Q8 路线 A）：
  * 容器 fixed 全宽透明 + safe-area padding（env 失效也不影响胶囊定位），
- * 胶囊本体 640rpx 居中悬浮；毛玻璃首选，不支持时降级半透明白 + 描边 + 阴影 */
+ * 胶囊本体 640rpx 居中悬浮；毛玻璃首选，不支持时降级半透明白 + 描边 + 阴影。
+ * 颜色全部走 page 继承的 CSS 变量（tokens.css 明暗两态自动跟随系统）。 */
 .float-tabbar {
   position: fixed;
   left: 0;
@@ -15,7 +16,7 @@
   margin: 0 auto 20rpx;
   width: 640rpx;
   border-radius: var(--r-full);
-  background: rgba(252, 250, 248, 0.94); /* 降级底（无毛玻璃机型） */
+  background: var(--tabbar-bg);
   border: 1rpx solid var(--c-border);
   box-shadow: var(--sh-float);
   display: flex;
@@ -25,7 +26,7 @@
 }
 @supports (backdrop-filter: blur(20px)) {
   .float-tabbar-inner {
-    background: rgba(252, 250, 248, 0.72);
+    background: var(--tabbar-bg); /* 半透明值在变量里（明暗各一份） */
     backdrop-filter: blur(20px);
   }
 }
@@ -41,7 +42,8 @@
   background-color: var(--c-accent-soft);
 }
 .float-tab-icon {
-  font-size: 36rpx;
+  width: 44rpx;
+  height: 44rpx;
 }
 .float-tab-label {
   font-size: 20rpx;

@@ -42,8 +42,8 @@ export default function CustomTabBar() {
   };
 
   return (
-    <View className="float-tabbar">
-      <View className="float-tabbar-inner">
+    <View className='float-tabbar'>
+      <View className='float-tabbar-inner'>
         {TABS.map((tab, idx) => (
           <View
             key={tab.path}
@@ -51,10 +51,10 @@ export default function CustomTabBar() {
             onClick={() => switchTo(idx)}
           >
             <Image
-              className="float-tab-icon"
+              className='float-tab-icon'
               src={selected === idx ? tab.active : tab.normal}
             />
-            <Text className="float-tab-label">{tab.label}</Text>
+            <Text className='float-tab-label'>{tab.label}</Text>
           </View>
         ))}
       </View>
