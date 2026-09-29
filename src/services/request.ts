@@ -6,6 +6,7 @@
  * - 304 语义：返回 { notModified: true }，由 manifest 流程消费
  */
 import type { ApiEnvelope } from "@/types/api";
+import { perfLog } from "@/utils/perf";
 import { LocalError, LocalErrorKind } from "./errors";
 import { platform } from "./platform";
 
@@ -53,6 +54,7 @@ async function requestOnce<T>(
   etag: string | null
 ): Promise<RequestResult<T> | { notModified: true }> {
   const adapter = platform();
+  const startedAt = Date.now();
   let res;
   try {
     res = await adapter.request({
@@ -71,6 +73,7 @@ async function requestOnce<T>(
     );
   }
 
+  perfLog(`GET ${url} -> ${res.statusCode} (${Date.now() - startedAt}ms)`);
   if (res.statusCode === 304) {
     return { notModified: true };
   }

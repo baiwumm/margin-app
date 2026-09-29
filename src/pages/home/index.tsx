@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 
 import { usePostsIndex, useSiteData, useTags } from "@/hooks/useCollection";
 import { useManifest } from "@/hooks/useManifest";
+import { perfLog } from "@/utils/perf";
 import type { PostMeta } from "@/types/api";
 import { useDidShow } from "@tarojs/taro";
 import { setSelectedTab } from "@/custom-tab-bar/store";
@@ -41,12 +42,23 @@ function formatDate(iso: string): string {
 export default function Home() {
   // 同步悬浮 tabBar 选中态（组件内不可用页面级 hook）
   useDidShow(() => setSelectedTab(0));
-  const { manifest, loading } = useManifest();
+  const { manifest, loading, cacheHit } = useManifest();
   const buildId = manifest?.buildId ?? null;
   const site = useSiteData(buildId);
   const posts = usePostsIndex(buildId);
   const tags = useTags(buildId);
   const [tab, setTab] = useState<TabKey>("default");
+
+  // A1：首屏数据渲染完成打点（首个列表数据到达即视为可交互）
+  const paintedRef = useRef(false);
+  useEffect(() => {
+    if (posts && !paintedRef.current) {
+      paintedRef.current = true;
+      perfLog(
+        `首页首屏数据渲染完成（缓存命中: ${cacheHit ?? "?"}，文章 ${posts.length} 篇）`
+      );
+    }
+  }, [posts, cacheHit]);
 
   const sorted = useMemo(() => (posts ? sortPosts(posts, tab).slice(0, 20) : []), [posts, tab]);
   const hotTags = useMemo(() => (tags ?? []).slice(0, 5), [tags]);
