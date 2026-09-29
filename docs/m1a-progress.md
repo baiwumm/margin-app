@@ -155,3 +155,21 @@ tab 图标灰色 `#909399` 在暗色胶囊上可读性足够，暂不出生成�
 **验证**：`taro build weapp` 编译通过（11.7s）；22 单测全绿；产物抽查——`.card-surface` 玻璃声明、`--c-chip-*` 明暗两套、nav/month-cal/hero-fade 等新类均在 dist 对应 chunk。
 
 **待用户（复验清单）**：真机重走打样第 1/2 项（浅色令牌与 demo + uni-halo 3.x 真机互证、暗色 chip 配对校准）；第 4/5 项（341rpx 网格、6 月翻页选择器边界）；NavBar 滚动渐显与 overlay 变体真机过一遍。视觉基线宣告在此之后。
+
+## 首屏截图复核：tabBar 重做 + 首页精修（2026-09-29，D54）
+
+用户发来 D53 构建的首屏实机截图：tabBar 呈半透明、图标过淡，与 demo 的白胶囊不符；首页整体风格需再贴近 demo。
+
+**tabBar（D54）**：
+- 形态：白玻璃宽胶囊 ~530rpx 居中（5 × 88rpx 等距 + gap 8 + padding 16/20，≈ demo 70% 屏宽）；**近实底白 0.92**——显式 `rgba(255,255,255,0.92)` 兜底在前 + `var(--tabbar-bg)` 覆盖在后（双保险，规避 var 解析异常时整条透明）；**去掉 backdrop-filter**（近实底下无增益，也规避裸 blur 的未知渲染形态）；阴影改 `--sh-tabbar`（明 14% 墨 / 暗 50% 黑，比玻璃淡紫投影更有悬浮感）。
+- 图标：sharp 按原字形重着色（字形零改动）——浅色 normal 从 #909399 → **深墨 #2D2F2E**（demo 图标即深色轮廓；normal/active 同色，选中靠浅绿方块区分）；active 维持深墨；**新增 normal-dark #9AA09A**（暗色未选中，此前暗色未选中复用浅色 normal 会不可读）；active-dark 亮柠檬维持。**三态 15 枚 → 四态 20 枚**，构建内联 base64 验证 20 枚全在产物。
+- tsx：选中逻辑补暗色分支（selected→activeDark/active，未选中→normalDark/normal）。
+
+**首页精修（对照 demo/首页.png）**：
+- hero 渐变加深（#CFE36F → #E4F39B → #F3F8D6，白日期可读）；日期文案改中文格式「2026年09月29日 星期一」（原 toLocaleDateString 的 2026/9/29 与 demo 不符）；徽标 28rpx/700、padding 12×32。
+- 快捷导航块 104→112rpx、emoji 52→56rpx、彩底加饱和（#FFE9C8/#FBD9E5/#CDEDE9/#DDE1FF/#D8F2DF）。
+- 小节标题节奏 section-head 上边距 32→40rpx（共享样式，我的页同步受益）。
+
+**验证**：build 编译通过；dist 抽查 `.float-tabbar-inner` 显式白底 + 变量双写在位、88rpx item、20 枚 base64 图标内联、normalDark 分支在 JS。
+
+**待用户**：真机复看 tabBar（白胶囊悬浮感 + 图标清晰度 + 暗色三态）与首页观感；打样第 3 项随复核闭环。
