@@ -102,3 +102,17 @@
 1. **合并前**：分支 push → Workers Builds check-run（构建脚本含 `astro check` + 构建 + **构建内断言**——导出端点对 schema/体积预算/URL 规则/缓存头/WCAG 自检，违规 throw 使构建失败）。⚠️ non-production builds 必须保持开启，check-run 是唯一合并前 CI 信号。
 2. **本地**：`pnpm dev` 冒烟看端点 JSON 形态（dev 可用，完整 build 才会卡死）。
 3. **合并后**：生产域复核——curl URL 200 / `/_astro/*` immutable / JSON 抽样；全站 HTML diff 用「合并前后各爬一次 www」（基线 156 页已存档 `mp-probe-work/prod/`，爬取脚本 `mp-probe-work/scripts/crawl.py` 可复用）。
+
+## 8. M0 生产域验收实测（2026-09-29，决策 D46 / D47）
+
+**部署**：`feat/mp-export`（3512686 重构 + fa17b6b 管线 + 71831bc 档位修正）→ 分支构建成功（~8 分钟，构建内断言首上 CI）→ fast-forward 合并 main → 生产构建成功（~12 分钟，Build ID c9ed283e）。构建耗时远低于 Cloudflare 上限，R3 的构建增量担忧落空（变体零新增由 D46 构造保证）。
+
+**13 端点生产实测（www.baiwumm.com）**：全部 200。manifest buildId = `71831bc-9bf4b88413de`，counts = 74 篇 / 3 画廊 / 9 瞬间 / 62 标签 / **246 图引用**（D41 引用数口径的精确值；249 估算差额 = 远程图走 unknown 等）；resources 87 项。terms 379KB ≤400KB；裸域 URL 抽查 = 0。
+
+**缓存头（checklist ④）**：`/_astro/*` 变体 = `HTTP 200 + Cache-Control: public, max-age=31536000, immutable`（同时闭环探针 A / D42 的 URL 200 复核）；HTML 与 `/api/v1/**` JSON = `max-age=0, must-revalidate` + ETag，未被误设长缓存。图片体积抽样：blog 640w thumb = 5.7KB ≤40KB 阈值。
+
+**HTML diff（checklist ⑤）→ 有界例外（D47）**：与合并前基线（156 页存档）比对，156/156 页有差，归因后全部为同一根因——`@layer astro.images` 样式层注入（~1.8KB/页）+ Footer.css chunk 重组换 hash。归因方法：剥离注入块并归一 Footer hash 后逐行扫描，无未解释差异行。惰性证明：全站 `data-astro-image="full-width"` 元素 = 0（`width:100%` 永不命中）；constrained 342 处的 `height:auto`/`max-width:100%` 与 Tailwind preflight `img{max-width:100%;height:auto}` 冗余；object-fit 在 height:auto 下几何无效。`data-astro-image` 属性旧 build 已存在（有图页 36 处），旧 build 处于「属性存在、CSS 缺失」的半生效状态——本次注入补齐了 CSS，视觉零变化。触发机制：端点 import `astro:assets` 把其样式副作用带进公共模块图；`layout:"none"` 实测不能阻止；从 Astro 内部 API 绕过违背 R8，不采用。
+
+**档位终验（D46）**：生产 AssetRef 宽度实测 = blog 640/750/1280、画廊照片 400/800/1600、画廊封面 800/800/1600、瞬间 400/800/800，全部 ⊆ 站点已渲染档位。变体文件名含内容 hash + 变换参数 hash，与站点 `<Image>` 同参数产物同文件（去重成立）。
+
+**验收结论**：api-contract.md §8 六项全过（⑤ 带记录在案的有界例外）；M0 关闭，M1 可开工。

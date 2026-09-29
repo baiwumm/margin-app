@@ -143,7 +143,7 @@ interface Manifest {
   assetBase: string;                    // 固定 "https://www.baiwumm.com"（D19）
   site: { title: string; author: string; desc: string };
   counts: { posts: number; galleries: number; moments: number; tags: number; images: number };
-  // images = 正文图片引用数（D41 口径；M0 实测 244：MDX 内 JSX 图与远程图不计）
+  // images = 正文图片引用数（D41 口径；生产实测 246，D47）
   resources: Resource[];                // 端上按 hash 做细粒度失效
   searchIndex: { titlesPath: string; titlesHash: string; termsPath: string; termsHash: string;
                  termsMinChars: 2; strategy: 'bigram' };
@@ -271,17 +271,18 @@ interface TermIndex {
 
 > **验收口径（D44，2026-09-28）**：workers.dev 已关闭、无预览产物可访问 → 机械性检查（1/3/6）以**构建内断言**执行（导出管线自检，违规 throw 使构建失败，check-run 变红即不合规发不了版）；体验性检查（4/5）与抽样复核在**合并部署后的生产域（www）**执行。workers.dev 探针期的预览 URL 比对法废止（过程记录见 research.md §7）。
 
-> **进度（2026-09-28 夜，本地开发完成）**：①②③⑥⑦⑧ 的本地部分已全量验证（下方数字为实测）；④⑤ 及生产域抽样复核待 `feat/mp-export` 推送（check-run 构建）与合并部署后执行。
+> **进度（2026-09-29，D47：生产验收完成，M0 关闭）**：全部六项通过——④⑤ 在生产域实测完成；⑤ HTML diff 带记录在案的有界例外（astro.images 样式层注入，惰性已证明，见 D47 / research.md §8）。
 
-1. ✅ 13 端点产物全部过 schema 校验 + 体积预算（实测数字见 §2 表）；URL 断言（无 `//_astro/`、无裸域）通过——**构建内断言**，合并后在生产域抽样 curl 复核。
+1. ✅ 13 端点产物全部过 schema 校验 + 体积预算（实测数字见 §2 表）；URL 断言（无 `//_astro/`、无裸域）通过——**构建内断言**，生产域抽样 curl 复核完成（13 端点全 200、裸域 0）。
 2. ✅ 6 篇样文（三类指令块/代码/表格/图片）转换验证：指令块全部结构化（music 3 / video 4+1 降级 / linkcard 46）、代码 365 块 tokens 化、图片 246 引 244 资产、无未识别指令；作者手写网格 HTML 与 MDX JSX 按契约落 `unknown`（35 处/10 篇，警告清单在构建日志）。
-3. ✅ 三组体积实测：posts/index 37.6KB（D23 瘦身后，D28 无封面已扣）、`terms.json` 376KB（正文前 28 段，<400KB 硬线）、`stats.json` 各字段非空（3.3KB）。
-4. ⬜ `/_astro/*` 实测回传 `immutable`，且 HTML / JSON 未被误设长缓存——生产域 `curl -I`（`_headers` 已追加，待部署验证）。
-5. ⬜ 站点 HTML 产物 diff 字节一致（排除 `_astro`、`/api/v1`、构建脚本写回的 `public/pagefind`）——合并前后各爬一次生产域全站比对（基线 156 页已存档，爬取脚本可复用，research.md §7）。
+3. ✅ 三组体积实测：posts/index 37.6KB（D23 瘦身后，D28 无封面已扣）、`terms.json` 379KB（正文前 28 段，<400KB 硬线）、`stats.json` 各字段非空（3.3KB）。
+4. ✅ `/_astro/*` 生产域实测回传 `Cache-Control: public, max-age=31536000, immutable`，HTML / JSON 保持 `max-age=0, must-revalidate` + ETag 未被误设（生产域 `curl -I`，research.md §8）。
+5. ✅ 站点 HTML 产物 diff——合并前后各爬一次生产域全站（156 页）：唯一差异 = `@layer astro.images` 样式层注入 + Footer.css chunk 重组（**惰性已证明的有界例外，D47**），无其它差异行。
 6. ✅ 10 档标签色 × 明暗两套 × `ink` 的 WCAG 对比度断言全过（白字方案最低 4.97，构建内断言）；校准后的 20 个色值待 M1 真机校准后回写本文 §3.2 `Tag` 注释。
 
 ## 变更记录
 
+- 2026-09-29（D47）：生产验收完成、M0 关闭——§3.3 counts.images 定为 246；§8 六项全绿（⑤ 带有界例外）。
 - 2026-09-28（M0 开工夜）：**契约冻结**——§2 预算按全量实测修订（manifest ≤24KB / titles ≤48KB，D45）；§3.3 hash 12 位、counts.images=244 实测口径；§4 补 M0 实测行为定档（linkcard/video 降级、unknown 兜底清单、块统计）；§8 本地验收完成情况标注。D38（hero 字段）/D39（avatar）/D40（排序）/D41（counts 口径）已落类型与实现。
 - 2026-09-28（晚 2）：workers.dev 关闭（D44）——§8 验收口径改为构建内断言 + 生产域复核。
 - 2026-09-28（晚）：M0-0 双探针通过（D42/D43）——§4 parse*Card 签名按实际实现修正（node 入参、非指令段落返回 null），§5 探针 A 标记通过、三条退路不启用。
