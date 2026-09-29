@@ -1,0 +1,83 @@
+/* 我的页：渐变 hero + 八宫格 + 列表（design.md §1 我的屏） */
+.mine {
+  padding-top: 0;
+}
+.mine-hero {
+  margin: 0 calc(-1 * var(--sp-page));
+  padding: calc(var(--sp-5) * 2) var(--sp-page) var(--sp-4);
+  background: linear-gradient(160deg, var(--c-accent-soft), var(--c-bg) 75%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.mine-avatar {
+  width: 128rpx;
+  height: 128rpx;
+  border-radius: var(--r-full);
+  border: 4rpx solid var(--c-surface);
+  box-shadow: var(--sh-card);
+}
+.mine-name {
+  font-size: var(--fs-title);
+  font-weight: 700;
+  color: var(--c-text);
+}
+.mine-desc {
+  font-size: var(--fs-cap);
+  color: var(--c-text-sub);
+}
+.mine-grid {
+  margin-top: var(--sp-4);
+  border-radius: var(--r-lg);
+  padding: var(--sp-3);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-3);
+}
+.mine-grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-2) 0;
+}
+.mine-grid-icon {
+  font-size: 40rpx;
+}
+.mine-grid-label {
+  font-size: 22rpx;
+  color: var(--c-text-sub);
+}
+.mine-list {
+  margin-top: var(--sp-gap);
+  border-radius: var(--r-lg);
+  padding: 0 var(--sp-3);
+}
+.mine-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--sp-3) 0;
+  border-bottom: 1rpx solid var(--c-border);
+}
+.mine-list-item:last-child {
+  border-bottom: none;
+}
+.mine-list-label {
+  font-size: var(--fs-body);
+  color: var(--c-text);
+}
+.mine-list-arrow {
+  color: var(--c-text-weak);
+  font-size: var(--fs-title);
+}
+.mine-footer {
+  padding: var(--sp-4);
+  display: flex;
+  justify-content: center;
+}
+.mine-footer-text {
+  font-size: 20rpx;
+  color: var(--c-text-weak);
+}

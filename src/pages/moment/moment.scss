@@ -1,0 +1,130 @@
+/* 瞬间页：月份横滚选择器 + 瞬间卡（design.md §1 瞬间屏，打样第 5 项） */
+.moment-header {
+  position: relative;
+  margin-bottom: var(--sp-gap);
+}
+.moment-caps {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  gap: var(--sp-1);
+}
+.moment-cap {
+  border-radius: var(--r-full);
+  padding: 6rpx 20rpx;
+}
+.moment-cap-text {
+  font-size: 22rpx;
+  color: var(--c-text-sub);
+}
+.moment-title {
+  display: block;
+  text-align: center;
+}
+.month-scroll {
+  white-space: nowrap;
+  margin-bottom: var(--sp-gap);
+}
+.month-row {
+  display: inline-flex;
+  gap: var(--sp-2);
+  padding: var(--sp-1) 0;
+}
+.month-pill {
+  display: inline-flex;
+  border-radius: var(--r-full);
+  padding: 10rpx 28rpx;
+  scroll-snap-align: center;
+}
+.month-pill-text {
+  font-size: var(--fs-cap);
+  color: var(--c-text-sub);
+}
+.month-pill-active .month-pill-text {
+  color: var(--c-accent-ink);
+  font-weight: 600;
+}
+.moment-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-gap);
+}
+.moment-card {
+  border-radius: var(--r-lg);
+  padding: var(--sp-3);
+  animation: rise-in 0.4s ease both;
+}
+.moment-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+.moment-avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: var(--r-full);
+  background: var(--c-accent-soft);
+}
+.moment-head-text {
+  display: flex;
+  flex-direction: column;
+}
+.moment-name {
+  font-size: var(--fs-cap);
+  font-weight: 600;
+  color: var(--c-text);
+}
+.moment-date {
+  font-size: 20rpx;
+  color: var(--c-text-weak);
+}
+.moment-text {
+  display: block;
+  font-size: var(--fs-body);
+  color: var(--c-text);
+  line-height: var(--lh-body);
+}
+.moment-images {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-1);
+  margin-top: var(--sp-2);
+}
+.moment-image-cell {
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+.moment-image {
+  width: 100%;
+  height: 200rpx;
+}
+.moment-foot {
+  display: flex;
+  gap: var(--sp-4);
+  margin-top: var(--sp-2);
+}
+.moment-foot-item {
+  font-size: var(--fs-cap);
+  color: var(--c-text-sub);
+}
+.empty {
+  padding: var(--sp-5);
+  display: flex;
+  justify-content: center;
+}
+.empty-text {
+  color: var(--c-text-weak);
+  font-size: var(--fs-cap);
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(24rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

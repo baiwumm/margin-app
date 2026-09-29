@@ -1,0 +1,61 @@
+{
+  "name": "margin-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Margin 博客小程序（Taro 4 + React + TS，内容源 margin 静态导出 API）",
+  "templateInfo": {
+    "name": "default",
+    "typescript": true,
+    "css": "none"
+  },
+  "scripts": {
+    "build:weapp": "taro build --type weapp",
+    "dev:weapp": "npm run build:weapp -- --watch",
+    "test": "vitest run",
+    "lint": "eslint src/ config/ test/ --fix && eslint src/ config/ test/",
+    "taro": "taro"
+  },
+  "browserslist": [
+    "last 3 versions",
+    "Android >= 4.1",
+    "ios >= 8"
+  ],
+  "dependencies": {
+    "@babel/runtime": "^7.24.4",
+    "@tarojs/components": "4.2.1",
+    "@tarojs/helper": "4.2.1",
+    "@tarojs/plugin-framework-react": "4.2.1",
+    "@tarojs/plugin-platform-weapp": "4.2.1",
+    "@tarojs/react": "4.2.1",
+    "@tarojs/runtime": "4.2.1",
+    "@tarojs/shared": "4.2.1",
+    "@tarojs/taro": "4.2.1",
+    "@tarojs/webpack5-runner": "^4.2.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.4",
+    "@babel/preset-react": "^8.0.1",
+    "@babel/preset-typescript": "^8.0.1",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
+    "@tarojs/cli": "4.2.1",
+    "@tarojs/webpack5-runner": "4.2.1",
+    "@types/node": "^20.12.7",
+    "@types/react": "^19.3.0",
+    "@types/webpack-env": "^1.13.6",
+    "@typescript-eslint/eslint-plugin": "^7.7.0",
+    "@typescript-eslint/parser": "^7.7.0",
+    "babel-preset-taro": "4.2.1",
+    "eslint": "^8.57.0",
+    "eslint-config-taro": "4.2.1",
+    "eslint-plugin-react": "^7.34.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "postcss": "^8.4.38",
+    "react-refresh": "^0.14.0",
+    "tailwindcss": "4.3.3",
+    "typescript": "^5.4.5",
+    "vitest": "^1.5.0",
+    "weapp-tailwindcss": "^5.5.11"
+  }
+}

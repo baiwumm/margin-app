@@ -1,0 +1,221 @@
+/* 首页样式：语义类为主（design.md §7：令牌走 CSS 变量），间距用 Tailwind 风格手写 */
+
+.page {
+  padding: var(--sp-page);
+  padding-bottom: calc(var(--sp-5) * 3); /* 给悬浮 tabBar 留底 */
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Hero（图 M1 定稿，先令牌底） */
+.hero {
+  border-radius: var(--r-lg);
+  background: linear-gradient(135deg, var(--c-accent-soft), var(--c-surface-alt));
+  padding: var(--sp-5) var(--sp-4);
+  margin-bottom: var(--sp-gap);
+  position: relative;
+}
+.hero-badge {
+  display: inline-flex;
+  border-radius: var(--r-full);
+  padding: 8rpx 24rpx;
+}
+.hero-badge-text {
+  font-size: var(--fs-cap);
+}
+.hero-date {
+  display: block;
+  margin-top: var(--sp-2);
+  color: var(--c-text-sub);
+  font-size: var(--fs-cap);
+}
+
+/* 搜索胶囊 */
+.search-pill {
+  border-radius: var(--r-full);
+  padding: 20rpx 32rpx;
+  margin-bottom: var(--sp-gap);
+}
+.search-pill-text {
+  color: var(--c-text-sub);
+  font-size: var(--fs-cap);
+}
+.search-pill-hl {
+  color: var(--c-text);
+  font-weight: 600;
+}
+
+/* 公告条 */
+.notice {
+  border-radius: var(--r-md);
+  padding: 16rpx 24rpx;
+  margin-bottom: var(--sp-gap);
+}
+.notice-text {
+  font-size: var(--fs-cap);
+  color: var(--c-text);
+}
+
+/* 快捷导航 */
+.quick-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--sp-4);
+}
+.quick-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.quick-nav-icon {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: var(--r-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+}
+.quick-nav-label {
+  font-size: 22rpx;
+  color: var(--c-text-sub);
+}
+
+/* 热门标签错落网格（打样第 4 项：341rpx 双列 + 左跨行大卡） */
+.tag-grid {
+  display: grid;
+  grid-template-columns: 341rpx 341rpx;
+  gap: var(--sp-gap);
+  margin-bottom: var(--sp-4);
+}
+.tag-card {
+  border-radius: var(--r-lg);
+  padding: var(--sp-3);
+  min-height: 140rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4rpx;
+}
+.tag-card-tall {
+  grid-row: span 2;
+  min-height: 300rpx;
+  justify-content: center;
+}
+.tag-card-name {
+  font-size: var(--fs-title);
+  font-weight: 600;
+}
+.tag-card-count {
+  font-size: var(--fs-cap);
+  opacity: 0.8;
+}
+
+/* 最新推荐 */
+.section-title-row {
+  margin-bottom: var(--sp-2);
+}
+.section-title {
+  font-size: var(--fs-title);
+  font-weight: 600;
+}
+.post-tabs {
+  display: flex;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-gap);
+}
+.post-tab {
+  border-radius: var(--r-full);
+  padding: 8rpx 28rpx;
+  background-color: var(--c-surface-alt);
+}
+.post-tab-label {
+  font-size: var(--fs-cap);
+  color: var(--c-text-sub);
+}
+.post-tab-active .post-tab-label {
+  color: var(--c-accent-ink);
+}
+.post-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-gap);
+}
+
+/* 文章卡（D28：纯文字卡） */
+.post-card {
+  border-radius: var(--r-lg);
+  padding: var(--sp-3);
+  animation: rise-in 0.4s ease both;
+}
+.post-card-title {
+  display: block;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--c-text);
+}
+.post-card-desc {
+  display: block;
+  margin-top: var(--sp-1);
+  font-size: var(--fs-cap);
+  color: var(--c-text-sub);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.post-card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+.post-card-tag {
+  font-size: 20rpx;
+  color: var(--c-text-sub);
+  background-color: var(--c-surface-alt);
+  border-radius: var(--r-full);
+  padding: 4rpx 16rpx;
+}
+.post-card-date {
+  font-size: 20rpx;
+  color: var(--c-text-weak);
+}
+
+/* 错峰入场（design.md §4：delay = index × 50ms 封顶 300ms，样式在 style 上） */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(24rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 空态 */
+.empty {
+  padding: var(--sp-5);
+  display: flex;
+  justify-content: center;
+}
+.empty-text {
+  color: var(--c-text-weak);
+  font-size: var(--fs-cap);
+}
+
+/* 骨架 */
+.skeleton-hero {
+  height: 320rpx;
+  border-radius: var(--r-lg);
+  background: var(--c-surface-alt);
+  margin-bottom: var(--sp-gap);
+}
+.skeleton-block {
+  height: 200rpx;
+  border-radius: var(--r-lg);
+  background: var(--c-surface-alt);
+}

@@ -1,0 +1,64 @@
+/* 图库页：横滚筛选胶囊 + 双列图片网格（design.md §1 图库屏） */
+.filter-scroll {
+  white-space: nowrap;
+  margin-bottom: var(--sp-gap);
+}
+.filter-row {
+  display: inline-flex;
+  gap: var(--sp-2);
+  padding-bottom: var(--sp-1);
+}
+.filter-pill {
+  display: inline-flex;
+  border-radius: var(--r-full);
+  padding: 10rpx 28rpx;
+}
+.filter-pill-text {
+  font-size: var(--fs-cap);
+  color: var(--c-text-sub);
+}
+.filter-pill-active .filter-pill-text {
+  color: var(--c-accent-ink);
+}
+.photo-grid {
+  display: grid;
+  grid-template-columns: 341rpx 341rpx;
+  gap: var(--sp-gap);
+}
+.photo-cell {
+  position: relative;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  animation: rise-in 0.4s ease both;
+}
+.photo-img {
+  width: 100%;
+  height: 341rpx;
+}
+.photo-name {
+  position: absolute;
+  left: var(--sp-2);
+  bottom: var(--sp-2);
+  color: #ffffff;
+  font-size: 22rpx;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.5);
+}
+.empty {
+  padding: var(--sp-5);
+  display: flex;
+  justify-content: center;
+}
+.empty-text {
+  color: var(--c-text-weak);
+  font-size: var(--fs-cap);
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(24rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

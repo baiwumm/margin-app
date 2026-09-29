@@ -1,0 +1,21 @@
+# 项目级 pnpm 配置
+# trustPolicy: 用户全局设为 no-downgrade（pnpm 12.6 供应链信任检查），会对
+# vite/semver 等历史「代发」版本一律拦截，阻塞 Taro 工程依赖安装。
+# 本项目按 pnpm 默认值 off（记录进 docs 决策 D48）；不影响其它项目。
+trustPolicy: off
+
+# weapp-tailwindcss 相关包发布较新，豁免 minimumReleaseAge 延迟
+minimumReleaseAgeExclude:
+  - '@weapp-tailwindcss/engine@0.1.3'
+  - '@weapp-tailwindcss/postcss@3.3.10'
+  - weapp-tailwindcss@5.5.11
+
+# 原生依赖构建脚本批准（pnpm 12 字段名 allowBuilds，对齐 margin 仓库惯例）
+allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
+  '@tarojs/binding': true
+  '@tarojs/cli': true
+  core-js: true
+  core-js-pure: true
+  esbuild: true

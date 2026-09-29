@@ -1,0 +1,47 @@
+/* 悬浮胶囊 tabBar（Q8 路线 A）：
+ * 毛玻璃首选 + 不支持时降级半透明白 + 1rpx 描边 + 淡阴影（design.md §6，打样第 6 项） */
+.float-tabbar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 16rpx);
+  width: 640rpx;
+  border-radius: var(--r-full);
+  background: rgba(252, 250, 248, 0.92); /* 降级底（无毛玻璃机型） */
+  border: 1rpx solid var(--c-border);
+  box-shadow: var(--sh-float);
+  z-index: 100;
+}
+@supports (backdrop-filter: blur(20px)) {
+  .float-tabbar {
+    background: rgba(252, 250, 248, 0.72);
+    backdrop-filter: blur(20px);
+  }
+}
+.float-tabbar-inner {
+  display: flex;
+  justify-content: space-around;
+  padding: 12rpx 8rpx;
+}
+.float-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rpx;
+  padding: 8rpx 32rpx;
+  border-radius: var(--r-full);
+}
+.float-tab-active {
+  background-color: var(--c-accent-soft);
+}
+.float-tab-icon {
+  font-size: 36rpx;
+}
+.float-tab-label {
+  font-size: 20rpx;
+  color: var(--c-text-sub);
+}
+.float-tab-active .float-tab-label {
+  color: var(--c-accent-ink);
+  font-weight: 600;
+}

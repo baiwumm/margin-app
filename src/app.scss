@@ -1,0 +1,8 @@
+/* app 全局样式：Tailwind v4 入口 + 设计令牌（tokens.css 已在 tailwind.css 内 @import） */
+@import "./styles/tailwind.css";
+
+page {
+  background-color: var(--c-bg);
+  font-family: var(--font-body);
+  color: var(--c-text);
+}

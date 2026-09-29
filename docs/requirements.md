@@ -3,7 +3,7 @@
 | 项 | 内容 |
 | --- | --- |
 | 项目代号 | margin-app |
-| 文档版本 | **v3.4**（2026-09-29）：M0 完成、生产验收通过（D45-D47）。v3.3 本地开发；v3.2 workers.dev 关闭；v3.1 M0-0 双探针通过；v3.0 全文重组口径不变，论证与过程记录在 `archive/` |
+| 文档版本 | **v3.5**（2026-09-29）：M1-a 基座与打样代码完成（D48-D50），待真机。M0 完成验收（D45-D47）。v3.3 本地开发；v3.2 workers.dev 关闭；v3.1 M0-0 双探针通过；v3.0 全文重组口径不变，论证与过程记录在 `archive/` |
 | 内容源 | `E:\personal-project\margin`（Astro 7 纯静态博客，线上 https://www.baiwumm.com/） |
 | 视觉基准 | `demo/` 5 张图（uni-halo v3.x 实机观感）为唯一基准（D10）；`E:\personal-project\uni-halo`（2.0.10）仅作页面结构参考 |
 | 配套文件 | [api-contract.md](api-contract.md) · [design.md](design.md) · [compliance.md](compliance.md) · [decisions.md](decisions.md) · [research.md](research.md) · [archive/requirements-v2.1.md](archive/requirements-v2.1.md) |
@@ -326,7 +326,7 @@ margin-app/
 | --- | --- | --- |
 | **M0-0 可行性探针** ✅ **双通过（2026-09-28，D42/D43）** | **探针 A**：临时 Endpoint 对 blog+画廊图调 `getImage()` + sharp 1×1 均色，CF 预览构建实证：静态 `/_astro/*` 产物路径返回、sharp 0.35.4 可跑；**探针 B**：`parse*Card(node)` 抽取完成，同构建内嵌旧插件双管线比对三篇样文 HTML 全等（3345/9340/9170 B），parse 结构化 Block 1/3/5 条 | A 过 → 按「只选择不生成」（D25）推进，三退路不启用；B 等价性以同环境逐字节比对证明（全站 diff 因 workers.dev 被墙移至 M0 照常执行）；**无未验证前提进入 M0-1** |
 | **M0 契约与导出管线** ✅ **完成并验收（2026-09-29，D45-D47）**：main@71831bc 已部署生产 | 冻结 schema（api-contract.md，D45/D46 实测修订）+ 13 端点 + toBlocks + toAssetRef + bigram 索引 + `_headers` + assetBase=www | ① ✅ 样文转换：指令块全结构化（music 3 / video 4 / linkcard 46）、手写 HTML 与 JSX 按契约落 unknown（35 处/10 篇）；② ✅ 构建内断言上 CI（分支构建过）+ 生产域 13 端点全 200；③ ✅ HTML diff：唯一差异 = astro.images 样式层注入（**惰性证明的有界例外，D47**）；④ ✅ `astro check` 0 错误；⑤ ✅ `_astro` immutable + JSON 未误设（生产域 curl）；⑥ ✅ 构建耗时：分支 ~8min / 生产 ~12min，变体零新增（D46）；⑦ ✅ 体积实测（posts/index 37.6KB / terms 379KB / stats 3.3KB）；⑧ ✅ WCAG 全过（最低 4.97） |
-| **M1 打样 + 基座 + 首页** | 6 个打样项（design.md §8）→ Taro 工程 / Tailwind v4+weapp-tw v5 / request+cache / Block 渲染器基础块 / 首页全部模块；**tabBar 路线定案（Q8）** | ① 打样全过=视觉基线；② 首屏 <1.5s、缓存命中 <500ms；③ 首页 6 模块数据正确无白闪（文章卡按无图验收）；④ 真机复核存储配额 + 301 行为写回文档；⑤ 切 tab 回首页滚动位置保留 |
+| **M1 打样 + 基座 + 首页**（代码完成 ✅ 2026-09-29，本地编译验收；真机与定案项待用户） | 6 个打样项（design.md §8）→ Taro 4.2.1 工程（D48 webpack5）/ Tailwind v4+weapp-tw v5 / request+cache+manifest（22 单测）/ Block 渲染器基础块 / 首页+标签+图库+瞬间+我的五页 / custom-tab-bar（D50 路线 A 搭法） | ① ⬜ 打样视觉基线（DevTools 导入 + 真机对照 demo）；② ⬜ 首屏 <1.5s、缓存命中 <500ms（真机）；③ ⬜ 首页 6 模块数据正确无白闪（真机；代码已按 D40 排序/D28 无图卡实现）；④ ⬜ 真机复核存储配额 + 301 行为；⑤ ⬜ 切 tab 回首页滚动位置保留（custom-tab-bar 已实现机制）；⑥ React 19 编译级通过（D49），真机运行确认 |
 | **M2 文章详情** | Block 全量块 + TOC + 进度 + 字号/行距/主题 + 代码块 + 图片预览 + 上下篇 + 分享 | ① 10 篇抽样渲染与站点一致（含三类指令块）；② 1000 行代码不卡；③ 分享卡图正确 |
 | **M3 图库与瞬间** | 画廊列表/详情/图片浏览；瞬间年月导航/卡片/图组/视频音乐块 | ① 75+16 图全可浏览；② 月份切换计数正确；③ 大图手势顺畅 |
 | **M4 检索、归档与个人中心** | 搜索（双层+拼音+高亮+历史）、归档、标签详情、友链、项目、关于（**备案号展示**）、我的页 | ① 一层 <40KB 即时、二层 ≤400KB、拼音首字母命中；② 偏好全生效持久化；③ 主包 ≤1.5MB；④ 备案号可见可复制；⑤ 连续读 30+ 篇无 `exceed size` |
@@ -408,6 +408,7 @@ M0 冻结 api-contract.md 时把这四条落进类型定义即可，无剩余待
 
 ## 13. 变更记录
 
+- **v3.5（2026-09-29）**：M1-a 闲时任务完成——Taro 4.2.1 基座（D48 webpack5 回退）、Tailwind v4+weapp-tw v5、services 22 单测、Block 渲染器、五打样页、custom-tab-bar；React 19 编译级通过（D49）。待 DevTools 导入与真机复核。
 - **v3.4（2026-09-29）**：M0 完成并生产验收通过（D46 档位定档 / D47 验收与 HTML diff 有界例外）——R3 关闭，M1 解锁。
 - **v3.3（2026-09-28 深夜）**：M0 本地开发完成——margin `feat/mp-export` 分支实装 13 端点 + 导出层（fa17b6b），dev 全量冒烟通过；契约冻结（D45 实测修订：预算 / hash / 色板 / counts.images=244 / 降级与 unknown 口径）。待推送验收与生产域复核（§9 M0 行）。
 - **v3.2（2026-09-28 晚）**：workers.dev 关闭（D44）；M0 验收口径改为「构建内断言（违规即构建失败）+ 生产域复核」，§9 同步。

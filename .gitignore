@@ -1,0 +1,28 @@
+# 编译产物
+dist/
+
+# 依赖
+node_modules/
+
+# Taro
+.swc/
+
+# 日志
+*.log
+
+# 环境变量
+.env
+.env.*
+!.env.example
+
+# 编辑器
+.idea/
+.vscode/
+.DS_Store
+
+# vitest
+coverage/
+
+# 误生成的它包管理器锁文件
+yarn.lock
+package-lock.json

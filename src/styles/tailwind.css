@@ -1,0 +1,31 @@
+/* Tailwind v4 入口（CSS-first）。样式生成由 weapp-tailwindcss v5 接管（D37），
+ * 不叠加 @tailwindcss/vite 或 @tailwindcss/postcss（weapp-tw README 明确禁止双生成器）。 */
+@import "tailwindcss";
+@import "./tokens.css";
+
+@source "../";
+
+/* 令牌映射为常用语义类（显式书写，不用通配选择器——design.md §6） */
+.page-bg {
+  background-color: var(--c-bg);
+}
+.card-surface {
+  background-color: var(--c-surface);
+  box-shadow: var(--sh-card);
+}
+.text-main {
+  color: var(--c-text);
+}
+.text-sub {
+  color: var(--c-text-sub);
+}
+.text-weak {
+  color: var(--c-text-weak);
+}
+.accent-bg {
+  background-color: var(--c-accent);
+  color: var(--c-accent-ink);
+}
+.font-body {
+  font-family: var(--font-body);
+}
