@@ -51,3 +51,24 @@
 | 4 | （同 #2 报错，三轮字节级一致） | **待定：DevTools 热重载增量缓存疑似把新旧两轮 chunk 混合服务**（私有配置 compileHotReLoad:true；三轮报错完全相同、`s=` 指纹不变、而 dist 实际已大改；Node 双顺序模拟均无法复现 → 指向 DevTools 侧缓存而非产物缺陷）。产物模块图已静态核验完整（tab bar 所需 7 模块全部在声明 chunk [907,96,76] 内） | 已：① 私有配置关 `compileHotReLoad` 与 `ignoreDevUnusedFiles`；② dist/runtime.js 注入缺失模块探针（打印确切 module id，下次 pnpm build 覆盖） | 待用户：清缓存（工具菜单 → 清除全部缓存）→ 重新编译；若仍报错，控制台会出现 `[mp-debug] missing module factory: <id>`——把该行发回 |
 | 5 | `SyntaxError: Invalid or unexpected token` + `module 'runtime.js' is not defined, require args is './runtime'` | **修复 #4 的诊断探针自身写坏了 runtime.js**（`
 ` 转义经 shell 层变成真实换行，截断字符串字面量）——模块系统没起来，require 全挂。属调试引入、非产物缺陷 | 重新干净构建 + 换**无转义的安全探针**（缺失模块时打印 id，`node --check` 全部 chunk 语法通过） | 探针仅存在于 dist（src 无污染，下次 pnpm build 自然消失） |
+
+## 首页对照 demo 精修（2026-09-29 下午，运行跑通后第一轮）
+
+**先修了一个数据 bug**（用户截图里「热门标签」「最新推荐」整块消失的根因）：collections 的 cache-first 首启返回 null、后台取到数据也不通知 UI → 改 **onData 回调模式**（缓存立即回填 0 等待渲染 + 网络到达且变化再回填），hooks 同步重写。
+
+**对照 demo/首页.png 的差距分类与处置**：
+
+| 差距 | 定性 | 处置 |
+| --- | --- | --- |
+| 热门标签 / 最新推荐整块消失 | **bug** | ✅ 已修（数据回调回填） |
+| Hero 一条细渐变 vs demo 大图卡 | **有意占位（D38 图 M1 定稿）**，但高度/出血/圆角/胶囊位置先对齐 | ✅ 结构到位：560rpx 全出血 + 下缘大圆角 + 胶囊居中 + 日期白字（图定稿后即视觉对齐） |
+| 快捷导航白圆+灰字 vs demo 圆角方浅彩底+彩字 | 打样毛坯 | ✅ 已改（5 入口各自浅彩底 + 彩字，映射 D9 重映射后的入口） |
+| 小节标题纯文字 vs demo 柠檬绿垫块 | 打样毛坯 | ✅ 已加（::after 垫块，demo 标志性装饰） |
+| tabs 在标题下左侧 vs demo 右置+选中柠檬绿块 | 打样毛坯 | ✅ 已改（标题行右侧，选中 accent-bg） |
+| tabBar 通栏贴底 vs demo 悬浮胶囊 | 打样毛坯 + env() 在 calc 中失效嫌疑 | ✅ 已改（透明容器 fixed bottom:0 + safe-area padding，胶囊 640rpx 居中悬浮；env 失效不再影响胶囊定位） |
+| 右侧悬浮操作组缺失（回顶/设置/头像） | M1-a 遗漏 | ✅ 已补（回顶可用；滚动显隐逻辑 M1-b） |
+| tab icon 用 emoji（不可着色，demo 为线性图标） | 打样占位 | ⬜ 打样第 3 项 Q8 定案时一并定图标方案（SVG/字体/图片） |
+| 公告条未显示 | **正确**（D32：announcement=null 整条隐藏，demo 有数据所以显示） | 无需处理 |
+| 搜索胶囊缺放大镜/关键词高亮块 | 打样毛坯 | ✅ 已加 |
+
+**待真机确认**：数据拉取是否成功（www 域名白名单 + urlCheck:true 下 DevTools 网络请求）；rpx-theme 警告的阴影/模糊类在真机的表现。本轮 commit `295cff1`（未推送）。
