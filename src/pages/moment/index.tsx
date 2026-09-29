@@ -4,12 +4,16 @@ import { useEffect, useMemo, useState } from "react";
 import { getMoments } from "@/services/api/collections";
 import { useManifest } from "@/hooks/useManifest";
 import type { Moment } from "@/types/api";
+import { useDidShow } from "@tarojs/taro";
+import { setSelectedTab } from "@/custom-tab-bar/store";
 import "./moment.scss";
 
 /** 月份键（端上聚合，D20/D34：按 pubDatetime） */
 const monthKey = (iso: string) => iso.slice(0, 7); // "2026-09"
 
 export default function MomentPage() {
+  // 同步悬浮 tabBar 选中态（组件内不可用页面级 hook）
+  useDidShow(() => setSelectedTab(3));
   const { manifest } = useManifest();
   const buildId = manifest?.buildId ?? null;
   const [moments, setMoments] = useState<Moment[] | null>(null);

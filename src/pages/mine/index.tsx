@@ -2,6 +2,8 @@ import { Image, View, Text } from "@tarojs/components";
 
 import { useSiteData } from "@/hooks/useCollection";
 import { useManifest } from "@/hooks/useManifest";
+import { useDidShow } from "@tarojs/taro";
+import { setSelectedTab } from "@/custom-tab-bar/store";
 import "./mine.scss";
 
 /** 八宫格（design.md §1 我的屏；demo 的投票中心/恋爱日记/通知公告去掉，D9/D20） */
@@ -19,6 +21,8 @@ const GRID = [
 const LIST = ["偏好设置", "免责声明", "关于项目"];
 
 export default function Mine() {
+  // 同步悬浮 tabBar 选中态（组件内不可用页面级 hook）
+  useDidShow(() => setSelectedTab(4));
   const { manifest } = useManifest();
   const site = useSiteData(manifest?.buildId ?? null);
 

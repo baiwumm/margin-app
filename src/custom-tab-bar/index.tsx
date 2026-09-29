@@ -1,13 +1,18 @@
 /**
- * 自定义 tabBar（Q8 路线 A 倾向：tabBar.custom = true，保留 switchTab 语义与
- * 页面缓存——切 tab 回首页滚动位置保留；路线 B 的页面内自绘变体待 Q8 定案）。
- * 每次 onShow 手动同步选中态（Taro.getCurrentPages().length 判定 + dataset）。
- * 悬浮胶囊形态（design.md §1 全局：5 tab 选中带色，非通栏）。
- * backdrop-filter 不支持的降级：半透明白 + 描边 + 淡阴影（design.md §6）。
+ * 自定义 tabBar（Q8 路线 A：tabBar.custom = true，保留 switchTab 语义与页面缓存）。
+ * 悬浮胶囊形态（design.md §1 全局）；毛玻璃不支持时降级半透明白 + 描边 + 阴影。
+ * 选中态同步：页面 useDidShow → store.setSelectedTab → 本组件订阅回显
+ * （组件内不能用 useDidShow —— 页面级 hook，见 M1-a 修复记录）。
  */
-import Taro, { useDidShow } from "@tarojs/taro";
 import { View, Text } from "@tarojs/components";
-import { useState } from "react";
+import Taro from "@tarojs/taro";
+import { useEffect, useState } from "react";
+
+import {
+  getSelectedTab,
+  setSelectedTab,
+  subscribeSelectedTab,
+} from "./store";
 import "./index.scss";
 
 const TABS = [
@@ -19,19 +24,12 @@ const TABS = [
 ];
 
 export default function CustomTabBar() {
-  const [selected, setSelected] = useState(0);
+  const [selected, setSelected] = useState(getSelectedTab());
 
-  useDidShow(() => {
-    const pages = Taro.getCurrentPages();
-    const current = pages[pages.length - 1];
-    if (!current) return;
-    const path = `/${current.route ?? ""}`;
-    const idx = TABS.findIndex(t => t.path === path);
-    if (idx >= 0) setSelected(idx);
-  });
+  useEffect(() => subscribeSelectedTab(setSelected), []);
 
   const switchTo = (idx: number) => {
-    setSelected(idx);
+    setSelectedTab(idx);
     void Taro.switchTab({ url: TABS[idx].path });
   };
 

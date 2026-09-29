@@ -2,9 +2,13 @@ import { View, Text } from "@tarojs/components";
 
 import { useTags } from "@/hooks/useCollection";
 import { useManifest } from "@/hooks/useManifest";
+import { useDidShow } from "@tarojs/taro";
+import { setSelectedTab } from "@/custom-tab-bar/store";
 import "./tags.scss";
 
 export default function Tags() {
+  // 同步悬浮 tabBar 选中态（组件内不可用页面级 hook）
+  useDidShow(() => setSelectedTab(1));
   const { manifest } = useManifest();
   const tags = useTags(manifest?.buildId ?? null);
 

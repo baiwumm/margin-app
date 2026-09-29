@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { usePostsIndex, useSiteData, useTags } from "@/hooks/useCollection";
 import { useManifest } from "@/hooks/useManifest";
 import type { PostMeta } from "@/types/api";
+import { useDidShow } from "@tarojs/taro";
+import { setSelectedTab } from "@/custom-tab-bar/store";
 import "./home.scss";
 
 /** D40：默认 = pubDatetime 降序（posts/index 本身即该序，tabs 里显式重排保险） */
@@ -37,6 +39,8 @@ function formatDate(iso: string): string {
 }
 
 export default function Home() {
+  // 同步悬浮 tabBar 选中态（组件内不可用页面级 hook）
+  useDidShow(() => setSelectedTab(0));
   const { manifest, loading } = useManifest();
   const buildId = manifest?.buildId ?? null;
   const site = useSiteData(buildId);

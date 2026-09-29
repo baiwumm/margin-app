@@ -5,6 +5,8 @@ import { CacheImage } from "@/components/media/CacheImage";
 import { getGalleriesIndex, getGalleryDetail } from "@/services/api/collections";
 import { useManifest } from "@/hooks/useManifest";
 import type { GalleryPhoto, AssetRef } from "@/types/api";
+import { useDidShow } from "@tarojs/taro";
+import { setSelectedTab } from "@/custom-tab-bar/store";
 import "./gallery.scss";
 
 interface GallerySummary {
@@ -14,6 +16,8 @@ interface GallerySummary {
 }
 
 export default function Gallery() {
+  // 同步悬浮 tabBar 选中态（组件内不可用页面级 hook）
+  useDidShow(() => setSelectedTab(2));
   const { manifest } = useManifest();
   const buildId = manifest?.buildId ?? null;
   const [galleries, setGalleries] = useState<GallerySummary[] | null>(null);
