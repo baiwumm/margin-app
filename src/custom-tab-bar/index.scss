@@ -1,7 +1,7 @@
-/* 悬浮胶囊 tabBar（Q8 路线 A）：
- * 容器 fixed 全宽透明 + safe-area padding（env 失效也不影响胶囊定位），
- * 胶囊本体 640rpx 居中悬浮；毛玻璃首选，不支持时降级半透明白 + 描边 + 阴影。
- * 颜色全部走 page 继承的 CSS 变量（tokens.css 明暗两态自动跟随系统）。 */
+/* 悬浮胶囊 tabBar（Q8 路线 A，对照 demo 特写）：
+ * 纯图标窄胶囊（shrink-to-fit），选中项 = 浅柠檬绿圆角方块（深墨图标）；
+ * 暗色：胶囊深底、选中块暗橄榄、图标亮柠檬；毛玻璃降级半透明+描边+阴影。
+ * 颜色走 page 继承的 CSS 变量（tokens.css 明暗两态自动跟随系统）。 */
 .float-tabbar {
   position: fixed;
   left: 0;
@@ -9,47 +9,39 @@
   bottom: 0;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   z-index: 100;
-  pointer-events: none; /* 容器透明区不挡点击 */
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
 }
 .float-tabbar-inner {
   pointer-events: auto;
-  margin: 0 auto 20rpx;
-  width: 640rpx;
+  display: inline-flex; /* shrink-to-fit：胶囊宽随图标收窄 */
+  gap: 12rpx;
+  margin-bottom: 24rpx;
+  padding: 14rpx 24rpx;
   border-radius: var(--r-full);
   background: var(--tabbar-bg);
   border: 1rpx solid var(--c-border);
   box-shadow: var(--sh-float);
-  display: flex;
-  justify-content: space-around;
-  padding: 12rpx 8rpx;
   box-sizing: border-box;
 }
 @supports (backdrop-filter: blur(20px)) {
   .float-tabbar-inner {
-    background: var(--tabbar-bg); /* 半透明值在变量里（明暗各一份） */
     backdrop-filter: blur(20px);
   }
 }
 .float-tab {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 24rpx; /* 选中高亮块的圆角方（demo 形态） */
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 2rpx;
-  padding: 8rpx 32rpx;
-  border-radius: var(--r-full);
+  justify-content: center;
 }
 .float-tab-active {
   background-color: var(--c-accent-soft);
 }
 .float-tab-icon {
-  width: 44rpx;
-  height: 44rpx;
-}
-.float-tab-label {
-  font-size: 20rpx;
-  color: var(--c-text-sub);
-}
-.float-tab-active .float-tab-label {
-  color: var(--c-accent-ink);
-  font-weight: 600;
+  width: 48rpx;
+  height: 48rpx;
 }
