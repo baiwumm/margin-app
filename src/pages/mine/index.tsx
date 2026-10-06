@@ -45,6 +45,9 @@ function formatWords(n: number): string {
   return n >= 10000 ? `${(n / 10000).toFixed(1)}w` : String(n);
 }
 
+/** 贡献日历窗口：近 53 周（GitHub 日历口径） */
+const HEAT_WEEKS = 53;
+
 export default function Mine() {
   const rootCls = useRootClass();
   const theme = useTheme();
@@ -76,17 +79,18 @@ export default function Mine() {
     ];
   }, [accent, theme]);
 
-  /** heatmap（稀疏：只含有文日）→ 密集周列：周日起始对齐、缺文日补 0、未来日不渲染 */
+  /** heatmap（稀疏：只含有文日）→ 密集周列：近 53 周（GitHub 日历口径）、周日起始、
+   * 缺文日补 0、未来日不渲染 */
   const weeks = useMemo(() => {
     const days = stats?.heatmap ?? [];
     if (days.length === 0) return [];
     const counts = new Map(days.map(d => [d.date, d.count]));
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const cur = new Date(`${days[0].date}T00:00:00`);
-    cur.setDate(cur.getDate() - cur.getDay());
+    const cur = new Date(today);
+    cur.setDate(cur.getDate() - cur.getDay() - (HEAT_WEEKS - 1) * 7);
     const cols: number[][] = [];
-    while (cur <= today) {
+    for (let w = 0; w < HEAT_WEEKS && cur <= today; w++) {
       const col: number[] = [];
       for (let i = 0; i < 7 && cur <= today; i++) {
         const key = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}-${String(cur.getDate()).padStart(2, "0")}`;
