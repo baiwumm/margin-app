@@ -1,0 +1,54 @@
+/* 详情页页面级样式（分包 A）。二级页没有 tabBar，底部只需安全区。 */
+.detail {
+  padding: 0 var(--sp-page) calc(96rpx + env(safe-area-inset-bottom, 0px));
+}
+.detail-loading {
+  display: block;
+  padding: var(--sp-5) 0;
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--c-fg-45);
+}
+.detail-retry {
+  margin-top: var(--sp-3);
+  padding: 12rpx 40rpx;
+  border: 1rpx solid var(--c-accent-30);
+  border-radius: var(--r-full);
+  background-color: var(--c-accent-8);
+  font-size: var(--fs-sm);
+  color: var(--c-accent);
+}
+
+/* 上下篇（margin .post-pagination：grid-cols-2 gap-3 + rounded-2xl 描边卡） */
+.post-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24rpx;
+  margin-top: 64rpx;
+}
+.post-nav-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  padding: 32rpx 40rpx;
+  border: 1rpx solid var(--c-border-20);
+  border-radius: var(--r-card);
+  min-width: 0;
+}
+.post-nav-right {
+  align-items: flex-end;
+  text-align: right;
+}
+.post-nav-label {
+  font-size: var(--fs-cap);
+  color: var(--c-accent-60);
+}
+.post-nav-title {
+  font-size: var(--fs-sm);
+  color: var(--c-fg);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

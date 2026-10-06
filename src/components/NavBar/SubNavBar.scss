@@ -1,0 +1,33 @@
+/* 二级页顶栏（与 NavBar.scss 同族，只补返回件与居中标题）。
+ * 返回箭头用边框旋转 45° 画，不新增位图素材（D24 只约束装饰性位图）。 */
+.sub-nav-back {
+  width: 64rpx;
+  height: 64rpx;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sub-nav-chevron {
+  width: 22rpx;
+  height: 22rpx;
+  margin-left: 10rpx;
+  border-left: 4rpx solid var(--c-fg);
+  border-bottom: 4rpx solid var(--c-fg);
+  transform: rotate(45deg);
+}
+.sub-nav-title {
+  flex: 1;
+  min-width: 0;
+  padding: 0 var(--sp-1);
+  text-align: center;
+  font-size: var(--fs-card);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sub-nav-slot {
+  width: 64rpx;
+  flex-shrink: 0;
+}

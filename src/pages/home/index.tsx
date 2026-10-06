@@ -19,6 +19,7 @@ import { usePostsIndex, useSiteData } from "@/hooks/useCollection";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
 import { setSelectedTab } from "@/custom-tab-bar/store";
+import { postDetailUrl } from "@/utils/routes";
 import { perfLog } from "@/utils/perf";
 import type { PostMeta } from "@/types/api";
 import Taro from "@tarojs/taro";
@@ -37,6 +38,7 @@ function PostCard({ post, featured }: { post: PostMeta; featured: boolean }) {
       className={`post-card card ${featured ? "card-featured" : ""}`}
       hoverClass='card-press'
       hoverStayTime={80}
+      onClick={() => void Taro.navigateTo({ url: postDetailUrl(post.slug) })}
     >
       <Text className='post-card-title'>{post.title}</Text>
       <View className='post-card-meta'>

@@ -20,7 +20,8 @@ import searchDark from "@/assets/deco/icon-search-dark.png";
 import moonLight from "@/assets/deco/icon-moon-light.png";
 import sunDark from "@/assets/deco/icon-sun-dark.png";
 
-const STATUS_BAR = (() => {
+/** 状态栏高度（px）——SubNavBar 复用同一套顶栏几何 */
+export const STATUS_BAR = (() => {
   try {
     return Taro.getSystemInfoSync().statusBarHeight ?? 44;
   } catch {

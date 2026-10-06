@@ -1,0 +1,58 @@
+/* 文章头（margin .post-header-card / .post-title / .post-tag-badge / meta chips）
+ * 数值溯源：text-3xl=60rpx、leading-tight=1.25、tracking-tight=-0.025em、
+ * rounded-3xl=--r-hero、px-6 py-8=48/64rpx、mb-10=80rpx、gap-2=16rpx、
+ * px-2.5 py-0.5=20/8rpx、text-xs=--fs-cap、mt-4=32rpx、mt-6=48rpx、gap-3=24rpx。 */
+.post-header {
+  margin-top: var(--sp-3);
+  margin-bottom: 80rpx;
+  padding: 64rpx 48rpx;
+  text-align: center;
+  border: 1rpx solid var(--c-border-20);
+  border-radius: var(--r-hero);
+  background-color: var(--c-muted-10);
+}
+.post-header-title {
+  display: block;
+  font-size: 60rpx;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--c-fg);
+}
+.post-header-tags {
+  margin-top: 32rpx;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16rpx;
+}
+.post-header-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: 4rpx 20rpx;
+  border: 1rpx solid var(--c-accent-20);
+  border-radius: var(--r-full);
+  background-color: var(--c-accent-8); /* design.md §2 tint 底 8–10% 口径 */
+  font-size: var(--fs-cap);
+  color: var(--c-accent);
+}
+.post-header-tag-hash {
+  opacity: 0.5;
+}
+.post-header-meta {
+  margin-top: 48rpx;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24rpx;
+}
+.post-header-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 20rpx;
+  border: 1rpx solid var(--c-border-25);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  color: var(--c-fg-mid);
+}
