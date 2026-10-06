@@ -67,32 +67,34 @@ export default function Mine() {
 
   /** 热力图强度分级（margin：accent 强度推导，端上按 accent 配置表落值） */
   const heatColors = useMemo(() => {
-    const accent = getAccent();
     return [
-      "transparent", // 0 级：空格（容器底 fg-6 由格线承担）
+      "transparent", // 0 级不走这里：空格无内联色，由 .heat-cell 的 --c-fg-16 承担
       accentRgba(accent, theme, 0.2),
       accentRgba(accent, theme, 0.4),
       accentRgba(accent, theme, 0.65),
       accentRgba(accent, theme, 1),
     ];
-  }, [theme]);
+  }, [accent, theme]);
 
-  /** heatmap → 周列（周日起始对齐 GitHub 布局；未来日期不渲染） */
+  /** heatmap（稀疏：只含有文日）→ 密集周列：周日起始对齐、缺文日补 0、未来日不渲染 */
   const weeks = useMemo(() => {
     const days = stats?.heatmap ?? [];
     if (days.length === 0) return [];
-    const cols: { date: string; count: number }[][] = [];
-    let col: { date: string; count: number }[] = [];
-    const firstDow = new Date(`${days[0].date}T00:00:00`).getDay();
-    for (let i = 0; i < firstDow; i++) col.push(null as never);
-    for (const d of days) {
-      col.push(d);
-      if (col.length === 7) {
-        cols.push(col);
-        col = [];
+    const counts = new Map(days.map(d => [d.date, d.count]));
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const cur = new Date(`${days[0].date}T00:00:00`);
+    cur.setDate(cur.getDate() - cur.getDay());
+    const cols: number[][] = [];
+    while (cur <= today) {
+      const col: number[] = [];
+      for (let i = 0; i < 7 && cur <= today; i++) {
+        const key = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}-${String(cur.getDate()).padStart(2, "0")}`;
+        col.push(counts.get(key) ?? 0);
+        cur.setDate(cur.getDate() + 1);
       }
+      cols.push(col);
     }
-    if (col.length > 0) cols.push(col);
     return cols;
   }, [stats]);
 
@@ -167,16 +169,20 @@ export default function Mine() {
               <View className='heat-grid'>
                 {weeks.map((col, ci) => (
                   <View key={ci} className='heat-col'>
-                    {col.map((d, di) => (
+                    {col.map((count, di) => (
                       <View
                         key={di}
                         className='heat-cell'
-                        style={{
-                          backgroundColor:
-                            d && d.count > 0
-                              ? heatColors[Math.min(4, Math.ceil(Math.log2(d.count + 1)))]
-                              : "transparent",
-                        }}
+                        style={
+                          count > 0
+                            ? {
+                                backgroundColor:
+                                  heatColors[
+                                    Math.min(4, Math.ceil(Math.log2(count + 1)))
+                                  ],
+                              }
+                            : undefined
+                        }
                       />
                     ))}
                   </View>

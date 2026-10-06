@@ -2,7 +2,7 @@
  * + rounded-2xl 双列网格；计数 accent 大字 + 大写小标签 + accent 渐变强度条。 */
 
 .tags {
-  padding: 0 var(--sp-page) 140rpx; /* 底部给固定 tabBar 留白 */
+  padding: 0 var(--sp-page) calc(140rpx + env(safe-area-inset-bottom, 0px)); /* tabBar 100rpx + 留白 + 手势条安全区 */
 }
 
 .tag-grid {

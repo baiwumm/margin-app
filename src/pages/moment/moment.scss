@@ -3,7 +3,7 @@
  * rounded-2xl，日期小字头、正文 1.85 行距、方图圆角网格、弱化 accent tag。 */
 
 .moment {
-  padding: 0 var(--sp-page) 140rpx;
+  padding: 0 var(--sp-page) calc(140rpx + env(safe-area-inset-bottom, 0px)); /* tabBar 100rpx + 留白 + 手势条安全区 */
 }
 
 /* ── 月份导航（端上组件；选中 = accent 底 + accent 字）────────────── */

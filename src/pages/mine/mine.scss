@@ -4,7 +4,7 @@
  * accentRgba，跟随五套轮换）；功能行 = surface-2 底圆角行。 */
 
 .mine {
-  padding: 0 var(--sp-page) 140rpx;
+  padding: 0 var(--sp-page) calc(140rpx + env(safe-area-inset-bottom, 0px));
 }
 
 /* ── hero ─────────────────────────────────────────────────────── */
@@ -100,7 +100,7 @@
   width: 18rpx;
   height: 18rpx;
   border-radius: 4rpx;
-  background-color: var(--c-fg-6);
+  background-color: var(--c-fg-16); /* 有日历无文的空格也可见（margin gh-level-0） */
 }
 .heat-empty {
   display: block;
