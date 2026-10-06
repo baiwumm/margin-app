@@ -102,9 +102,11 @@ export default function Mine() {
     return cols;
   }, [stats]);
 
-  const totalContrib = useMemo(
-    () => (stats?.heatmap ?? []).reduce((s, d) => s + d.count, 0),
-    [stats]
+  /** 小节计数 = 窗口内贡献数（标题已标「近一年」，与 GitHub「N contributions in the
+   * last year」同口径；全量 74 在上方统计卡） */
+  const windowContrib = useMemo(
+    () => weeks.flat().reduce((s, c) => s + c, 0),
+    [weeks]
   );
 
   const onRow = (label: string) => {
@@ -166,7 +168,7 @@ export default function Mine() {
         </View>
 
         {/* 贡献日历（stats heatmap 视图网格，横向滚动） */}
-        <SectionTitle title='Activity' count={totalContrib > 0 ? `${totalContrib}` : undefined} />
+        <SectionTitle title='Activity · 近一年' count={windowContrib > 0 ? `${windowContrib}` : undefined} />
         <View className='mine-heat card'>
           {weeks.length > 0 ? (
             <ScrollView className='heat-scroll' scrollX enhanced showScrollbar={false}>
