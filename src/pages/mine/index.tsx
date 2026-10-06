@@ -70,39 +70,53 @@ export default function Mine() {
     getStats(buildId, s => setStats(s));
   }, [buildId]);
 
-  /** 热力图强度分级（margin：accent 强度推导，端上按 accent 配置表落值） */
-  const heatColors = useMemo(() => {
-    return [
+  /** 热力图强度分级：四档 alpha 取 margin gh-level-1..4 原值（32 / 56 / 78 / 100%） */
+  const heatColors = useMemo(
+    () => [
       "transparent", // 0 级不走这里：空格无内联色，由 .heat-cell 的 --c-fg-16 承担
-      accentRgba(accent, theme, 0.2),
-      accentRgba(accent, theme, 0.4),
-      accentRgba(accent, theme, 0.65),
+      accentRgba(accent, theme, 0.32),
+      accentRgba(accent, theme, 0.56),
+      accentRgba(accent, theme, 0.78),
       accentRgba(accent, theme, 1),
-    ];
-  }, [accent, theme]);
+    ],
+    [accent, theme]
+  );
 
-  /** heatmap（稀疏：只含有文日）→ 密集周列：近 53 周（GitHub 日历口径）、周日起始、
-   * 缺文日补 0、未来日不渲染 */
-  const weeks = useMemo(() => {
+  /** heatmap（稀疏：只含有文日）→ 近 53 周密集网格（GitHub 日历口径）：周日起始、
+   * 缺文日补 0、未来日不渲染。顺带算出月份标签落哪一列（GitHub 规则 = 含当月 1 号的列）
+   * 和窗口内单日最大值——强度按它线性分档，否则一年最多 3 篇时整张图只用得上最淡两档。 */
+  const heat = useMemo(() => {
     const days = stats?.heatmap ?? [];
-    if (days.length === 0) return [];
+    if (days.length === 0) return { cols: [], months: [], max: 0 };
     const counts = new Map(days.map(d => [d.date, d.count]));
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const cur = new Date(today);
     cur.setDate(cur.getDate() - cur.getDay() - (HEAT_WEEKS - 1) * 7);
     const cols: number[][] = [];
+    const months: (string | null)[] = [];
+    let max = 0;
     for (let w = 0; w < HEAT_WEEKS && cur <= today; w++) {
       const col: number[] = [];
+      let monthStart = -1;
       for (let i = 0; i < 7 && cur <= today; i++) {
+        if (cur.getDate() === 1) monthStart = cur.getMonth();
         const key = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}-${String(cur.getDate()).padStart(2, "0")}`;
-        col.push(counts.get(key) ?? 0);
+        const c = counts.get(key) ?? 0;
+        if (c > max) max = c;
+        col.push(c);
         cur.setDate(cur.getDate() + 1);
       }
       cols.push(col);
+      months.push(monthStart >= 0 ? `${monthStart + 1}月` : null);
     }
-    return cols;
+    return { cols, months, max };
   }, [stats]);
+  const weeks = heat.cols;
+
+  /** 单日强度：按窗口内最大值线性分 1–4 档（最忙那天必落最深档） */
+  const levelOf = (count: number) =>
+    Math.min(4, Math.max(1, Math.ceil((count / (heat.max || 1)) * 4)));
 
   /** 小节计数 = 窗口内贡献数（标题已标「近一年」，与 GitHub「N contributions in the
    * last year」同口径；全量 74 在上方统计卡） */
@@ -178,6 +192,18 @@ export default function Mine() {
         <View className='mine-heat card'>
           {weeks.length > 0 ? (
             <View className='heat-scroll'>
+              <View className='heat-months'>
+                {heat.months.map((m, i) => (
+                  <View
+                    key={i}
+                    className={`heat-month-slot ${
+                      i >= heat.months.length - 4 ? "heat-month-slot-end" : ""
+                    }`}
+                  >
+                    {m ? <Text className='heat-month-label'>{m}</Text> : null}
+                  </View>
+                ))}
+              </View>
               <View className='heat-grid'>
                 {weeks.map((col, ci) => (
                   <View key={ci} className='heat-col'>
@@ -187,12 +213,7 @@ export default function Mine() {
                         className='heat-cell'
                         style={
                           count > 0
-                            ? {
-                                backgroundColor:
-                                  heatColors[
-                                    Math.min(4, Math.ceil(Math.log2(count + 1)))
-                                  ],
-                              }
+                            ? { backgroundColor: heatColors[levelOf(count)] }
                             : undefined
                         }
                       />

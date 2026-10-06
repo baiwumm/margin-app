@@ -89,6 +89,34 @@
 .heat-scroll {
   width: 100%;
 }
+/* 月份标签行：与网格同为 53 列 + 2rpx 间距 ⇒ 天然逐列对齐；标签绝对定位向右溢出到
+ * 后续空列（margin ContributionCalendar「标签允许溢出」同法）。18rpx 字号下「10月」
+ * 约 40rpx 宽，相邻月间隔约 52rpx，不会叠字。末 4 列改右对齐，避免最后一个月的标签
+ * 探出卡片被裁。 */
+.heat-months {
+  display: flex;
+  gap: 2rpx;
+  margin-bottom: 6rpx;
+}
+.heat-month-slot {
+  position: relative;
+  width: 10rpx;
+  height: 22rpx;
+}
+.heat-month-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 18rpx;
+  line-height: 22rpx;
+  color: var(--c-fg-45);
+}
+.heat-month-slot-end .heat-month-label {
+  left: auto;
+  right: 0;
+}
 .heat-grid {
   display: flex;
   gap: 2rpx;
