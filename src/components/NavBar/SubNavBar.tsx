@@ -11,6 +11,18 @@ import { STATUS_BAR } from "./NavBar";
 import "./NavBar.scss";
 import "./SubNavBar.scss";
 
+/* 微信右上角胶囊按钮占掉的右侧宽度（+8px 呼吸位）：标题必须让开它，
+ * 否则居中标题会钻到胶囊底下被截断（模拟器实测 cap.left=296 / win=390）。 */
+const CAP_RIGHT = (() => {
+  try {
+    const cap = Taro.getMenuButtonBoundingClientRect();
+    const win = Taro.getSystemInfoSync().windowWidth;
+    return cap && cap.left ? Math.max(0, win - cap.left + 8) : 0;
+  } catch {
+    return 0;
+  }
+})();
+
 interface SubNavBarProps {
   title: string;
   /** navAlpha(scrollTop) 的返回值（页面 usePageScroll 里 setState） */
@@ -22,7 +34,13 @@ export default function SubNavBar({ title, alpha = 0 }: SubNavBarProps) {
     <>
       <View className='nav-root'>
         <View className='nav-bg' style={{ opacity: alpha }} />
-        <View className='nav-row' style={{ paddingTop: `${STATUS_BAR}px` }}>
+        <View
+          className='nav-row'
+          style={{
+            paddingTop: `${STATUS_BAR}px`,
+            paddingRight: `${CAP_RIGHT}px`,
+          }}
+        >
           <View
             className='sub-nav-back'
             hoverClass='row-press'

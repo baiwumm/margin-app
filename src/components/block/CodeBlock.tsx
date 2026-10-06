@@ -4,7 +4,7 @@
  * - 文本由 tokens join 复原（不存纯文本），复制用 tokens 拼接；
  * - 行号 + 语言角标 + file 徽章 + 换行/滚动（M2 接偏好）。
  */
-import { Text, View } from "@tarojs/components";
+import { ScrollView, Text, View } from "@tarojs/components";
 
 import type { Block, CodeColors } from "@/types/api";
 
@@ -34,34 +34,36 @@ export function CodeBlock({ block }: { block: Extract<Block, { t: "code" }> }) {
           复制
         </View>
       </View>
-      <View className='code-block-body'>
-        {block.tokens.map((line, li) => (
-          <View key={li} className='code-line'>
-            <Text className='code-line-num'>{li + 1}</Text>
-            <Text className='code-line-content'>
-              {line.length === 0 ? (
-                " "
-              ) : (
-                line.map((token, ti) => {
-                  const c = token.c !== undefined ? codeColors[token.c] : undefined;
-                  return (
-                    <Text
-                      key={ti}
-                      style={
-                        c
-                          ? { color: `var(--code-c-${token.c}, #${c.light})` }
-                          : undefined
-                      }
-                    >
-                      {token.v}
-                    </Text>
-                  );
-                })
-              )}
-            </Text>
-          </View>
-        ))}
-      </View>
+      <ScrollView className='code-block-body' scrollX>
+        <View className='code-block-rows'>
+          {block.tokens.map((line, li) => (
+            <View key={li} className='code-line'>
+              <Text className='code-line-num'>{li + 1}</Text>
+              <Text className='code-line-content'>
+                {line.length === 0 ? (
+                  " "
+                ) : (
+                  line.map((token, ti) => {
+                    const c = token.c !== undefined ? codeColors[token.c] : undefined;
+                    return (
+                      <Text
+                        key={ti}
+                        style={
+                          c
+                            ? { color: `var(--code-c-${token.c}, #${c.light})` }
+                            : undefined
+                        }
+                      >
+                        {token.v}
+                      </Text>
+                    );
+                  })
+                )}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
       <View className='code-block-lines'>{block.lines} 行</View>
     </View>
   );

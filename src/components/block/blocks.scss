@@ -202,9 +202,16 @@
   color: var(--c-accent);
 }
 .code-block-body {
+  width: 100%;
   padding: 24rpx 0;
   white-space: nowrap;
-  overflow-x: auto;
+}
+/* 行容器用 inline-flex 列（同 mine 页 heat-grid 的 ScrollView 模式）：宽随最长行，
+ * ScrollView 才有确定的可滚区域。别在行上写 min-width:100%——百分比对着 shrink-to-fit
+ * 父盒算，实测 178 行直接把渲染层卡死（selector query 全部超时）。 */
+.code-block-rows {
+  display: inline-flex;
+  flex-direction: column;
 }
 .code-line {
   display: flex;
@@ -220,6 +227,7 @@
   color: var(--c-fg-45);
 }
 .code-line-content {
+  flex-shrink: 0;
   font-family: var(--font-mono);
   font-size: 26rpx;
   line-height: 1.6;
