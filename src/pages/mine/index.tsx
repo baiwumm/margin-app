@@ -7,7 +7,7 @@
  * （备案号展示挂 M4，D10）。
  * 数据接线不动：useSiteData + getStats（既有 service 回调模式，不新增 hook）。
  */
-import { Image, View, Text } from "@tarojs/components";
+import { Image, ScrollView, View, Text } from "@tarojs/components";
 import { useEffect, useMemo, useState } from "react";
 import { useDidShow, usePageScroll } from "@tarojs/taro";
 
