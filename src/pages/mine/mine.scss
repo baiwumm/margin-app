@@ -95,6 +95,9 @@
  * 探出卡片被裁。 */
 .heat-months {
   display: flex;
+  /* 两行同为 53 槽 = 634rpx、卡片内宽 654rpx，居中后左右各留 10rpx ⇒ 两侧留白对称
+   * （不居中时 20rpx 余量全堆在一边，实测看起来就是歪的），且两行槽位仍逐列对齐 */
+  justify-content: center;
   gap: 2rpx;
   margin-bottom: 6rpx;
 }
@@ -102,6 +105,7 @@
   position: relative;
   width: 10rpx;
   height: 22rpx;
+  flex-shrink: 0;
 }
 .heat-month-label {
   position: absolute;
@@ -113,17 +117,15 @@
   line-height: 22rpx;
   color: var(--c-fg-45);
 }
-.heat-month-slot-end .heat-month-label {
-  left: auto;
-  right: 0;
-}
 .heat-grid {
   display: flex;
+  justify-content: center;
   gap: 2rpx;
 }
 .heat-col {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: 2rpx;
 }
 .heat-cell {

@@ -110,6 +110,15 @@ export default function Mine() {
       cols.push(col);
       months.push(monthStart >= 0 ? `${monthStart + 1}月` : null);
     }
+    /* 标签防碰撞：53 列摊 12 个月 ≈ 每 4.3 列一个，而「10月」宽约 2.7 列 ⇒ 相邻月必叠
+     * （实测 9月/10月 撞成「9月0月」）。按 GitHub 的做法从左到右贪心，间距不足 5 列的
+     * 直接不标——宁可少标也不叠字，且不需要「末列右对齐」那种特例。 */
+    let lastLabelCol = -99;
+    for (let i = 0; i < months.length; i++) {
+      if (months[i] === null) continue;
+      if (i - lastLabelCol < 5) months[i] = null;
+      else lastLabelCol = i;
+    }
     return { cols, months, max };
   }, [stats]);
   const weeks = heat.cols;
@@ -194,12 +203,7 @@ export default function Mine() {
             <View className='heat-scroll'>
               <View className='heat-months'>
                 {heat.months.map((m, i) => (
-                  <View
-                    key={i}
-                    className={`heat-month-slot ${
-                      i >= heat.months.length - 4 ? "heat-month-slot-end" : ""
-                    }`}
-                  >
+                  <View key={i} className='heat-month-slot'>
                     {m ? <Text className='heat-month-label'>{m}</Text> : null}
                   </View>
                 ))}
