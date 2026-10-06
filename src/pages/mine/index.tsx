@@ -7,7 +7,7 @@
  * （备案号展示挂 M4，D10）。
  * 数据接线不动：useSiteData + getStats（既有 service 回调模式，不新增 hook）。
  */
-import { Image, ScrollView, View, Text } from "@tarojs/components";
+import { Image, View, Text } from "@tarojs/components";
 import { useEffect, useMemo, useState } from "react";
 import { useDidShow, usePageScroll } from "@tarojs/taro";
 
@@ -177,7 +177,7 @@ export default function Mine() {
         <SectionTitle title='Activity · 近一年' count={windowContrib > 0 ? `${windowContrib}` : undefined} />
         <View className='mine-heat card'>
           {weeks.length > 0 ? (
-            <ScrollView className='heat-scroll' scrollX enhanced showScrollbar={false}>
+            <View className='heat-scroll'>
               <View className='heat-grid'>
                 {weeks.map((col, ci) => (
                   <View key={ci} className='heat-col'>
@@ -200,7 +200,7 @@ export default function Mine() {
                   </View>
                 ))}
               </View>
-            </ScrollView>
+            </View>
           ) : (
             <Text className='heat-empty'>暂无活动数据</Text>
           )}

@@ -79,27 +79,29 @@
   color: var(--c-fg-mid);
 }
 
-/* ── 贡献日历（heat 网格横滚；格 18rpx 间距 4rpx）────────────────── */
+/* ── 贡献日历（近 53 周一屏放完：格 10rpx + 间距 2rpx ⇒ 53×10+52×2 = 634rpx
+ * ≤ 卡片内宽 654rpx（750 − 2×32 页边距 − 2×16 卡内边距），不横滚。
+ * 对齐 margin 的做法——它的格子是 flex-1 + aspect-square 靠容器撑开，端上
+ * 不赌 aspect-ratio（D20），改按 750 设计稿定档。强度色走内联 accentRgba。 ── */
 .mine-heat {
   padding: var(--sp-2);
 }
 .heat-scroll {
   width: 100%;
-  white-space: nowrap;
 }
 .heat-grid {
-  display: inline-flex;
-  gap: 4rpx;
+  display: flex;
+  gap: 2rpx;
 }
 .heat-col {
   display: flex;
   flex-direction: column;
-  gap: 4rpx;
+  gap: 2rpx;
 }
 .heat-cell {
-  width: 18rpx;
-  height: 18rpx;
-  border-radius: 4rpx;
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 2rpx;
   background-color: var(--c-fg-16); /* 有日历无文的空格也可见（margin gh-level-0） */
 }
 .heat-empty {
