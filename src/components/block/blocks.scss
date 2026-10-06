@@ -1,0 +1,248 @@
+/* 正文块排版（M2 步 4）。数值全部溯源 margin src/styles/typography.css 的
+ * `.app-prose { @apply prose … }` = Tailwind Typography 默认值 + margin 覆盖项。
+ * 约定：
+ *  · prose 自带的 em 值保持 em（随 --fs-body / 后续字号偏好缩放）；
+ *  · margin 用 Tailwind 绝对间距覆盖的地方按 750 设计稿换算成 rpx（1rem=16px=32rpx）；
+ *  · WXSS 硬约束（D20）：不用通配符、不用伪类、color-mix 一律预计算成 rgba 令牌。
+ * 指令块（linkcard/music/video/unknown）与代码配色不在本文件（M2 步 8 / 步 5）。 */
+
+.blocks {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--c-fg);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* ── 段落 / 标题（prose p margin 1.25em；h2 1.5em·1.333、h3 1.25em·1.6、
+      h4 1em·1.5；margin 用 mb-3 覆盖标题下距 = 24rpx）────────────────── */
+.block-p {
+  margin: 1.25em 0;
+}
+.block-h {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--c-fg);
+}
+.block-h-2 {
+  font-size: 1.5em;
+  line-height: 1.333;
+  margin: 2em 0 24rpx;
+}
+.block-h-3 {
+  font-size: 1.25em;
+  line-height: 1.6;
+  margin: 1.5em 0 24rpx;
+}
+.block-h-4 {
+  font-size: 1em;
+  line-height: 1.5;
+  margin: 1.5em 0 24rpx;
+}
+
+/* ── 引用（margin: rounded-r-xl + border-s-[3px] accent/80 + bg-accent/5
+      + py-4 pr-5 pl-6 + text-[1.05rem] + opacity-90；font-sriracha 不加载 = D4）── */
+.block-quote {
+  margin: 1.25em 0;
+  padding: 32rpx 40rpx 32rpx 48rpx;
+  border-left: 6rpx solid var(--c-accent-70); /* accent/80 → 现有档位取 70%（D24 预计算） */
+  border-radius: 0 24rpx 24rpx 0;
+  background-color: var(--c-accent-8); /* design.md §2 tint 底 8–10% 口径 */
+  color: var(--c-fg);
+  font-size: 1.05em;
+  opacity: 0.9;
+}
+
+/* ── 列表（prose ul/ol margin 1.25em + padding-left 1.625em + li .5em；
+      marker 色 = accent，由渲染器自绘 .block-list-dot / -num）────────────── */
+.block-list {
+  margin: 1.25em 0;
+  padding-left: 1.625em;
+}
+.block-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  margin: 0.5em 0;
+}
+.block-list-dot {
+  flex-shrink: 0;
+  width: 12rpx;
+  height: 12rpx;
+  margin-top: 22rpx; /* 与首行（30rpx × 1.75）视觉居中 */
+  border-radius: var(--r-full);
+  background-color: var(--c-accent);
+}
+.block-list-num {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  color: var(--c-accent);
+}
+
+/* ── 表格（margin: w-full table-auto border-collapse + th/td border border p-2、
+      th py-1.5；端上是 View 拼的，border-collapse 不可用，:last-child 又属 D20④
+      禁赌范围 → 每格画满四边、再用 -1rpx 负边距把相邻双线压成单线）─────────── */
+.block-table {
+  margin: 1.25em 0;
+  font-size: 0.875em;
+  line-height: 1.714;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+.block-table-row {
+  display: flex;
+  min-width: 100%;
+  margin-top: -1rpx;
+}
+.block-table-cell {
+  flex: 1 0 auto;
+  min-width: 128rpx;
+  padding: 16rpx;
+  border: 1rpx solid var(--c-border);
+  margin-right: -1rpx;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.block-table-head .block-table-cell {
+  padding-top: 12rpx;
+  padding-bottom: 12rpx;
+  font-weight: 600;
+}
+
+/* ── 分隔线（prose hr margin 3em 0 + margin border-border = #7cadff / #2264e3）─ */
+.block-hr {
+  height: 1rpx;
+  margin: 3em 0;
+  background-color: var(--c-border);
+}
+
+/* ── 图片（prose img margin 2em 0 + margin mx-auto rounded-xl；figcaption 75%）─ */
+.block-img {
+  max-width: 100%;
+  margin: 2em auto;
+  border-radius: 24rpx;
+  overflow: hidden;
+}
+.block-img-alt {
+  margin-top: 8rpx;
+  font-size: var(--fs-cap);
+  text-align: center;
+  color: var(--c-fg);
+  opacity: 0.75;
+}
+
+/* ── 行内修饰（margin a = font-medium + 1px accent/40 下划线、无 text-decoration；
+      inline code = rounded-md bg-muted/15 px-1.5 py-0.5 text-sm font-firacode）─ */
+.is-bold {
+  font-weight: 600;
+}
+.is-italic {
+  font-style: italic;
+}
+.is-strike {
+  text-decoration: line-through;
+}
+.link-ext,
+.link-int {
+  font-weight: 500;
+  color: var(--c-fg);
+  border-bottom: 1rpx solid var(--c-accent-40);
+  word-break: break-word;
+}
+.inline-code {
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  background-color: var(--c-muted-15);
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  color: var(--c-fg);
+}
+
+/* ── 代码块外壳（.astro-code = border + shiki 背景；行号/角标/复制条为端上形态）
+      token 配色由 M2 步 5 接 manifest codeColors，当前为单色 ───────────────── */
+.code-block {
+  margin: 1.5em 0;
+  border: 1rpx solid var(--c-border-20);
+  border-radius: var(--r-card);
+  background-color: var(--c-surface-2);
+  overflow: hidden;
+}
+.code-block-head {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 16rpx 24rpx;
+  border-bottom: 1rpx solid var(--c-border-20);
+  background-color: var(--c-surface);
+  font-family: var(--font-mono);
+  font-size: var(--fs-cap);
+  color: var(--c-fg-mid);
+}
+.code-block-lang {
+  color: var(--c-accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.code-block-file {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.7;
+}
+.code-block-copy {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 4rpx 20rpx;
+  border: 1rpx solid var(--c-accent-30);
+  border-radius: var(--r-full);
+  color: var(--c-accent);
+}
+.code-block-body {
+  padding: 24rpx 0;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+.code-line {
+  display: flex;
+}
+.code-line-num {
+  flex-shrink: 0;
+  width: 88rpx;
+  padding-right: 24rpx;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 26rpx;
+  line-height: 1.6;
+  color: var(--c-fg-45);
+}
+.code-line-content {
+  font-family: var(--font-mono);
+  font-size: 26rpx;
+  line-height: 1.6;
+  white-space: pre;
+  color: var(--c-fg);
+}
+.code-block-lines {
+  padding: 12rpx 24rpx;
+  border-top: 1rpx solid var(--c-border-20);
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cap);
+  color: var(--c-fg-45);
+}
+
+/* ── unknown 兜底（35 处/10 篇，视觉细化在 M2 步 8）──────────────────── */
+.block-unknown {
+  margin: 1.25em 0;
+  padding: 24rpx;
+  border: 1rpx dashed var(--c-border-40);
+  border-radius: var(--r-card);
+}
+.block-unknown-note {
+  font-size: var(--fs-sm);
+  color: var(--c-fg-45);
+}

@@ -8,6 +8,7 @@ import type { Block } from "@/types/api";
 import { CodeBlock } from "./CodeBlock";
 import { InlineText } from "./InlineText";
 import { BlockImage } from "./BlockImage";
+import "./blocks.scss";
 
 export function BlockRenderer({ blocks }: { blocks: Block[] }) {
   return (
