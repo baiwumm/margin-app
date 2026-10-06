@@ -67,7 +67,11 @@ export default function PostDetailPage() {
   };
 
   return (
-    <View className={`page page-bg ${rootCls} ${prefsClass(prefs)}`}>
+    <View
+      className={`page page-bg ${rootCls} ${prefsClass(prefs)} ${
+        prefs.readMode ? "read-mode" : ""
+      }`}
+    >
       <PageBackdrop />
       <SubNavBar title={detail?.meta.title ?? ""} alpha={alpha} />
       <View className='page-body detail'>

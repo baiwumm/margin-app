@@ -28,6 +28,7 @@ import {
 } from "@/config/accent";
 import { setSelectedTab } from "@/custom-tab-bar/store";
 import { setPrefs } from "@/utils/prefs";
+import { PREFERENCE } from "@/utils/routes";
 import type { Stats } from "@/types/api";
 import Taro from "@tarojs/taro";
 import "./mine.scss";
@@ -110,8 +111,12 @@ export default function Mine() {
     [weeks]
   );
 
-  const onRow = (label: string) => {
-    // M2（偏好）/ M4（收藏/历史/联系/免责声明）就绪前占位
+  const onRow = (key: string, label: string) => {
+    // 偏好页 M2 已就绪；其余（收藏/历史/联系/免责声明）M4 前占位
+    if (key === "prefs") {
+      void Taro.navigateTo({ url: PREFERENCE });
+      return;
+    }
     void Taro.showToast({ title: `${label}即将上线`, icon: "none" });
   };
 
@@ -210,7 +215,7 @@ export default function Mine() {
               className='mine-row'
               hoverClass='row-press'
               hoverStayTime={80}
-              onClick={() => onRow(row.label)}
+              onClick={() => onRow(row.key, row.label)}
             >
               <Text className='mine-row-label'>{row.label}</Text>
               <Text className='mine-row-arrow'>›</Text>

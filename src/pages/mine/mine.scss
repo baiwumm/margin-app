@@ -133,22 +133,12 @@
   color: var(--c-fg-45);
 }
 
-/* ── accent 五色圆点（margin accent-dots：激活 = fg75 描边 + glow）──────── */
+/* ── accent 五色圆点（圆点本体 .accent-dot* 已上移到 app.scss，与偏好页共用）── */
 .accent-dots {
   display: flex;
   align-items: center;
   gap: 20rpx;
   padding: var(--sp-1) 0;
-}
-.accent-dot {
-  width: 42rpx;
-  height: 42rpx;
-  border-radius: var(--r-full);
-  border: 4rpx solid transparent;
-}
-.accent-dot-active {
-  border-color: var(--c-fg-75);
-  box-shadow: 0 0 16rpx var(--c-accent-40);
 }
 
 /* ── 版权行 ───────────────────────────────────────────────────── */

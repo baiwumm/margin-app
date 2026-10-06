@@ -7,12 +7,17 @@ export default defineAppConfig({
     "pages/mine/index",
   ],
   darkmode: true, // 跟随系统暗色（WXSS @media prefers-color-scheme 生效开关）
-  // 分包 A = 内容与浏览类页面（requirements §6.2）。详情页分享 path 一旦发布即固化，
-  // 故按 §6.2 规划落 pagesA 而非主包（M4 还有 9 个二级页要进分包，主包预算 ≤1.5MB）。
+  // 分包 A = 内容与浏览类页面、分包 B = 个人与设置类页面（均按 requirements §6.2）。
+  // 详情页分享 path 一旦发布即固化，故按 §6.2 规划落分包而非主包（M4 还有 8 个二级页
+  // 要进分包，主包预算 ≤1.5MB）。
   subPackages: [
     {
       root: "pagesA",
       pages: ["post/detail"],
+    },
+    {
+      root: "pagesB",
+      pages: ["preference"],
     },
   ],
   preloadRule: {

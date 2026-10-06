@@ -1,0 +1,104 @@
+/* 偏好设置页（margin mobile-menu Preferences 小节同族语言：surface-2 底行 +
+ * accent 激活态；数值走 tokens.css，间距按 design.md §2 边距 32rpx / gap 16rpx）。 */
+.pref {
+  padding: 0 var(--sp-page) calc(96rpx + env(safe-area-inset-bottom, 0px));
+}
+.pref-group {
+  margin-top: var(--sp-4);
+}
+.pref-group-title {
+  display: block;
+  margin-bottom: var(--sp-2);
+  font-size: var(--fs-cap);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-accent);
+}
+.pref-group-body {
+  padding: var(--sp-3);
+  border: 1rpx solid var(--c-fg-6);
+  border-radius: var(--r-card);
+  background-color: var(--c-surface-2);
+}
+.pref-hint {
+  display: block;
+  margin-top: var(--sp-2);
+  font-size: var(--fs-cap);
+  color: var(--c-fg-45);
+}
+
+/* accent 圆点行（.accent-dot / .accent-dot-active 在 app.scss，与「我的」页共用） */
+.pref-dots {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: var(--sp-1) 0;
+}
+
+/* 分段选择（三档主题 / 三档行距） */
+.pref-segment {
+  display: flex;
+  gap: var(--sp-1);
+}
+.pref-seg-item {
+  flex: 1;
+  padding: 16rpx 0;
+  border: 1rpx solid var(--c-border-25);
+  border-radius: var(--r-sm);
+  text-align: center;
+}
+.pref-seg-active {
+  border-color: var(--c-accent-30);
+  background-color: var(--c-accent-8);
+}
+.pref-seg-label {
+  font-size: var(--fs-sm);
+  color: var(--c-fg-mid);
+}
+.pref-seg-active .pref-seg-label {
+  color: var(--c-accent);
+  font-weight: 600;
+}
+
+/* 字号步进器（margin ReadMode 的 −/+ 缩放交互，端上按 2rpx 步进） */
+.pref-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.pref-step {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1rpx solid var(--c-accent-30);
+  border-radius: var(--r-sm);
+  background-color: var(--c-accent-8);
+}
+.pref-step-sign {
+  font-size: 40rpx;
+  line-height: 1;
+  color: var(--c-accent);
+}
+.pref-step-value {
+  min-width: 128rpx;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-card);
+  color: var(--c-fg);
+}
+
+/* 开关行 */
+.pref-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.pref-switch-hint {
+  font-size: var(--fs-sm);
+  color: var(--c-fg-mid);
+}

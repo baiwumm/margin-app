@@ -164,6 +164,19 @@ page {
   color: var(--c-fg-mid);
 }
 
+/* ── accent 五色圆点（margin accent-dots：激活 = fg75 描边 + accent 辉光）
+ * 「我的」页与偏好页两处消费，故放全局层。 ───────────────────────────── */
+.accent-dot {
+  width: 42rpx;
+  height: 42rpx;
+  border-radius: var(--r-full);
+  border: 4rpx solid transparent;
+}
+.accent-dot-active {
+  border-color: var(--c-fg-75);
+  box-shadow: 0 0 16rpx var(--c-accent-40);
+}
+
 /* 列表入场（design.md §4：逐项错峰上浮，delay = index × 50ms 封顶 300ms） */
 @keyframes rise-in {
   from {

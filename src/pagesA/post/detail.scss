@@ -19,6 +19,22 @@
   color: var(--c-accent);
 }
 
+/* 阅读模式（D7：margin 的 r 键转偏好开关）。隐藏项对齐 margin ReadMode.astro:534-547
+ * 的 html[data-read-mode] 清单——装饰层 / 上下篇 /（步 6 的 TOC 与进度条也归这里撤）
+ * 只留正文；.post-header 下移 2.5rem 同 margin「标题别贴着顶」那条。
+ * 端上唯一偏离：顶栏不隐藏。margin 靠 r 键 + 底部悬浮条退出，两者都在 D7 不做清单里，
+ * 没有顶栏就没有退出入口。 */
+.read-mode .bg-grid,
+.read-mode .bg-noise {
+  display: none;
+}
+.read-mode .post-nav {
+  display: none;
+}
+.read-mode .post-header {
+  margin-top: 80rpx;
+}
+
 /* 上下篇（margin .post-pagination：grid-cols-2 gap-3 + rounded-2xl 描边卡） */
 .post-nav {
   display: grid;
