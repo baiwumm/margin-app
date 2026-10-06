@@ -468,3 +468,20 @@ page,
   --lh-body: 1.75;
   --lh-loose: 1.85; /* 瞬间正文（margin moment-text） */
 }
+
+/* ── 字号 / 行距偏好档（M2 步 3；requirements §10「正文 26–40rpx 可调」）────
+ * 为什么是构建期落死的类、而不是内联 style 挂 CSS 变量：rpx 由编译器换算，
+ * 把 `--fs-body: 32rpx` 写进内联样式再喂给 var() 属运行时赌注（D20 同族纪律）。
+ * 这些类挂在页面 root View 上 = 直接命中该元素，稳赢 `page` 传下来的继承值。
+ * 行距档用 lead- 前缀，避开已有的 --lh-loose（瞬间正文 1.85，语义不同）。 */
+.fs-26 { --fs-body: 26rpx; }
+.fs-28 { --fs-body: 28rpx; }
+.fs-30 { --fs-body: 30rpx; }
+.fs-32 { --fs-body: 32rpx; }
+.fs-34 { --fs-body: 34rpx; }
+.fs-36 { --fs-body: 36rpx; }
+.fs-38 { --fs-body: 38rpx; }
+.fs-40 { --fs-body: 40rpx; }
+.lead-tight { --lh-body: 1.6; }
+.lead-base { --lh-body: 1.75; } /* margin .app-prose 默认 */
+.lead-loose { --lh-body: 1.9; }

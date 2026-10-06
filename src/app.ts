@@ -1,12 +1,24 @@
 import { PropsWithChildren } from "react";
-import { useLaunch } from "@tarojs/taro";
+import Taro, { useLaunch } from "@tarojs/taro";
 
 import { perfLog } from "./utils/perf";
 import { setPlatformAdapter } from "./services/platform";
 import { taroAdapter } from "./services/taro-adapter";
+import { KEY_PREFS } from "./services/cache";
+import { setAccent } from "./config/accent";
+import { setThemePreference } from "./hooks/useTheme";
+import { getPrefs, hydratePrefs } from "./utils/prefs";
 import "./app.scss";
 
 setPlatformAdapter(taroAdapter);
+
+/* 偏好水合（M2 步 3）：必须在首帧前同步落到 theme/accent 单例，否则强制暗色或
+ * 非 blue accent 的用户会闪一帧默认浅色 + 蓝。这里直读 getStorageSync——cache 层的
+ * readCache 是异步的，等不到首帧之前；水合本身不回写（省一次无意义磁盘写）。 */
+hydratePrefs(Taro.getStorageSync(KEY_PREFS) || null);
+const bootPrefs = getPrefs();
+setThemePreference(bootPrefs.theme);
+setAccent(bootPrefs.accent);
 
 function App({ children }: PropsWithChildren) {
   useLaunch(() => {

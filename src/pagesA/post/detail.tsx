@@ -19,6 +19,7 @@ import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
 import { getPostDetail } from "@/services/api/collections";
 import { postDetailUrl } from "@/utils/routes";
+import { getPrefs, prefsClass, subscribePrefs } from "@/utils/prefs";
 import type { PostDetail, PostMeta } from "@/types/api";
 import "./detail.scss";
 
@@ -31,6 +32,9 @@ export default function PostDetailPage() {
   const [detail, setDetail] = useState<PostDetail | null>(null);
   const [failed, setFailed] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  // 字号/行距偏好（M2 步 3 机制）：订阅即时生效，落到 root 的 .fs-*/.lead-* 类
+  const [prefs, setPrefsState] = useState(getPrefs);
+  useEffect(() => subscribePrefs(setPrefsState), []);
   // 导航滚动渐显（0.05 档量化，与 tab 页同一套）
   const [alpha, setAlpha] = useState(0);
   usePageScroll(p => setAlpha(navAlpha(p.scrollTop)));
@@ -63,7 +67,7 @@ export default function PostDetailPage() {
   };
 
   return (
-    <View className={`page page-bg ${rootCls}`}>
+    <View className={`page page-bg ${rootCls} ${prefsClass(prefs)}`}>
       <PageBackdrop />
       <SubNavBar title={detail?.meta.title ?? ""} alpha={alpha} />
       <View className='page-body detail'>

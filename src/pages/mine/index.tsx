@@ -27,6 +27,7 @@ import {
   type AccentKey,
 } from "@/config/accent";
 import { setSelectedTab } from "@/custom-tab-bar/store";
+import { setPrefs } from "@/utils/prefs";
 import type { Stats } from "@/types/api";
 import Taro from "@tarojs/taro";
 import "./mine.scss";
@@ -228,6 +229,7 @@ export default function Mine() {
               hoverClass='row-press'
               onClick={() => {
                 setAccent(k);
+                setPrefs({ accent: k }); // D23：accent 持久化闭合（启动水合见 app.ts）
                 setAccentState(k);
               }}
             />
