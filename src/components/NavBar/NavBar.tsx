@@ -29,6 +29,21 @@ export const STATUS_BAR = (() => {
   }
 })();
 
+/**
+ * 微信右上角胶囊按钮占掉的右侧宽度（+8px 呼吸位），顶栏右侧内容必须让开它。
+ * 实测 iPhone 12/13 档 cap.left=296 / windowWidth=390 ⇒ 预留 102px；取不到时回落 0
+ * （不破坏原几何）。NavBar 与 SubNavBar 共用这一份，避免两栏各算各的。
+ */
+export const CAP_RIGHT = (() => {
+  try {
+    const cap = Taro.getMenuButtonBoundingClientRect();
+    const win = Taro.getSystemInfoSync().windowWidth;
+    return cap && cap.left ? Math.max(0, win - cap.left + 8) : 0;
+  } catch {
+    return 0;
+  }
+})();
+
 /** 滚动渐显 alpha（scrollY/360 封顶 1），量化到 0.05 档 */
 export function navAlpha(scrollTop: number): number {
   const a = Math.min(scrollTop / 360, 1);
@@ -56,7 +71,13 @@ export default function NavBar({ alpha = 0 }: NavBarProps) {
     <>
       <View className='nav-root'>
         <View className='nav-bg' style={{ opacity: alpha }} />
-        <View className='nav-row' style={{ paddingTop: `${STATUS_BAR}px` }}>
+        <View
+          className='nav-row'
+          style={{
+            paddingTop: `${STATUS_BAR}px`,
+            paddingRight: `${CAP_RIGHT}px`,
+          }}
+        >
           <View className='nav-logo'>
             <Image className='nav-mark' src={dark ? markDark : markLight} />
             <Image
