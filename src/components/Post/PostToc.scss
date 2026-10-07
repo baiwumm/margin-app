@@ -18,13 +18,29 @@
   color: var(--c-fg-75);
 }
 .toc-caret {
-  font-size: 28rpx;
-  line-height: 1;
-  color: var(--c-fg-45);
-  transition: transform 0.2s ease;
+  /* = margin summary::after（14px 框里的折角 7×3.5px、描边 1.46px、fg 45%）：
+     端上不用 mask/伪元素，改「两条边框的方框转 45°」——10rpx 方框转后正好
+     画出 14.1rpx(≈7.3px) 宽、7.1rpx 深的折角，3rpx 边框 ≈ margin 的 1.46px 描边。 */
+  position: relative;
+  width: 10rpx;
+  height: 10rpx;
+  flex-shrink: 0;
+  border-right: 3rpx solid var(--c-fg-45);
+  border-bottom: 3rpx solid var(--c-fg-45);
+  /* 画出的 V 只落在盒子中心以下（重心偏下 ~3.5rpx），用 top 补偿而不是
+     transform 内的位移：避开 D31 那条长度单位风险；展开态 V 朝上、偏移反向，
+     两态各一个符号正好对称。 */
+  top: -4rpx;
+  transform: rotate(45deg);
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .toc-caret-open {
-  transform: rotate(180deg);
+  /* margin details[open] summary::after = rotate(180°) + accent 70% */
+  border-color: var(--c-accent-70);
+  top: 4rpx;
+  transform: rotate(225deg);
 }
 .toc-list {
   display: flex;

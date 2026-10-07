@@ -33,11 +33,9 @@ export default function PostToc({ items, activeId, onJump }: PostTocProps) {
         onClick={() => setOpen(o => !o)}
       >
         <Text className='toc-title'>本页目录</Text>
-        <Text
+        <View
           className={`toc-caret ${open ? "toc-caret-open" : ""}`}
-        >
-          ⌄
-        </Text>
+        />
       </View>
       {open ? (
         <View className='toc-list'>
