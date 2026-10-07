@@ -1,15 +1,19 @@
 /**
  * CodeBlock：构建期 Shiki 预高亮 tokens 上色（零运行时解析）。
- * - 配色表由 manifest 下发（机制留接口：BLOCK_CODE_COLORS，M0 时为空表 → 退化为单色）；
+ * - 配色表 = manifest 的 additive 字段 `codeColors`（`utils/codeColors.ts` 读取，
+ *   由详情页注入 `setCodeColors`）；表为空（旧版本站点）时退回单色 = 默认字色；
  * - 文本由 tokens join 复原（不存纯文本），复制用 tokens 拼接；
- * - 行号 + 语言角标 + file 徽章 + 换行/滚动（M2 接偏好）。
+ * - 底色/默认字色取线上 `--shiki-*-bg` / `--shiki-*` 实测原值（margin .astro-code 同源）；
+ * - 行号 + 语言角标 + file 徽章 + 横向滚动（换行偏好走 M2 步 9）。
  */
 import { ScrollView, Text, View } from "@tarojs/components";
+import Taro from "@tarojs/taro";
 
+import { useTheme } from "@/hooks/useTheme";
+import { SHIKI_SURFACE, tokenColor } from "@/utils/codeColors";
 import type { Block, CodeColors } from "@/types/api";
 
-/** 配色表：M0 由 manifest 下发（api-contract §4 CodeColors 索引 c）。
- * 独立模块级变量，M1-b 接 manifest 后由 App 注入。 */
+/** 配色表：详情页拿到 manifest 后注入（模块级，整份文档共享） */
 let codeColors: CodeColors[] = [];
 
 export function setCodeColors(colors: CodeColors[]): void {
@@ -17,6 +21,8 @@ export function setCodeColors(colors: CodeColors[]): void {
 }
 
 export function CodeBlock({ block }: { block: Extract<Block, { t: "code" }> }) {
+  const theme = useTheme();
+  const surface = SHIKI_SURFACE[theme];
   const copyText = block.tokens.map(line => line.map(t => t.v).join("")).join("\n");
 
   return (
@@ -28,32 +34,35 @@ export function CodeBlock({ block }: { block: Extract<Block, { t: "code" }> }) {
         ) : null}
         <View
           className='code-block-copy'
-          // M2 接 Taro.setClipboardData（一期占位）
-          data-copy={copyText}
+          hoverClass='row-press'
+          hoverStayTime={80}
+          onClick={() => void Taro.setClipboardData({ data: copyText })}
         >
           复制
         </View>
       </View>
-      <ScrollView className='code-block-body' scrollX>
+      <ScrollView
+        className='code-block-body'
+        scrollX
+        style={{ backgroundColor: surface.bg }}
+      >
         <View className='code-block-rows'>
           {block.tokens.map((line, li) => (
             <View key={li} className='code-line'>
               <Text className='code-line-num'>{li + 1}</Text>
-              <Text className='code-line-content'>
+              <Text className='code-line-content' style={{ color: surface.fg }}>
                 {line.length === 0 ? (
                   " "
                 ) : (
                   line.map((token, ti) => {
-                    const c = token.c !== undefined ? codeColors[token.c] : undefined;
+                    const col = tokenColor(
+                      token.c === undefined ? undefined : codeColors[token.c],
+                      theme
+                    );
+                    /* 无颜色时整对象都不传：style={{color: undefined}} 会被序列化成
+                     * 畸形声明 `color:;`，实测足以把渲染层楔住（DOM 查询全部超时） */
                     return (
-                      <Text
-                        key={ti}
-                        style={
-                          c
-                            ? { color: `var(--code-c-${token.c}, #${c.light})` }
-                            : undefined
-                        }
-                      >
+                      <Text key={ti} style={col ? { color: col } : undefined}>
                         {token.v}
                       </Text>
                     );

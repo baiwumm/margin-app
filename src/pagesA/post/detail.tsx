@@ -17,6 +17,8 @@ import SubNavBar from "@/components/NavBar/SubNavBar";
 import { navAlpha, STATUS_BAR } from "@/components/NavBar/NavBar";
 import { BlockAssetsProvider } from "@/components/block/BlockImage";
 import { BlockRenderer } from "@/components/block/BlockRenderer";
+import { setCodeColors } from "@/components/block/CodeBlock";
+import { readCodeColors } from "@/utils/codeColors";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
 import { getPostDetail } from "@/services/api/collections";
@@ -52,6 +54,11 @@ export default function PostDetailPage() {
   // 字号/行距偏好（M2 步 3 机制）：订阅即时生效，落到 root 的 .fs-*/.lead-* 类
   const [prefs, setPrefsState] = useState(getPrefs);
   useEffect(() => subscribePrefs(setPrefsState), []);
+  /* 配色表与正文必须同源：codeColors 的索引顺序 = 同一个 buildId 那批正文的构建期累积顺序，
+   * 而 buildId 正是下面 getPostDetail 的缓存键成分，所以注入点就跟着 manifest 走 */
+  useEffect(() => {
+    setCodeColors(readCodeColors(manifest));
+  }, [manifest]);
   // 顶栏渐显 / 阅读进度 / TOC 命中 / 返回顶部浮现
   const [alpha, setAlpha] = useState(0);
   const [progress, setProgress] = useState(0);
