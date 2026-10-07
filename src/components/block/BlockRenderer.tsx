@@ -8,6 +8,7 @@ import type { Block } from "@/types/api";
 import { CodeBlock } from "./CodeBlock";
 import { InlineText } from "./InlineText";
 import { BlockImage } from "./BlockImage";
+import { LinkCardOf, VideoCard } from "./LinkCardBlock";
 import "./blocks.scss";
 
 export function BlockRenderer({ blocks }: { blocks: Block[] }) {
@@ -82,16 +83,7 @@ function BlockView({ block, index }: { block: Block; index: number }) {
     case "hr":
       return <View className='block-hr' />;
     case "linkcard":
-      // M2：卡片视觉 + 复制链接（D6 一期不外跳）；先做结构化占位
-      return (
-        <View className='block-linkcard'>
-          <View className='block-linkcard-title'>{block.title}</View>
-          {block.desc ? (
-            <View className='block-linkcard-desc'>{block.desc}</View>
-          ) : null}
-          <View className='block-linkcard-href'>{block.href}</View>
-        </View>
-      );
+      return <LinkCardOf block={block} />;
     case "music":
       // M2：MusicPlayer 卡片（D6 降级：卡片 + 复制链接）
       return (
@@ -101,12 +93,8 @@ function BlockView({ block, index }: { block: Block; index: number }) {
         </View>
       );
     case "video":
-      // M2：VideoPlayer（D6：封面 + 跳转/复制）
-      return (
-        <View className='block-video'>
-          <View className='block-video-title'>{block.title ?? block.id ?? block.src}</View>
-        </View>
-      );
+      // 只有 BV 号或异域 src ⇒ 一律降级引用卡（D8 无 web-view，契约 :173）
+      return <VideoCard block={block} />;
     case "unknown":
       return (
         <View className='block-unknown'>
