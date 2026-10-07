@@ -31,3 +31,24 @@
   width: 64rpx;
   flex-shrink: 0;
 }
+
+/* 阅读进度（margin PostDetails.astro createProgressBar：容器 h-0.5 w-full
+ * bg-background，条 h-0.5 rounded-full + accent 20%→60%→100% 横向渐变） */
+.nav-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4rpx;
+  background-color: var(--c-bg);
+}
+.nav-progress-bar {
+  height: 4rpx;
+  border-radius: var(--r-full);
+  background: linear-gradient(
+    90deg,
+    var(--c-accent-20),
+    var(--c-accent-60),
+    var(--c-accent)
+  );
+}

@@ -15,20 +15,16 @@ interface SubNavBarProps {
   title: string;
   /** navAlpha(scrollTop) 的返回值（页面 usePageScroll 里 setState） */
   alpha?: number;
+  /** 阅读进度 0–1（margin .progress-container：顶栏底沿 4rpx 渐变条） */
+  progress?: number;
 }
 
-export default function SubNavBar({ title, alpha = 0 }: SubNavBarProps) {
+export default function SubNavBar({ title, alpha = 0, progress = 0 }: SubNavBarProps) {
   return (
     <>
       <View className='nav-root'>
         <View className='nav-bg' style={{ opacity: alpha }} />
-        <View
-          className='nav-row'
-          style={{
-            paddingTop: `${STATUS_BAR}px`,
-            paddingRight: `${CAP_RIGHT}px`,
-          }}
-        >
+        <View className='nav-row' style={{ paddingTop: `${STATUS_BAR}px`, paddingRight: `${CAP_RIGHT}px` }}>
           <View
             className='sub-nav-back'
             hoverClass='row-press'
@@ -39,6 +35,12 @@ export default function SubNavBar({ title, alpha = 0 }: SubNavBarProps) {
           </View>
           <Text className='sub-nav-title'>{title}</Text>
           <View className='sub-nav-slot' />
+        </View>
+        <View className='nav-progress'>
+          <View
+            className='nav-progress-bar'
+            style={{ width: `${Math.round(Math.min(1, Math.max(0, progress)) * 100)}%` }}
+          />
         </View>
       </View>
       <View

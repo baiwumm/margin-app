@@ -6,13 +6,15 @@
  * TOC/进度、字号行距与阅读模式、代码配色、图片预览、指令块视觉、分享在后续单元。
  */
 import { Text, View } from "@tarojs/components";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Taro, { usePageScroll, useRouter } from "@tarojs/taro";
 
 import PageBackdrop from "@/components/deco/PageBackdrop";
+import BackToTop from "@/components/deco/BackToTop";
 import PostHeader from "@/components/Post/PostHeader";
+import PostToc from "@/components/Post/PostToc";
 import SubNavBar from "@/components/NavBar/SubNavBar";
-import { navAlpha } from "@/components/NavBar/NavBar";
+import { navAlpha, STATUS_BAR } from "@/components/NavBar/NavBar";
 import { BlockAssetsProvider } from "@/components/block/BlockImage";
 import { BlockRenderer } from "@/components/block/BlockRenderer";
 import { useManifest } from "@/hooks/useManifest";
@@ -22,6 +24,21 @@ import { postDetailUrl } from "@/utils/routes";
 import { getPrefs, prefsClass, subscribePrefs } from "@/utils/prefs";
 import type { PostDetail, PostMeta } from "@/types/api";
 import "./detail.scss";
+
+/** 视口高（滚动进度分母与「返回顶部」浮现阈值用） */
+const VIEWPORT_H = (() => {
+  try {
+    return Taro.getSystemInfoSync().windowHeight;
+  } catch {
+    return 667;
+  }
+})();
+
+/**
+ * 锚点线：顶栏底沿（状态栏 + 88rpx≈44px）+ 12px 呼吸位。margin 那边是写死的
+ * HEADER_OFFSET = 104px（sticky header 6rem + 余量），端上按自己的顶栏几何算等价值。
+ */
+const SPY_LINE = STATUS_BAR + 44 + 12;
 
 export default function PostDetailPage() {
   const rootCls = useRootClass();
@@ -35,9 +52,74 @@ export default function PostDetailPage() {
   // 字号/行距偏好（M2 步 3 机制）：订阅即时生效，落到 root 的 .fs-*/.lead-* 类
   const [prefs, setPrefsState] = useState(getPrefs);
   useEffect(() => subscribePrefs(setPrefsState), []);
-  // 导航滚动渐显（0.05 档量化，与 tab 页同一套）
+  // 顶栏渐显 / 阅读进度 / TOC 命中 / 返回顶部浮现
   const [alpha, setAlpha] = useState(0);
-  usePageScroll(p => setAlpha(navAlpha(p.scrollTop)));
+  const [progress, setProgress] = useState(0);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [showBtt, setShowBtt] = useState(false);
+  const scrollTopRef = useRef(0);
+  /** 各标题的文档绝对偏移（top）与对应 toc id —— 端上读不到 JSX 的 id 属性
+   * （boundingClientRect 回的 id 是 Taro 内部节点号），而 toc 与 .block-h 同为
+   * 文档序、同为 depth 2|3|4，故按序号配对，不需要 id 查询 */
+  const headsRef = useRef<{ id: string; top: number }[]>([]);
+  const rangeRef = useRef(1);
+
+  const measure = () => {
+    const q = Taro.createSelectorQuery();
+    q.selectAll(".block-h").boundingClientRect();
+    q.select(".page").boundingClientRect();
+    q.exec(res => {
+      const rects = (res?.[0] ?? []) as Array<{ top: number }>;
+      const pageBox = res?.[1] as { height?: number } | undefined;
+      const y = scrollTopRef.current;
+      const toc = detail?.toc ?? [];
+      headsRef.current = rects.map((r, i) => ({
+        id: toc[i]?.id ?? "",
+        top: r.top + y,
+      }));
+      rangeRef.current = Math.max(1, (pageBox?.height ?? 0) - VIEWPORT_H);
+    });
+  };
+
+  // 图片是 widthFix（高度要等加载完才知道），故渲染后补测一次，避免锚点偏移整体偏小
+  useEffect(() => {
+    if (!detail) return;
+    measure();
+    const t = setTimeout(measure, 1200);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [detail]);
+
+  usePageScroll(p => {
+    const y = p.scrollTop;
+    scrollTopRef.current = y;
+    setAlpha(navAlpha(y));
+    setProgress(Math.round((y / rangeRef.current) * 100) / 100);
+    setShowBtt(y > VIEWPORT_H);
+    const hs = headsRef.current;
+    if (hs.length === 0) return;
+    // 二分：最后一个「顶边已越过锚点线」的标题即当前小节（margin spy 同规则）
+    const line = y + SPY_LINE;
+    let lo = 0;
+    let hi = hs.length - 1;
+    let idx = 0;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      if (hs[mid].top <= line) {
+        idx = mid;
+        lo = mid + 1;
+      } else {
+        hi = mid - 1;
+      }
+    }
+    setActiveId(hs[idx].id || null);
+  });
+
+  const jumpTo = (id: string) => {
+    const hit = headsRef.current.find(h => h.id === id);
+    if (!hit) return;
+    void Taro.pageScrollTo({ scrollTop: Math.max(0, hit.top - SPY_LINE), duration: 200 });
+  };
 
   useEffect(() => {
     if (!buildId || !slug) return;
@@ -73,11 +155,14 @@ export default function PostDetailPage() {
       }`}
     >
       <PageBackdrop />
-      <SubNavBar title={detail?.meta.title ?? ""} alpha={alpha} />
+      <SubNavBar title={detail?.meta.title ?? ""} alpha={alpha} progress={progress} />
       <View className='page-body detail'>
         {detail ? (
           <>
             <PostHeader meta={detail.meta} />
+            {detail.toc.length > 0 ? (
+              <PostToc items={detail.toc} activeId={activeId} onJump={jumpTo} />
+            ) : null}
             <BlockAssetsProvider assets={detail.assets}>
               <BlockRenderer blocks={detail.blocks} />
             </BlockAssetsProvider>
@@ -116,6 +201,10 @@ export default function PostDetailPage() {
           <Text className='detail-loading'>加载中…</Text>
         )}
       </View>
+      <BackToTop
+        visible={showBtt}
+        onTop={() => void Taro.pageScrollTo({ scrollTop: 0, duration: 200 })}
+      />
     </View>
   );
 }

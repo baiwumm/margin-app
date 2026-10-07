@@ -31,6 +31,12 @@
 .read-mode .post-nav {
   display: none;
 }
+/* margin 的 data-read-mode 清单里 TOC、进度条、返回顶部都在撤除之列 */
+.read-mode .toc-card,
+.read-mode .nav-progress,
+.read-mode .btt {
+  display: none;
+}
 .read-mode .post-header {
   margin-top: 80rpx;
 }
