@@ -86,7 +86,16 @@ export type Block =
   | { t: "table"; head: Inline[][]; rows: Inline[][][] }
   | { t: "hr" }
   | { t: "linkcard"; href: string; title: string; desc?: string; icon?: string }
-  | { t: "music"; platform: "netease" | "qq"; id: string; audio?: string }
+  | {
+      t: "music";
+      platform: "netease" | "qq";
+      id: string;
+      audio?: string;
+      /** margin 构建期从 music-cache.json 同源下发；未缓存的 id 三个字段一起缺席 */
+      name?: string;
+      artist?: string;
+      cover?: string;
+    }
   | {
       t: "video";
       id?: string;

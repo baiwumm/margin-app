@@ -1,14 +1,15 @@
 /**
  * music 块：黑胶风格播放卡（margin Music.astro + music.css 同族）。
  *
- * 数据只有 `{platform, id, audio?}` —— 契约里**没有**歌名/歌手/封面（margin 侧是构建期
- * resolveTrack 抓的，端上拿不到），所以文字区只放平台标签 + 曲库 id，不编造歌名。
+ * 数据 = `{platform, id, audio?, name?, artist?, cover?}`。后三个是 margin 构建期从
+ * music-cache.json 同源下发的；未缓存的 id 会三个字段一起缺席（导出层禁联网，不为了
+ * 补字段在构建期发请求），此时退回「曲库 ID + 占位盘心」，不编造歌名。
  *
  * 能不能播：`audio` 是自托管在同域的 `/audio/<id>.mp3`（实测 200、audio/mpeg、约 2.4MB，
  * 已在域名白名单内）⇒ 用 InnerAudioContext 直接播；没有 audio 或播放出错时按 R4/D8
  * 降级成「复制链接」。同一篇文章里多张卡互斥（margin 用全局音频单例，这里同族做法）。
  */
-import { Text, View } from "@tarojs/components";
+import { Image, Text, View } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { useEffect, useRef, useState } from "react";
 
@@ -95,14 +96,24 @@ export default function MusicBlock({ block }: MusicBlockProps) {
       <View className='music-vinyl'>
         <View className={`music-disc ${playing ? "music-spin" : ""}`}>
           <View className='music-grooves' />
-          <View className='music-cover-hole' />
+          {block.cover ? (
+            /* 封面是平台 CDN 的远程图（music.163.com / y.gtimg.cn），不走 request 域名
+             * 白名单那套校验；万一端上取不到，Image 只是留空，盘面纹路 + 占位底色仍在，
+             * 不会塌成空卡（同 margin 的 .music-cover-placeholder 降级）。 */
+            <Image className='music-cover' src={block.cover} mode='aspectFill' />
+          ) : (
+            <View className='music-cover-hole' />
+          )}
         </View>
       </View>
       <View className='music-body'>
         <View className='music-title-row'>
           <View className='music-titles'>
             <Text className='music-platform'>{PLATFORM_LABEL[block.platform]}</Text>
-            <Text className='music-name'>曲库 ID {block.id}</Text>
+            <Text className='music-name'>{block.name ?? `曲库 ID ${block.id}`}</Text>
+            {block.artist ? (
+              <Text className='music-artist'>{block.artist}</Text>
+            ) : null}
           </View>
           <View className='music-toggle' hoverClass='row-press' onClick={toggle}>
             <Text className='music-toggle-icon'>{playing ? "❙❙" : "▶"}</Text>

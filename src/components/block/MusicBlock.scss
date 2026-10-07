@@ -68,8 +68,18 @@
     transform: rotate(360deg);
   }
 }
-/* 契约的 music 块只有 {platform,id,audio}、没有歌名/歌手/封面（margin 侧是构建期
- * resolveTrack 抓的），所以文字区只标「平台 + 曲库 ID」，不编造歌名，盘心一律占位 */
+/* 盘心：契约的 music 块带 name/artist/cover（margin 构建期从 music-cache.json 同源下发，
+ * 未缓存到的 id 三个字段会一起缺席）⇒ 有封面贴封面，没有才落 margin 的 .music-cover-placeholder
+ * 占位；文字区同理「真歌名优先，取不到才退回曲库 ID」，不编造。 */
+.music-cover {
+  position: relative; /* 压在绝对定位的纹路层之上 */
+  z-index: 1;
+  width: 78%; /* margin .music-cover */
+  height: 78%;
+  border: 4rpx solid var(--c-bg); /* margin 2px solid background/80 */
+  border-radius: var(--r-full);
+  box-shadow: 0 0 0 6rpx var(--c-fg-16); /* margin 3px ring = foreground 12% → 现有档 16 */
+}
 .music-cover-hole {
   position: relative; /* 压在绝对定位的纹路层之上 */
   z-index: 1;
@@ -114,6 +124,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.music-artist {
+  font-size: 26rpx; /* margin .8125rem */
+  line-height: 1.4;
+  color: var(--c-fg-mid); /* foreground 60% */
 }
 
 /* ── 播放按钮 ── */

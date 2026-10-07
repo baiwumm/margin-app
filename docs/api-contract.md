@@ -190,7 +190,8 @@ type Block =
   | { t: 'hr' }
   // ── 三类自定义指令，由 parse* 直接给出，不经过 HTML 串 ──
   | { t: 'linkcard'; href: string; title: string; desc?: string; icon?: string }
-  | { t: 'music';    platform: 'netease' | 'qq'; id: string; audio?: string }
+  | { t: 'music';    platform: 'netease' | 'qq'; id: string; audio?: string;
+                 name?: string; artist?: string; cover?: string }
   | { t: 'video';    id?: string; src?: string; poster?: string; title?: string; ratio?: string }
   // ── 兜底：未识别的节点不丢内容 ──
   | { t: 'unknown'; raw: string };
