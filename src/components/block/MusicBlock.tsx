@@ -94,6 +94,7 @@ export default function MusicBlock({ block }: MusicBlockProps) {
     <View className={`music-card ${playing ? "music-playing" : ""}`}>
       <View className='music-vinyl'>
         <View className={`music-disc ${playing ? "music-spin" : ""}`}>
+          <View className='music-grooves' />
           <View className='music-cover-hole' />
         </View>
       </View>

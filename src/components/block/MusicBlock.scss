@@ -35,15 +35,27 @@
   width: 100%;
   height: 100%;
   border-radius: var(--r-full);
-  background: repeating-radial-gradient(
-      circle at center,
-      var(--c-fg-16) 0 2rpx,
-      transparent 2rpx 6rpx
-    ),
-    radial-gradient(circle at 35% 30%, var(--c-fg-16), var(--c-fg-6) 70%);
+  /* 底色单独一层：autoprefixer 会把 repeating-radial-gradient 改写成旧 webkit 语法
+   * 且不保留标准写法（实测产物只剩 -webkit-repeating-radial-gradient(center,circle,…)），
+   * 两条梯度写在同一条 background 里会「一起有效或一起被判无效」⇒ 拆给子层，
+   * 最坏只掉纹路，盘面不消失。 */
+  background: radial-gradient(circle at 35% 30%, var(--c-fg-16), var(--c-fg-6) 70%);
   box-shadow: inset 0 0 0 1rpx var(--c-fg-6),
     0 8rpx 28rpx -12rpx var(--c-fg-45);
   overflow: hidden;
+}
+.music-grooves {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: var(--r-full);
+  background: repeating-radial-gradient(
+    circle at center,
+    var(--c-fg-16) 0 2rpx,
+    transparent 2rpx 6rpx
+  );
 }
 .music-spin {
   animation: music-spin 8s linear infinite;
@@ -56,8 +68,11 @@
     transform: rotate(360deg);
   }
 }
-/* 契约里 music 块没有封面字段（margin 是构建期抓的），故一律走占位盘心 */
+/* 契约的 music 块只有 {platform,id,audio}、没有歌名/歌手/封面（margin 侧是构建期
+ * resolveTrack 抓的），所以文字区只标「平台 + 曲库 ID」，不编造歌名，盘心一律占位 */
 .music-cover-hole {
+  position: relative; /* 压在绝对定位的纹路层之上 */
+  z-index: 1;
   width: 70%;
   height: 70%;
   border: 4rpx solid var(--c-bg);
