@@ -9,6 +9,7 @@ import { CodeBlock } from "./CodeBlock";
 import { InlineText } from "./InlineText";
 import { BlockImage } from "./BlockImage";
 import { LinkCardOf, VideoCard } from "./LinkCardBlock";
+import MusicBlock from "./MusicBlock";
 import "./blocks.scss";
 
 export function BlockRenderer({ blocks }: { blocks: Block[] }) {
@@ -85,13 +86,8 @@ function BlockView({ block, index }: { block: Block; index: number }) {
     case "linkcard":
       return <LinkCardOf block={block} />;
     case "music":
-      // M2：MusicPlayer 卡片（D6 降级：卡片 + 复制链接）
-      return (
-        <View className='block-music'>
-          <View className='block-music-platform'>{block.platform}</View>
-          <View className='block-music-id'>id: {block.id}</View>
-        </View>
-      );
+      // 自托管同域 mp3 可直接播；无 audio / 播放失败 ⇒ 卡内降级成复制链接（R4）
+      return <MusicBlock block={block} />;
     case "video":
       // 只有 BV 号或异域 src ⇒ 一律降级引用卡（D8 无 web-view，契约 :173）
       return <VideoCard block={block} />;

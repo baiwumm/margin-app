@@ -1,0 +1,154 @@
+/* 音乐卡（margin music.css 逐值换算，1rem=32rpx；color-mix 一律落到现有预计算令牌，
+ * 端上不做运行时模糊 ⇒ margin 的 backdrop-filter 不复刻）。
+ * 播放态（margin .music-card.is-playing）：描边转 accent、底转 accent tint、加投影，
+ * 黑胶 8s 匀速转（transform 只给角度，D31 之后不给 rpx）。 */
+.music-card {
+  display: flex;
+  align-items: center;
+  gap: 35rpx; /* 1.1rem */
+  margin: 56rpx 0; /* margin-block 1.75rem */
+  padding: 32rpx 36rpx; /* 1rem 1.1rem */
+  border: 1rpx solid var(--c-border-30);
+  border-radius: 40rpx; /* 1.25rem */
+  background-color: var(--c-muted-12);
+}
+.music-playing {
+  border-color: var(--c-accent-40); /* accent/45 → 现有档 40 */
+  background-color: var(--c-accent-8); /* accent/5 按 design.md §2 tint 口径 */
+  box-shadow: 0 28rpx 72rpx -32rpx var(--c-accent-40);
+}
+
+/* ── 黑胶 ── */
+.music-vinyl {
+  flex-shrink: 0;
+  width: 136rpx; /* 4.25rem */
+  height: 136rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.music-disc {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--r-full);
+  background: repeating-radial-gradient(
+      circle at center,
+      var(--c-fg-16) 0 2rpx,
+      transparent 2rpx 6rpx
+    ),
+    radial-gradient(circle at 35% 30%, var(--c-fg-16), var(--c-fg-6) 70%);
+  box-shadow: inset 0 0 0 1rpx var(--c-fg-6),
+    0 8rpx 28rpx -12rpx var(--c-fg-45);
+  overflow: hidden;
+}
+.music-spin {
+  animation: music-spin 8s linear infinite;
+}
+@keyframes music-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* 契约里 music 块没有封面字段（margin 是构建期抓的），故一律走占位盘心 */
+.music-cover-hole {
+  width: 70%;
+  height: 70%;
+  border: 4rpx solid var(--c-bg);
+  border-radius: var(--r-full);
+  background-color: var(--c-accent-20); /* accent/18 → 现有档 20 */
+}
+
+/* ── 文字区 ── */
+.music-body {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 13rpx; /* .4rem */
+}
+.music-title-row {
+  display: flex;
+  align-items: center;
+  gap: 29rpx; /* .9rem */
+  min-width: 0;
+}
+.music-titles {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5rpx;
+}
+.music-platform {
+  font-size: 20rpx; /* .625rem */
+  letter-spacing: 0.14em;
+  color: var(--c-fg-55);
+}
+.music-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--c-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── 播放按钮 ── */
+.music-toggle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 77rpx; /* 2.4rem */
+  height: 77rpx;
+  border: 1rpx solid var(--c-accent-40);
+  border-radius: var(--r-full);
+  background-color: var(--c-accent-12);
+}
+.music-toggle-icon {
+  font-size: 26rpx;
+  line-height: 1;
+  color: var(--c-accent);
+}
+
+/* ── 进度条与时间行 ── */
+.music-progress {
+  width: 100%;
+  height: 8rpx; /* 4px */
+  margin-top: 13rpx;
+  border-radius: var(--r-full);
+  background-color: var(--c-border-35);
+  overflow: hidden;
+}
+.music-progress-fill {
+  height: 100%;
+  border-radius: var(--r-full);
+  /* margin: accent → mix(accent 70%, foreground)；端上取预计算的 accent-mix 作终点 */
+  background: linear-gradient(90deg, var(--c-accent), var(--c-accent-mix));
+}
+.music-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+  margin-top: 11rpx;
+  min-width: 0;
+}
+.music-time {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 22rpx; /* .7rem */
+  color: var(--c-fg-55);
+}
+.music-note {
+  font-size: 22rpx;
+  color: var(--c-accent-70); /* accent/80 → 现有档 70 */
+}
