@@ -35,12 +35,15 @@
   left: 40%;
   animation: aurora-orb-3 11s ease-in-out infinite alternate;
 }
+/* 光球漂移：位移一律用 px —— WXSS 不换算 transform 里的 rpx，整条 transform
+ * 会被判非法丢弃（实测：改前三个光球在模拟器里纹丝不动，D20⑥）。
+ * 换算按 750 设计稿 1rpx = 0.5px。 */
 @keyframes aurora-orb-1 {
   0% {
     transform: translate(0, 0) scale(1);
   }
   100% {
-    transform: translate(80rpx, 40rpx) scale(1.2);
+    transform: translate(40px, 20px) scale(1.2);
   }
 }
 @keyframes aurora-orb-2 {
@@ -48,7 +51,7 @@
     transform: translate(0, 0) scale(1);
   }
   100% {
-    transform: translate(-60rpx, 60rpx) scale(1.15);
+    transform: translate(-30px, 30px) scale(1.15);
   }
 }
 @keyframes aurora-orb-3 {
@@ -56,7 +59,7 @@
     transform: translate(0, 0) scale(1);
   }
   100% {
-    transform: translate(40rpx, -50rpx) scale(1.1);
+    transform: translate(20px, -25px) scale(1.1);
   }
 }
 

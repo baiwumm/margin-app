@@ -150,7 +150,7 @@ page {
     transform: translateY(0);
   }
   100% {
-    transform: translateY(-16rpx);
+    transform: translateY(-8px); /* rpx 在 transform 里不换算（D20⑥），只能给 px */
   }
 }
 .empty-title {
@@ -181,7 +181,7 @@ page {
 @keyframes rise-in {
   from {
     opacity: 0;
-    transform: translateY(24rpx);
+    transform: translateY(12px); /* 24rpx 等价值；rpx 在 transform 里不换算（D20⑥） */
   }
   to {
     opacity: 1;
