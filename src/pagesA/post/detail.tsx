@@ -27,6 +27,7 @@ import { readCodeColors } from "@/utils/codeColors";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
 import { getPostDetail } from "@/services/api/collections";
+import { perfLog } from "@/utils/perf";
 import { postDetailUrl } from "@/utils/routes";
 import { getPrefs, prefsClass, subscribePrefs } from "@/utils/prefs";
 import type { PostDetail, PostMeta } from "@/types/api";
@@ -70,6 +71,7 @@ export default function PostDetailPage() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [showBtt, setShowBtt] = useState(false);
   const scrollTopRef = useRef(0);
+  const arriveRef = useRef(0);
   /** 各标题的文档绝对偏移（top）与对应 toc id —— 端上读不到 JSX 的 id 属性
    * （boundingClientRect 回的 id 是 Taro 内部节点号），而 toc 与 .block-h 同为
    * 文档序、同为 depth 2|3|4，故按序号配对，不需要 id 查询 */
@@ -100,6 +102,16 @@ export default function PostDetailPage() {
     const t = setTimeout(measure, 1200);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [detail]);
+
+  /* 性能基线打点（M3 前置，D21 同族，M5 提审前随 utils/perf 一起拆）：
+   * 「可渲」= 逻辑层已把整棵正文 vnode 交给渲染层的时刻，「首屏落地」= 渲染层把这一轮
+   * setData 用完、nextTick 回调跑起来的时刻 —— 后者才是用户看见字的点，两者之差就是
+   * 渲染层耗时，也是 1000 行形态唯一会放大的那一段。 */
+  useEffect(() => {
+    if (!detail) return;
+    perfLog("详情页可渲");
+    Taro.nextTick(() => perfLog("详情页首屏落地"));
   }, [detail]);
 
   usePageScroll(p => {
@@ -142,6 +154,9 @@ export default function PostDetailPage() {
     void getPostDetail(buildId, slug, d => {
       if (!alive) return;
       got = true;
+      arriveRef.current += 1;
+      // #1 = 缓存命中或首次网络到达；出现 #2 说明缓存先给、网络后覆盖（M2 的 cache-first 形态）
+      perfLog(`详情页数据到达 #${arriveRef.current}`);
       setDetail(d);
     });
     // loadWithCache 返回 void 且吞掉所有网络错误（collections.ts:46-48/65-80），
