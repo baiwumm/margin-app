@@ -237,6 +237,9 @@
      现在宽度由 tsx 按 total 的位数给内联 `min-width: Nch`（ch = 等宽字形的 0 宽 ⇒ 自校准，
      1000 行的 4 位数也不会挤），这里只留 16rpx 的数字-代码间隙。 */
   flex-shrink: 0;
+  /* 左边留 20rpx（≈10px）：列宽改成按位数自校准后，1 位数的块行号几乎贴着边框（数字左边缘
+     距块左只有 1px 边框），用户报「太贴边了，给个 10 像素间距」 */
+  padding-left: 20rpx;
   padding-right: 16rpx;
   text-align: right;
   font-family: var(--font-mono);
