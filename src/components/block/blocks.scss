@@ -216,6 +216,12 @@
 .code-line {
   display: flex;
 }
+/* 长块的未渲占位片（M2 步 9）：高度由 tsx 按「未渲行数 × 实测行高」给内联 px，
+ * 这里只保证它在 column flex 里不被压缩。顶住高度是为了让文档总高第一帧就正确
+ * ⇒ detail 页的 TOC 锚点偏移表、进度条分母都不会因为分片追加而漂（也就不用改 measure 通路）。 */
+.code-block-tail {
+  flex-shrink: 0;
+}
 .code-line-num {
   flex-shrink: 0;
   width: 88rpx;
