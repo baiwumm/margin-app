@@ -10,6 +10,7 @@ import {
   type CodeRun,
 } from "@/utils/codeTokens";
 import type { CodeToken } from "@/types/api";
+import fixture from "./golden/code-tokens-real.json";
 
 /** 配色表桩：下标即 CodeToken.c，越界返回 undefined（与 tokenColor 的缺色回落同形） */
 const TABLE: (string | undefined)[] = ["#d73a49", "#005cc5", "#22863a", "#6f42c1"];
@@ -131,5 +132,49 @@ describe("分片行区间", () => {
 describe("占位高度常量", () => {
   it("行盒算式与 blocks.scss 对齐：26rpx × 1.6", () => {
     expect(CODE_ROW_RPX).toBeCloseTo(41.6, 10);
+  });
+});
+
+/* 真实语料金标准（test/golden/code-tokens-real.json，脚本 make-fixture.mjs 从线上
+ * r254pvqf 的最大代码块抽 26 行样本，2026-10-08 抓）。这个块是全语料 token 最密的一块
+ * （1173 token / 125 行），样本合并率 16.95% 是**上界**；语料整体只 3.65%（见 stats2.json）。
+ * 数字写死在这里，不是让被测函数自己算自己。 */
+describe("真实语料 fixture（线上 r254pvqf 行样本）", () => {
+  const stubColorOf = (c: number | undefined) => (c === undefined ? undefined : `#${c}`);
+  const lines = fixture.lines as CodeToken[][];
+  const golden = fixture.golden as {
+    lines: number;
+    tokens: number;
+    runsByIndex: number;
+    mergedLinesByIndex: number;
+  };
+
+  it("样本形状没被改动（行条数 / token 总数对得上）", () => {
+    expect(lines).toHaveLength(golden.lines);
+    expect(lines.reduce((s, l) => s + l.length, 0)).toBe(golden.tokens);
+  });
+
+  it("每一行合并后逐字等价 —— 真实 Shiki 样本上文本不能掉一个字符", () => {
+    for (const line of lines) {
+      expect(joinRuns(mergeRuns(line, stubColorOf))).toBe(
+        line.map(tk => tk.v).join("")
+      );
+    }
+  });
+
+  it(`236 token → 196 run，且 ${golden.mergedLinesByIndex} 行真的被合并过（探针响过）`, () => {
+    const merged = lines.map(line => mergeRuns(line, stubColorOf));
+    const runCount = merged.reduce((s, r) => s + r.length, 0);
+    expect(runCount).toBe(golden.runsByIndex);
+    expect(runCount).toBeLessThan(golden.tokens); // 恒等实现会在这里露馅
+    expect(merged.filter((r, i) => r.length < lines[i].length).length).toBe(
+      golden.mergedLinesByIndex
+    );
+  });
+
+  it("样本里的空行渲成 0 个 run（由调用方落一个占位空格）", () => {
+    const empties = lines.filter(l => l.length === 0);
+    expect(empties.length).toBeGreaterThan(0);
+    for (const line of empties) expect(mergeRuns(line, stubColorOf)).toEqual([]);
   });
 });
