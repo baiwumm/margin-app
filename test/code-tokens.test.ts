@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   CODE_CHUNK_ROWS,
+  CODE_ROW_EM,
   CODE_ROW_RPX,
   chunked,
   firstRows,
@@ -132,6 +133,11 @@ describe("分片行区间", () => {
 describe("占位高度常量", () => {
   it("行盒算式与 blocks.scss 对齐：26rpx × 1.6", () => {
     expect(CODE_ROW_RPX).toBeCloseTo(41.6, 10);
+  });
+
+  it("占位片走 em（1 行 = 1.6em，em 基数 = .code-block-tail 的 font-size 26rpx）", () => {
+    expect(CODE_ROW_EM).toBe(1.6);
+    expect(26 * CODE_ROW_EM).toBe(CODE_ROW_RPX);
   });
 });
 

@@ -216,11 +216,15 @@
 .code-line {
   display: flex;
 }
-/* 长块的未渲占位片（M2 步 9）：高度由 tsx 按「未渲行数 × 实测行高」给内联 px，
- * 这里只保证它在 column flex 里不被压缩。顶住高度是为了让文档总高第一帧就正确
- * ⇒ detail 页的 TOC 锚点偏移表、进度条分母都不会因为分片追加而漂（也就不用改 measure 通路）。 */
+/* 长块的未渲占位片（M2 步 9）：高度由 tsx 给内联 `未渲行数 × 1.6em`，这里的 font-size
+ * 就是 em 的基数 —— 必须与 .code-line-num / .code-line-content 的 26rpx 同值，占位的
+ * 1.6em 才正好等于一个行盒（内核会把 26rpx 字号量化，实测行盒 20.796875px ≠ 按
+ * windowWidth 换算的 21.632px ⇒ 别在 JS 里算 px，让它跟着 CSS 走）。
+ * 顶住高度是为了让文档总高第一帧就正确 ⇒ detail 页的 TOC 锚点偏移表、进度条分母
+ * 都不会因为分片追加而漂（也就不用改 measure 通路）。 */
 .code-block-tail {
   flex-shrink: 0;
+  font-size: 26rpx;
 }
 .code-line-num {
   flex-shrink: 0;
