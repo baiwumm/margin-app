@@ -80,28 +80,33 @@
   color: var(--c-accent);
 }
 
-/* ── 表格（margin: w-full table-auto border-collapse + th/td border border p-2、
-      th py-1.5；端上是 View 拼的，border-collapse 不可用，:last-child 又属 D20④
-      禁赌范围 → 每格画满四边、再用 -1rpx 负边距把相邻双线压成单线）─────────── */
+/* ── 表格（margin typography.css：`.app-prose table { w-full table-auto border-collapse }`
+      + `th,td { border border-border p-2; word-wrap/word-break: break-word; hyphens: auto }`、
+      th 再 py-1.5）
+      端上原来用 flex 拼格子：`flex: 1 0 auto` 不可收缩 ⇒ 内容一宽就把整行顶出容器，
+      而外层是普通 View + `overflow-x: auto`（微信里 View 不产生滚动，同 b41e616 代码块那个坑）
+      ⇒ 右边那截永久看不见（用户截图实测：4 列表格最右格顶到 x=658.5，容器只有 358px 宽）。
+      改成 CSS 表格语义 display:table / table-row / table-cell ⇒ 列宽按内容自动分配、跨行天然对齐、
+      格内换行塞满 100% 宽（与站点同形）；border-collapse 顺带把相邻双线压成单线，
+      原来的 `-1rpx` 负边距 hack 一并删掉。D20④ 的禁赌项是伪类与属性选择器，display:table 不在其列。
+      已知边界：列数多到「各列最小内容宽之和 > 容器」时仍会溢出且不可横滚（站点那边同样靠页面
+      滚动兜）⇒ 语料实测最宽 4 列未触发；真需要再加 ScrollView 包一层（代码块那套已验过）。 ── */
 .block-table {
+  display: table;
+  width: 100%;
+  table-layout: auto;
+  border-collapse: collapse;
   margin: 1.25em 0;
   font-size: 0.875em;
   line-height: 1.714;
-  white-space: nowrap;
-  overflow-x: auto;
 }
 .block-table-row {
-  display: flex;
-  min-width: 100%;
-  margin-top: -1rpx;
+  display: table-row;
 }
 .block-table-cell {
-  flex: 1 0 auto;
-  min-width: 128rpx;
+  display: table-cell;
   padding: 16rpx;
   border: 1rpx solid var(--c-border);
-  margin-right: -1rpx;
-  white-space: normal;
   word-break: break-word;
   overflow-wrap: break-word;
 }
