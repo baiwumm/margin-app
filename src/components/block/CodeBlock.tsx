@@ -18,12 +18,10 @@ import { useTheme } from "@/hooks/useTheme";
 import { SHIKI_SURFACE, tokenColor } from "@/utils/codeColors";
 import {
   CODE_ROW_EM,
-  CODE_ROW_RPX,
   firstRows,
   hiddenRows,
   mergeRuns,
   nextRows,
-  rpxToPx,
 } from "@/utils/codeTokens";
 import type { Block, CodeColors } from "@/types/api";
 
@@ -34,18 +32,19 @@ export function setCodeColors(colors: CodeColors[]): void {
   codeColors = colors;
 }
 
-/** 视口尺寸：宽用来换 rpx→px，高用来判「片尾进视口了吗」（boundingClientRect 的 top 是视口相对值） */
-const WINDOW = (() => {
+/** 视口高：boundingClientRect 的 top 是视口相对值，用它判「片尾进视野了吗」 */
+const VIEWPORT_H = (() => {
   try {
-    const { windowWidth, windowHeight } = Taro.getSystemInfoSync();
-    return { w: windowWidth, h: windowHeight };
+    return Taro.getSystemInfoSync().windowHeight;
   } catch {
-    return { w: 375, h: 667 }; // 取不到就按 iPhone SE 档算，误差只有几 px
+    return 667; // 取不到就按 iPhone SE 档算
   }
 })();
 
-/** 提前 3 行就开始追加下一片（滚到这儿还没看见片尾就不会有「等一下才出字」的感觉） */
-const PRELOAD_PX = Math.round(rpxToPx(CODE_ROW_RPX * 3, WINDOW.w));
+/* 预读带 = 一整屏。占位片是**空白**的，触发点又正好在「空白刚开始进视野」那一刻，
+ * 带子给窄了就会看到用户先撞上一段空白、等 setData 落地才出字（追加一片实测要 100–300ms）
+ * ⇒ 提前一屏把下一片备好。这里不碰 windowWidth：rpx→px 的量化由 CSS 负责（见 CODE_ROW_EM）。 */
+const PRELOAD_PX = VIEWPORT_H;
 
 /** 同页多个长块要各有自己的 id（观察器与探针都按 id 定点） */
 let uid = 0;
@@ -107,7 +106,7 @@ export function CodeBlock({ block }: { block: Extract<Block, { t: "code" }> }) {
           else setShown(total); // 三次都查不到 ⇒ 不玩分片了
           return;
         }
-        if (tail.top < WINDOW.h + PRELOAD_PX) setShown(s => nextRows(s, total));
+        if (tail.top < VIEWPORT_H + PRELOAD_PX) setShown(s => nextRows(s, total));
       });
     };
     Taro.nextTick(() => probe(2));

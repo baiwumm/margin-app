@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
   CODE_CHUNK_ROWS,
   CODE_ROW_EM,
-  CODE_ROW_RPX,
   chunked,
   firstRows,
   mergeRuns,
@@ -130,14 +129,11 @@ describe("分片行区间", () => {
   });
 });
 
-describe("占位高度常量", () => {
-  it("行盒算式与 blocks.scss 对齐：26rpx × 1.6", () => {
-    expect(CODE_ROW_RPX).toBeCloseTo(41.6, 10);
-  });
-
-  it("占位片走 em（1 行 = 1.6em，em 基数 = .code-block-tail 的 font-size 26rpx）", () => {
+describe("占位片高度口径", () => {
+  /* 一行 = 1.6em，em 基数 = `.code-block-tail` 的 font-size（必须与 .code-line-* 的 26rpx 同值）。
+     实测模拟器行盒 20.796875px，而按 windowWidth 换算的算式值 21.632px 高 3.9% ⇒ 占位只能走 em */
+  it("1 个未渲行 = 1.6em（= .code-line-* 的 line-height）", () => {
     expect(CODE_ROW_EM).toBe(1.6);
-    expect(26 * CODE_ROW_EM).toBe(CODE_ROW_RPX);
   });
 });
 

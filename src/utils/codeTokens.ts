@@ -17,15 +17,13 @@ import type { CodeToken } from "@/types/api";
  */
 export const CODE_CHUNK_ROWS = 120;
 
-/** blocks.scss 的 `.code-line` 行盒 = font-size 26rpx × line-height 1.6（预读带用，px 口径） */
-export const CODE_ROW_RPX = 26 * 1.6;
-
 /**
- * 占位片高度的单位口径：**一个未渲行 = 1.6em**，em 的基数 = 行字号 26rpx（写在
- * `.code-block-tail` 的 font-size 上）。为什么不用 px 算：模拟器实测行高 20.796875px，
- * 而 `26rpx × 1.6` 按 windowWidth 换算是 21.632px —— 内核把 26rpx 字号量化成 ~13px 再乘
- * 1.6，差 3.9%；880 行未渲就是 735px，正是会把片尾之后 TOC 锚点整体推歪的量级。
- * 用 em 让占位与行盒**同源同量化**，既不用猜 windowWidth，也不用等实测回填。
+ * 占位片高度的单位口径：**一个未渲行 = 1.6em**（= blocks.scss 里 `.code-line-*` 的
+ * line-height，em 基数 = 行字号 26rpx，写在 `.code-block-tail` 的 font-size 上）。
+ * 为什么不在 JS 里算 px：模拟器实测行盒 20.796875px，而 `26rpx × 1.6` 按 windowWidth=390
+ * 换算是 21.632px —— 内核把 26rpx 字号量化成 ~13px 再乘 1.6 ⇒ 算式系统性高 3.9%，
+ * 880 行未渲就多顶 735px，正是会把片尾之后 TOC 锚点整体推歪的量级。
+ * 走 em 则占位与行盒**同源同量化**：不猜 windowWidth、不查节点、不等实测回填。
  */
 export const CODE_ROW_EM = 1.6;
 
