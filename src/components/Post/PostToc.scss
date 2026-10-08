@@ -27,9 +27,8 @@
   flex-shrink: 0;
   border-right: 3rpx solid var(--c-fg-45);
   border-bottom: 3rpx solid var(--c-fg-45);
-  /* 画出的 V 只落在盒子中心以下（重心偏下 ~3.5rpx），用 top 补偿而不是
-     transform 内的位移：避开 D31 那条长度单位风险；展开态 V 朝上、偏移反向，
-     两态各一个符号正好对称。 */
+  /* 画出的 V 只落在盒子中心以下（重心偏下 ~3.5rpx），用 top 补偿而不是 transform 内位移
+     （两者几何等价，少一层合成；展开态 V 朝上、偏移反向，两态各一个符号正好对称）。 */
   top: -4rpx;
   transform: rotate(45deg);
   transition:

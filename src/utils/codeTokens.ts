@@ -83,8 +83,3 @@ export function nextRows(shown: number, total: number, chunk = CODE_CHUNK_ROWS):
 export function hiddenRows(shown: number, total: number): number {
   return Math.max(0, total - shown);
 }
-
-/** rpx → px（750 设计稿）。占位高度用内联 px 而不是 rpx：避开 D31/D34 那类单位换算不确定点 */
-export function rpxToPx(rpx: number, windowWidth: number): number {
-  return (rpx * windowWidth) / 750;
-}
