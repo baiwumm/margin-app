@@ -15,6 +15,10 @@ interface CacheImageProps {
   mode?: string;
   className?: string;
   lazy?: boolean;
+  /** 点击回调（正文图用来开预览）。默认不挂 ⇒ tab 页行为不变（M1-b 基线冻结） */
+  onTap?: () => void;
+  /** 长按弹系统菜单（发送给朋友 / 保存图片 / 收藏）——用平台内置，不自造存图 UI */
+  longPressMenu?: boolean;
 }
 
 type LoadState = "idle" | "loaded" | "error";
@@ -25,6 +29,8 @@ export function CacheImage({
   mode = "widthFix",
   className,
   lazy = true,
+  onTap,
+  longPressMenu = false,
 }: CacheImageProps) {
   const [state, setState] = useState<LoadState>("idle");
   const url = asset[variant];
@@ -45,7 +51,9 @@ export function CacheImage({
         src={url}
         mode={mode}
         lazyLoad={lazy}
+        showMenuByLongpress={longPressMenu}
         className={`cache-image-img state-${state}`}
+        onClick={onTap}
         onLoad={() => setState("loaded")}
         onError={() => setState("error")}
       />
