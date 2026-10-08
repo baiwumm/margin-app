@@ -255,6 +255,25 @@
   white-space: pre;
   color: var(--c-fg);
 }
+
+/* 代码换行（prefs.codeWrap —— 偏好页那个开关的首个消费者，M2 收尾 A）：
+ * 关 = 横向滚动（margin 原站默认，也是上面的形态）；开 = 行内换行填满容器宽。
+ * 三处必须一起改，少一处就换不了行：
+ *  · 行容器从 shrink-to-fit 的 inline-flex 改成 width:100% 的 flex，否则子节点按 max-content 撑开、永远不换行；
+ *  · 内容 Text 放开 flex-shrink + min-width:0（默认 0 是给它 nowrap 用的，换行时反而不让压）；
+ *  · white-space 从 pre 换 pre-wrap（保留空格与缩进，同时允许断行）。
+ * 副作用：行高不再等 ⇒ 占位片改用实测平均行高（CodeBlock 的 avgRowPx），不再用固定 1.6em。 */
+.code-block-wrap .code-block-rows {
+  display: flex;
+  width: 100%;
+}
+.code-block-wrap .code-line-content {
+  flex-shrink: 1;
+  min-width: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
 .code-block-lines {
   padding: 12rpx 24rpx;
   border-top: 1rpx solid var(--c-border-20);

@@ -16,12 +16,14 @@ import Taro from "@tarojs/taro";
 
 import { useTheme } from "@/hooks/useTheme";
 import { SHIKI_SURFACE, tokenColor } from "@/utils/codeColors";
+import { getPrefs } from "@/utils/prefs";
 import {
-  CODE_ROW_EM,
+  avgRowPx,
   firstRows,
   hiddenRows,
   mergeRuns,
   nextRows,
+  reserveHeightPx,
 } from "@/utils/codeTokens";
 import type { Block, CodeColors } from "@/types/api";
 
@@ -56,8 +58,13 @@ export function CodeBlock({ block }: { block: Extract<Block, { t: "code" }> }) {
    * 同一个 buildId ⇒ 注入必然早于本组件首渲，读到的就是与正文同一 build 的那张表 */
   const table = codeColors;
   const total = block.tokens.length;
-  const [ids] = useState(() => ({ tail: `code-t-${++uid}` }));
+  const [ids] = useState(() => ({ head: `code-h-${++uid}`, tail: `code-t-${++uid}` }));
   const [shown, setShown] = useState(() => firstRows(total));
+  /* 平均行高（px）：null = 还没量到 ⇒ 占位退回 em。换行模式下每行高度不等，只有实测靠得住 */
+  const [rowPx, setRowPx] = useState<number | null>(null);
+  /* 代码换行偏好（M2 步 3b 那个开关的首个消费者）。不订阅：detail 页本身订阅了 prefs，
+     改值会整页重渲 ⇒ 这里渲染时读快照就是最新值，省掉每个代码块一个监听器 */
+  const wrap = getPrefs().codeWrap;
 
   // 换文复用同一实例（上下篇 redirectTo / 缓存先给再被网络结果覆盖）⇒ 回到首片
   useEffect(() => {
@@ -92,22 +99,27 @@ export function CodeBlock({ block }: { block: Extract<Block, { t: "code" }> }) {
    *     IO 要页面实例当 context，而 Taro 的 getCurrentInstance().page 是不是 wx 认的那个实例
    *     没有保证；位置探针与 IO 用的是同一套选择器，所以「探针查得到」至少说明节点找得到。
    *     实测 IO 有响（1000 行块滚到底补齐 ⇒ 判据 C 过），位置探针是第二道保险。
-   *  占位片高度走 `hidden × 1.6em`（em 基数 = `.code-block-tail` 的 font-size 26rpx），
-   *  所以这里不再需要量行高 —— 详见 utils/codeTokens.ts 的 CODE_ROW_EM。 */
+   *  ③ 顺手量平均行高（尾片顶 − 首行顶）÷ 已渲行数 ⇒ 交给 reserveHeightPx。
+   *     不换行时它就是等高的行盒（em 也能算准），换行时它是唯一靠得住的数 ——
+   *     所以两种模式共用这一条测量，不再各写一套占位逻辑。 */
   useEffect(() => {
     if (hidden <= 0) return;
     let alive = true;
     const probe = (triesLeft: number) => {
       const q = Taro.createSelectorQuery();
+      q.select(`#${ids.head}`).boundingClientRect();
       q.select(`#${ids.tail}`).boundingClientRect();
       q.exec(res => {
         if (!alive) return;
-        const tail = res?.[0] as { top?: number } | undefined;
+        const head = res?.[0] as { top?: number } | undefined;
+        const tail = res?.[1] as { top?: number } | undefined;
         if (tail?.top === undefined) {
           if (triesLeft > 0) setTimeout(() => alive && probe(triesLeft - 1), 150);
           else setShown(total); // 三次都查不到 ⇒ 不玩分片了
           return;
         }
+        const avg = avgRowPx(tail.top, head?.top ?? NaN, shown);
+        if (avg) setRowPx(avg);
         if (tail.top < VIEWPORT_H + PRELOAD_PX) setShown(s => nextRows(s, total));
       });
     };
@@ -140,13 +152,13 @@ export function CodeBlock({ block }: { block: Extract<Block, { t: "code" }> }) {
         /* 已经断开了 */
       }
     };
-  }, [hidden, ids, total]);
+  }, [hidden, ids, total, wrap, shown]);
 
   const copyText = () =>
     block.tokens.map(line => line.map(tk => tk.v).join("")).join("\n");
 
   return (
-    <View className='code-block'>
+    <View className={`code-block ${wrap ? "code-block-wrap" : ""}`}>
       <View className='code-block-head'>
         <View className='code-block-lang'>{block.lang ?? "text"}</View>
         {block.file ? (
@@ -161,14 +173,15 @@ export function CodeBlock({ block }: { block: Extract<Block, { t: "code" }> }) {
           复制
         </View>
       </View>
+      {/* 换行模式下内容不再超宽，关掉横滚免得留一条空滚动条 */}
       <ScrollView
         className='code-block-body'
-        scrollX
+        scrollX={!wrap}
         style={{ backgroundColor: surface.bg }}
       >
         <View className='code-block-rows'>
           {runs.map((line, li) => (
-            <View key={li} className='code-line'>
+            <View key={li} id={li === 0 ? ids.head : undefined} className='code-line'>
               {/* 行号列宽 = total 的位数 × 1ch（等宽字形自校准）：写死 88rpx 时两位数字
                   左侧白吃 28px（实测整列 57px），见 blocks.scss 同条注释 */}
               <Text className='code-line-num' style={{ minWidth: `${numCh}ch` }}>
@@ -195,7 +208,7 @@ export function CodeBlock({ block }: { block: Extract<Block, { t: "code" }> }) {
             <View
               id={ids.tail}
               className='code-block-tail'
-              style={{ height: `${hidden * CODE_ROW_EM}em` }}
+              style={{ height: reserveHeightPx(hidden, rowPx) }}
             />
           ) : null}
         </View>

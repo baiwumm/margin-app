@@ -83,3 +83,27 @@ export function nextRows(shown: number, total: number, chunk = CODE_CHUNK_ROWS):
 export function hiddenRows(shown: number, total: number): number {
   return Math.max(0, total - shown);
 }
+
+/**
+ * 占位片的高度：量到平均行高就用 px，否则退回 `未渲行数 × 1.6em`。
+ * 为什么两种单位并存：不换行时每行等高，em 与行盒同源、零查询就准确（实测 880 行只差 2.75px）；
+ * 换行模式（prefs.codeWrap）下每行高度不等，**只有实测平均行高靠得住** ⇒ 每次武装都顺手量一次
+ * 平均行高（尾片顶 − 首行顶）÷ 已渲行数，px 分支自动接管。两分支都写死在同一处，
+ * 免得以后又出现「一处改单位、另一处忘了改」。
+ */
+export function reserveHeightPx(hidden: number, rowPx: number | null): string {
+  return rowPx && rowPx > 0
+    ? `${(hidden * rowPx).toFixed(2)}px`
+    : `${hidden * CODE_ROW_EM}em`;
+}
+
+/**
+ * 平均行高：已渲区间的实际高度 ÷ 已渲行数。
+ * 高度取「尾片顶边 − 首行顶边」（两者是同一个 flex 列里的兄弟节点，视口相对值相减即文档内距离），
+ * 所以它天然不含占位片自己，也不依赖任何单位换算假设。
+ */
+export function avgRowPx(tailTop: number, headTop: number, shown: number): number | null {
+  if (!(shown > 0) || !Number.isFinite(tailTop) || !Number.isFinite(headTop)) return null;
+  const h = tailTop - headTop;
+  return h > 0 ? h / shown : null;
+}

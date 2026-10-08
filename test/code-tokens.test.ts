@@ -3,10 +3,12 @@ import { describe, expect, it } from "vitest";
 import {
   CODE_CHUNK_ROWS,
   CODE_ROW_EM,
+  avgRowPx,
   chunked,
   firstRows,
   mergeRuns,
   nextRows,
+  reserveHeightPx,
   type CodeRun,
 } from "@/utils/codeTokens";
 import type { CodeToken } from "@/types/api";
@@ -134,6 +136,31 @@ describe("占位片高度口径", () => {
      实测模拟器行盒 20.796875px，而按 windowWidth 换算的算式值 21.632px 高 3.9% ⇒ 占位只能走 em */
   it("1 个未渲行 = 1.6em（= .code-line-* 的 line-height）", () => {
     expect(CODE_ROW_EM).toBe(1.6);
+  });
+});
+
+describe("占位高度：em 兜底 / 实测均值优先", () => {
+  it("没量到平均行高 ⇒ 走 1.6em（与行盒同源，不换行时精确）", () => {
+    expect(reserveHeightPx(880, null)).toBe("1408em");
+    expect(reserveHeightPx(880, 0)).toBe("1408em");
+  });
+
+  it("量到了 ⇒ 走 px（换行模式下每行不等高，只有实测靠得住）", () => {
+    // 20.796875 = 模拟器实测行盒；880 行未渲 ⇒ 18301.25px（与运行时量到的占位高度一致）
+    expect(reserveHeightPx(880, 20.796875)).toBe("18301.25px");
+  });
+});
+
+describe("平均行高（尾片顶 − 首行顶）÷ 已渲行数", () => {
+  it("用模拟器那一对真实 rect 反算出行盒 20.796875px", () => {
+    expect(avgRowPx(3167.109375, 671.484375, 120)).toBeCloseTo(20.796875, 6);
+  });
+
+  it("退化输入一律给 null（0 / 负数 / NaN 都不拿去顶占位）", () => {
+    expect(avgRowPx(100, 100, 120)).toBeNull();
+    expect(avgRowPx(50, 100, 120)).toBeNull();
+    expect(avgRowPx(Number.NaN, 0, 10)).toBeNull();
+    expect(avgRowPx(100, 0, 0)).toBeNull();
   });
 });
 
