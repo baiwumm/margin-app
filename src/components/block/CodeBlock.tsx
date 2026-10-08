@@ -65,6 +65,8 @@ export function CodeBlock({ block }: { block: Extract<Block, { t: "code" }> }) {
   }, [block]);
 
   const hidden = hiddenRows(shown, total);
+  /** 行号列宽（ch）：按总行数位数取，1000 行的 4 位数也留得下 */
+  const numCh = String(total).length;
 
   /* 只合并「要渲出去的那一片」：1000 行块不会为了首帧先把 5600 个 token 走一遍。
    * 每行 run 仍然各包一层 Text —— 「默认色 run 直接退化成裸文本、省掉那层节点」这条路
@@ -167,7 +169,11 @@ export function CodeBlock({ block }: { block: Extract<Block, { t: "code" }> }) {
         <View className='code-block-rows'>
           {runs.map((line, li) => (
             <View key={li} className='code-line'>
-              <Text className='code-line-num'>{li + 1}</Text>
+              {/* 行号列宽 = total 的位数 × 1ch（等宽字形自校准）：写死 88rpx 时两位数字
+                  左侧白吃 28px（实测整列 57px），见 blocks.scss 同条注释 */}
+              <Text className='code-line-num' style={{ minWidth: `${numCh}ch` }}>
+                {li + 1}
+              </Text>
               <Text className='code-line-content' style={{ color: surface.fg }}>
                 {line.length === 0 ? (
                   " "
