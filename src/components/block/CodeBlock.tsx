@@ -18,7 +18,6 @@ import { useTheme } from "@/hooks/useTheme";
 import { SHIKI_SURFACE, tokenColor } from "@/utils/codeColors";
 import {
   CODE_ROW_RPX,
-  chunked,
   firstRows,
   hiddenRows,
   mergeRuns,
@@ -34,17 +33,18 @@ export function setCodeColors(colors: CodeColors[]): void {
   codeColors = colors;
 }
 
-/** 750 稿 → 设备 px 的基准（占位片高度用；取不到按 375 算，误差只有几 px） */
-const WINDOW_W = (() => {
+/** 视口尺寸：宽用来换 rpx→px，高用来判「片尾进视口了吗」（boundingClientRect 的 top 是视口相对值） */
+const WINDOW = (() => {
   try {
-    return Taro.getSystemInfoSync().windowWidth;
+    const { windowWidth, windowHeight } = Taro.getSystemInfoSync();
+    return { w: windowWidth, h: windowHeight };
   } catch {
-    return 375;
+    return { w: 375, h: 667 }; // 取不到就按 iPhone SE 档算，误差只有几 px
   }
 })();
 
 /** 提前 3 行就开始追加下一片（滚到这儿还没看见片尾就不会有「等一下才出字」的感觉） */
-const PRELOAD_PX = Math.round(rpxToPx(CODE_ROW_RPX * 3, WINDOW_W));
+const PRELOAD_PX = Math.round(rpxToPx(CODE_ROW_RPX * 3, WINDOW.w));
 
 /** 同页多个长块要各有自己的 id（观察器与探针都按 id 定点） */
 let uid = 0;
@@ -56,11 +56,10 @@ export function CodeBlock({ block }: { block: Extract<Block, { t: "code" }> }) {
    * 同一个 buildId ⇒ 注入必然早于本组件首渲，读到的就是与正文同一 build 的那张表 */
   const table = codeColors;
   const total = block.tokens.length;
-  const isChunked = chunked(total);
   const [ids] = useState(() => ({ head: `code-h-${++uid}`, tail: `code-t-${++uid}` }));
   const [shown, setShown] = useState(() => firstRows(total));
   // 首帧先用算式值（blocks.scss 的 26rpx × 1.6），随后被实测行高替换（见下方探针）
-  const [rowPx, setRowPx] = useState(() => rpxToPx(CODE_ROW_RPX, WINDOW_W));
+  const [rowPx, setRowPx] = useState(() => rpxToPx(CODE_ROW_RPX, WINDOW.w));
 
   // 换文复用同一实例（上下篇 redirectTo / 缓存先给再被网络结果覆盖）⇒ 回到首片
   useEffect(() => {
@@ -85,13 +84,18 @@ export function CodeBlock({ block }: { block: Extract<Block, { t: "code" }> }) {
     [block, shown, table, theme]
   );
 
-  /* 一次查询办两件事：
-   *  ① 首行真实行高 ⇒ 占位片按它算（算式 41.6rpx 若被内核取整，880 行能累计差出几百 px，
-   *     会让片尾之后的 TOC 锚点整体偏掉，所以以实测为准、算式只当首帧估算）
-   *  ② 尾片节点查得到吗 ⇒ 查不到就是 id 选择器在这套渲染管线上不生效，
-   *     那分片/观察器都无从谈起，直接整块渲完。宁可一次多渲，不能滚到片尾看见一片空白。 */
+  /* 每武装一次（= 每追加一片）用同一批查询把三件事办完：
+   *  ① 首行真实行高 ⇒ 占位片按它算。算式 41.6rpx 若被内核取整，880 行能累计差出几百 px，
+   *     那正是会把片尾之后的 TOC 锚点整体推歪的量级 ⇒ 以实测为准，算式只当首帧估算。
+   *  ② 尾片节点查不到 = id 选择器在这套管线上不生效（base.wxml 是 `id="{{i.uid||i.sid}}"`，
+   *     Taro runtime 在 setAttribute("id") 时把 uid 一起写掉 ⇒ 理论上可用，但端上无先例）
+   *     ⇒ 整块渲完。宁可一次多渲，不能滚到片尾看见一片空白。
+   *  ③ 片尾已经在（或已贴近）视口 ⇒ 立刻追加，不等观察器。这条是给 IO 兜底的：
+   *     IO 要页面实例当 context，而 Taro 的 getCurrentInstance().page 是不是 wx 认的那个实例
+   *     没有保证；位置探针与 IO 用的是同一套选择器，所以「探针查得到」至少说明节点找得到。
+   *     IO 全程不回话时，判据 C（滚到块尾能否补齐 1000 行）会把它揪出来，届时改轮询。 */
   useEffect(() => {
-    if (!isChunked) return;
+    if (hidden <= 0) return;
     let alive = true;
     const probe = (mayRetry: boolean) => {
       const q = Taro.createSelectorQuery();
@@ -100,47 +104,39 @@ export function CodeBlock({ block }: { block: Extract<Block, { t: "code" }> }) {
       q.exec(res => {
         if (!alive) return;
         const head = res?.[0] as { height?: number } | undefined;
-        const tail = res?.[1] as { height?: number } | undefined;
+        const tail = res?.[1] as { top?: number } | undefined;
+        if (tail?.top === undefined) {
+          if (mayRetry) setTimeout(() => alive && probe(false), 150);
+          else setShown(total); // 两次都查不到 ⇒ 不玩分片了
+          return;
+        }
         if (head?.height) setRowPx(head.height);
-        if (tail) return;
-        if (mayRetry) setTimeout(() => alive && probe(false), 150);
-        else setShown(total);
+        if (tail.top < WINDOW.h + PRELOAD_PX) setShown(s => nextRows(s, total));
       });
     };
     Taro.nextTick(() => probe(true));
-    return () => {
-      alive = false;
-    };
-  }, [isChunked, ids, total]);
-
-  /* 追加下一片：观察占位片是否进入（或即将进入）视口。
-   * 每追加一次就重建观察器 —— 微信的 IntersectionObserver 只在**相交比例跨过阈值**时回调，
-   * 占位片换高度但依旧相交时不会再来第二次，不重建就会停在「一直相交」不动。
-   * 占位片本身当被观察节点（真实高度、面积恒 > 0）；换成 1px 探针的话面积为 0，
-   * intersectionRatio 无从计算，回调可能永远不来。 */
-  useEffect(() => {
-    if (hidden <= 0) return;
+    /* 被观察节点就是占位片本身（真实高度、面积恒 > 0）；换成 1px 探针的话面积为 0、
+     * intersectionRatio 无从计算，回调可能永远不来。每追加一次重建观察器 ——
+     * 微信的 IO 只在**相交比例跨过阈值**时回调，占位片换了高度但依旧相交不会再触发，
+     * 不重建就会停在「一直相交」不动。 */
     let observer: Taro.IntersectionObserver | null = null;
     try {
-      observer = Taro.createIntersectionObserver(Taro.getCurrentInstance().page ?? {}, {
+      const io = Taro.createIntersectionObserver(Taro.getCurrentInstance().page ?? {}, {
         thresholds: [0],
-        // 挂上时若已经相交（首片比视口矮、或用户直接跳到了块中间），
-        // initialRatio=0 保证这一臂立刻回调一次，不必等「跨过阈值」
+        // 挂上时若已经相交（首片比视口矮、或用户直接跳到了块中间），initialRatio=0 让它立刻回一次
         initialRatio: 0,
       });
+      // observe() 返 void，所以句柄单独留着（cleanup 里要的是 disconnect）
+      io.relativeToViewport({ bottom: PRELOAD_PX }).observe(`#${ids.tail}`, res => {
+        if ((res?.intersectionRatio ?? 0) > 0) setShown(s => nextRows(s, total));
+      });
+      observer = io;
     } catch {
       observer = null;
     }
-    if (!observer) {
-      setShown(total); // 建不出观察器 ⇒ 整块渲完，内容不能少
-      return;
-    }
-    observer
-      .relativeToViewport({ bottom: PRELOAD_PX })
-      .observe(`#${ids.tail}`, res => {
-        if ((res?.intersectionRatio ?? 0) > 0) setShown(s => nextRows(s, total));
-      });
+    if (!observer) setShown(total); // 连观察器都建不出来 ⇒ 整块渲完，内容不能少
     return () => {
+      alive = false;
       try {
         observer?.disconnect();
       } catch {
