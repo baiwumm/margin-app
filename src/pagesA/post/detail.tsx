@@ -7,7 +7,12 @@
  */
 import { Text, View } from "@tarojs/components";
 import { useEffect, useRef, useState } from "react";
-import Taro, { usePageScroll, useRouter } from "@tarojs/taro";
+import Taro, {
+  usePageScroll,
+  useRouter,
+  useShareAppMessage,
+  useShareTimeline,
+} from "@tarojs/taro";
 
 import PageBackdrop from "@/components/deco/PageBackdrop";
 import BackToTop from "@/components/deco/BackToTop";
@@ -154,6 +159,33 @@ export default function PostDetailPage() {
     // 上下篇用 redirectTo 换页：连续翻文不会把页面栈堆到 10 层上限，返回仍回来源页
     void Taro.redirectTo({ url: postDetailUrl(next) });
   };
+
+  /* ── 分享（M2 步 10）────────────────────────────────────────────
+   * 卡图这一版**不传 imageUrl** ⇒ 微信用「当前页截图」当封面。原因实测过：站点 OG 图是
+   * 1200×630，而转发位显示比例 5:4、朋友圈位 1:1，居中裁完只剩 65.7% / 52.5% 的宽度，
+   * 标题首字与 `baiwumm.com` 徽章都会被切掉（预检图 mp-probe-work/code-step9/evidence/og-crops.jpg）。
+   * 回调里只读 ref：Taro 只在页面实例上挂一次回调，直接闭包 detail 会拿到首帧的 null。 */
+  const shareRef = useRef<{ title: string; path: string; query: string }>({
+    title: "",
+    path: postDetailUrl(slug),
+    query: `slug=${encodeURIComponent(slug)}`,
+  });
+  useEffect(() => {
+    shareRef.current = {
+      title: detail?.meta.title ?? "",
+      path: postDetailUrl(slug),
+      query: `slug=${encodeURIComponent(slug)}`,
+    };
+  }, [detail, slug]);
+  useShareAppMessage(() => {
+    const s = shareRef.current;
+    /* title 空串会被当成「无标题」，宁可不传让微信回落小程序名 */
+    return s.title ? { title: s.title, path: s.path } : { path: s.path };
+  });
+  useShareTimeline(() => {
+    const s = shareRef.current;
+    return s.title ? { title: s.title, query: s.query } : { query: s.query };
+  });
 
   return (
     <View
