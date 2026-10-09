@@ -78,11 +78,16 @@ export type VideoLike = { id?: string; src?: string; title?: string };
 
 export function VideoCard({ block }: { block: VideoLike }) {
   const bv = block.id;
+  /* 契约里 video.src 可以是站内相对路径（瞬间语料就有 `/video/atyjcue6.mp4`）⇒ 必须拼成
+   * 绝对地址再交给复制/域名行，否则复制出去是个打不开的相对路径。缩略图那行早就是这么办的。
+   * 正文 4 个 video 块（3 个 B 站 id + 1 个绝对 URL）不走这支，只有自托管 mp4 会踩。 */
+  const raw = block.src ?? "";
+  const src = raw.startsWith("/") ? currentBase() + raw : raw;
   return (
     <LinkCardBlock
       data={{
         title: block.title || (bv ? `B 站视频 ${bv}` : "视频"),
-        href: bv ? `https://www.bilibili.com/video/${bv}` : (block.src ?? ""),
+        href: bv ? `https://www.bilibili.com/video/${bv}` : src,
         action: "复制",
       }}
     />
