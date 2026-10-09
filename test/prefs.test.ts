@@ -114,7 +114,7 @@ describe("运行时单例与落盘", () => {
     expect(getPrefs().bodyRpx).toBe(40);
     expect(seen).toEqual([40]);
     await flush();
-    expect(JSON.parse(await readCache("prefs"))).toMatchObject({ bodyRpx: 40 });
+    expect(JSON.parse((await readCache("prefs")) ?? "{}")).toMatchObject({ bodyRpx: 40 });
     off();
     setPrefs({ bodyRpx: 26 });
     expect(seen).toEqual([40]); // 取消订阅后不再收通知

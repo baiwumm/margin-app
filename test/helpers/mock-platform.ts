@@ -50,7 +50,7 @@ export class MockPlatform {
   }
 
   json(url: string, body: unknown, etag?: string): void {
-    this.route(url, () => ({
+    this.route(url, (): PlatformResponse => ({
       statusCode: 200,
       data: JSON.stringify(body),
       header: etag ? { etag } : {},

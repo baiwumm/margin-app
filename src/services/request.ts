@@ -193,6 +193,12 @@ export async function getJson<T>(
     .finally(() => {
       inflight.delete(flightKey);
     });
-  if (dedupe) inflight.set(flightKey, { promise });
+  if (dedupe) {
+    inflight.set(flightKey, {
+      // notModified 分支本 FlightEntry 装不下（缺 envelope/etag），断言收窄；
+      // 读侧本来就会 as 回 RequestResult<T>，行为不变
+      promise: promise as Promise<RequestResult<unknown>>,
+    });
+  }
   return promise;
 }

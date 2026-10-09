@@ -5,6 +5,7 @@ import {
   LocalErrorKind,
 } from "@/services/errors";
 import { setPlatformAdapter } from "@/services/platform";
+import type { PlatformResponse } from "@/services/platform";
 import { getJson, resetRequestMemo } from "@/services/request";
 import { resetMemoryCache } from "@/services/cache";
 import { MockPlatform } from "./helpers/mock-platform.ts";
@@ -71,12 +72,17 @@ describe("request.getJson", () => {
   });
 
   it("带 If-None-Match 且服务端 304 → notModified", async () => {
-    mp.route(URL, opts => {
-      if (opts.header?.["If-None-Match"] === '"v1"') {
-        return { statusCode: 304, data: "", header: {} };
-      }
-      return { statusCode: 200, data: JSON.stringify(mp.envelope({})), header: { etag: '"v1"' } };
-    });
+    mp.route(
+      URL,
+      (opts): PlatformResponse =>
+        opts.header?.["If-None-Match"] === '"v1"'
+          ? { statusCode: 304, data: "", header: {} }
+          : {
+              statusCode: 200,
+              data: JSON.stringify(mp.envelope({})),
+              header: { etag: '"v1"' },
+            }
+    );
     const first = await getJson(URL);
     if ("notModified" in first) throw new Error("first should be 200");
     const second = await getJson(URL, { etag: first.etag });
