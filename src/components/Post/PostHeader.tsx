@@ -7,6 +7,7 @@
  * backdrop-blur 不做（D20/D24 禁运行时模糊）；chip 图标待资产管线补（D24）。
  */
 import { Text, View } from "@tarojs/components";
+import { memo } from "react";
 
 import type { PostMeta } from "@/types/api";
 import "./PostHeader.scss";
@@ -15,7 +16,7 @@ function formatDate(iso: string): string {
   return iso.slice(0, 10);
 }
 
-export default function PostHeader({ meta }: { meta: PostMeta }) {
+function PostHeader({ meta }: { meta: PostMeta }) {
   const updated =
     meta.modDatetime && meta.modDatetime.slice(0, 10) !== meta.pubDatetime.slice(0, 10)
       ? formatDate(meta.modDatetime)
@@ -53,3 +54,7 @@ export default function PostHeader({ meta }: { meta: PostMeta }) {
     </View>
   );
 }
+
+/** 详情页每滚一次都会 setState（顶栏渐显 / 进度 / 返回顶部 / TOC 命中），而 meta 只在换文时
+ *  变 ⇒ memo 掉，滚动期间整棵文章头不再重 diff（真机 render:stutter 的来源之一，D44） */
+export default memo(PostHeader);

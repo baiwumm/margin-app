@@ -39,7 +39,11 @@ export default function SubNavBar({ title, alpha = 0, progress = 0 }: SubNavBarP
         <View className='nav-progress'>
           <View
             className='nav-progress-bar'
-            style={{ width: `${Math.round(Math.min(1, Math.max(0, progress)) * 100)}%` }}
+            /* 不再 round 到整数百分比（那是第二重量化，和 detail 那边叠起来把进度压成
+             * 101 档）；三位小数 = 390px 屏上 0.004px 一档，肉眼连续 */
+            style={{
+              width: `${(Math.min(1, Math.max(0, progress)) * 100).toFixed(3)}%`,
+            }}
           />
         </View>
       </View>

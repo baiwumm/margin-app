@@ -3,6 +3,7 @@
  * 未知类型落 Unknown 兜底（内容不丢）。
  */
 import { View } from "@tarojs/components";
+import { memo } from "react";
 
 import type { Block } from "@/types/api";
 import { CodeBlock } from "./CodeBlock";
@@ -12,17 +13,24 @@ import { LinkCardOf, VideoCard } from "./LinkCardBlock";
 import MusicBlock from "./MusicBlock";
 import "./blocks.scss";
 
-export function BlockRenderer({ blocks }: { blocks: Block[] }) {
+/** memo 的必要性在真机数据上：详情页每滚动一次都会 setState（顶栏渐显 / 进度 / 返回顶部 /
+ *  TOC 命中），整棵正文跟着重 diff 就是 iPhone 16 Pro 上那六条 `render:stutter`
+ *  （dur 588–1285ms）的来源。blocks 每次换文才变，滚动期间 props 恒等 ⇒ 直接跳过。 */
+export const BlockRenderer = memo(function BlockRenderer({
+  blocks,
+}: {
+  blocks: Block[];
+}) {
   return (
     <View className='blocks'>
       {blocks.map((block, i) => (
-        <BlockView key={i} block={block} index={i} />
+        <BlockView key={i} block={block} />
       ))}
     </View>
   );
-}
+});
 
-function BlockView({ block, index }: { block: Block; index: number }) {
+function BlockView({ block }: { block: Block }) {
   switch (block.t) {
     case "p":
       return (
@@ -39,7 +47,7 @@ function BlockView({ block, index }: { block: Block; index: number }) {
     case "img": {
       // a = assets 下标（契约瘦身）；图片本身由 PostDetail.assets 提供给组件树，
       // 这里通过 BlockImages 上下文取（见 BlockImage）。
-      return <BlockImage assetIndex={block.a} alt={block.alt} index={index} />;
+      return <BlockImage assetIndex={block.a} alt={block.alt} />;
     }
     case "code":
       return <CodeBlock block={block} />;

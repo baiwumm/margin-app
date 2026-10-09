@@ -9,7 +9,7 @@
  * 内，取 --r-card 24rpx 与全站卡片一致；卡底 fg 2% 复用 --c-surface-2（同 .mine-row）。
  */
 import { Text, View } from "@tarojs/components";
-import { useState } from "react";
+import { memo, useState } from "react";
 
 import type { TocItem } from "@/types/api";
 import "./PostToc.scss";
@@ -21,7 +21,7 @@ interface PostTocProps {
   onJump: (id: string) => void;
 }
 
-export default function PostToc({ items, activeId, onJump }: PostTocProps) {
+function PostToc({ items, activeId, onJump }: PostTocProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -61,3 +61,7 @@ export default function PostToc({ items, activeId, onJump }: PostTocProps) {
     </View>
   );
 }
+
+/** memo 的前提是 detail.tsx 那边把 onJump 用 useCallback 稳住；滚动期间只有 activeId
+ *  会变（命中同一小节时 props 恒等）⇒ 整张 TOC 卡不再跟着进度条一起重 diff */
+export default memo(PostToc);

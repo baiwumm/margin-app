@@ -6,7 +6,7 @@
  * TOC/进度、字号行距与阅读模式、代码配色、图片预览、指令块视觉、分享在后续单元。
  */
 import { Text, View } from "@tarojs/components";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Taro, {
   usePageScroll,
   useRouter,
@@ -124,7 +124,10 @@ export default function PostDetailPage() {
     const y = p.scrollTop;
     scrollTopRef.current = y;
     setAlpha(navAlpha(y));
-    setProgress(Math.round((y / rangeRef.current) * 100) / 100);
+    /* 进度只量化到万分之一：原来这里 round 到 1%、SubNavBar 那层又 round 到整数百分比，
+     * 双重下取整 ⇒ 整条进度只有 101 档，390px 屏上每档 3.9px ⇒ 肉眼就是「一点一点跳」。
+     * 留万分之一档是为了值没真变时 React 能 bail out（同 navAlpha 的 1/20 量化思路）。 */
+    setProgress(Math.round((y / rangeRef.current) * 10000) / 10000);
     setShowBtt(y > VIEWPORT_H);
     const hs = headsRef.current;
     if (hs.length === 0) return;
@@ -145,11 +148,13 @@ export default function PostDetailPage() {
     setActiveId(hs[idx].id || null);
   });
 
-  const jumpTo = (id: string) => {
+  /* useCallback 是给 memo(PostToc) 用的：不稳住这个引用，页面每次重渲染都会造一个新函数，
+   * TOC 的 memo 立刻失效。函数体只读 ref 与模块常量，空依赖是安全的。 */
+  const jumpTo = useCallback((id: string) => {
     const hit = headsRef.current.find(h => h.id === id);
     if (!hit) return;
     void Taro.pageScrollTo({ scrollTop: Math.max(0, hit.top - SPY_LINE), duration: 200 });
-  };
+  }, []);
 
   useEffect(() => {
     if (!buildId || !slug) return;
