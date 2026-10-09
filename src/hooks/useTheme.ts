@@ -37,7 +37,7 @@ function bindSystem(): void {
   if (bound) return;
   bound = true;
   try {
-    system = (Taro.getSystemInfoSync().theme as Theme) || "light";
+    system = (Taro.getAppBaseInfo().theme as Theme) || "light";
   } catch {
     system = "light";
   }

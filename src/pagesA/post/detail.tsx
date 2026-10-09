@@ -37,7 +37,7 @@ import "./detail.scss";
 /** 视口高（滚动进度分母与「返回顶部」浮现阈值用） */
 const VIEWPORT_H = (() => {
   try {
-    return Taro.getSystemInfoSync().windowHeight;
+    return Taro.getWindowInfo().windowHeight;
   } catch {
     return 667;
   }

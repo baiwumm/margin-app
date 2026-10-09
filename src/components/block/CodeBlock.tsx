@@ -37,7 +37,7 @@ export function setCodeColors(colors: CodeColors[]): void {
 /** 视口高：boundingClientRect 的 top 是视口相对值，用它判「片尾进视野了吗」 */
 const VIEWPORT_H = (() => {
   try {
-    return Taro.getSystemInfoSync().windowHeight;
+    return Taro.getWindowInfo().windowHeight;
   } catch {
     return 667; // 取不到就按 iPhone SE 档算
   }

@@ -23,7 +23,7 @@ import sunDark from "@/assets/deco/icon-sun-dark.png";
 /** 状态栏高度（px）——SubNavBar 复用同一套顶栏几何 */
 export const STATUS_BAR = (() => {
   try {
-    return Taro.getSystemInfoSync().statusBarHeight ?? 44;
+    return Taro.getWindowInfo().statusBarHeight ?? 44;
   } catch {
     return 44;
   }
@@ -37,7 +37,7 @@ export const STATUS_BAR = (() => {
 export const CAP_RIGHT = (() => {
   try {
     const cap = Taro.getMenuButtonBoundingClientRect();
-    const win = Taro.getSystemInfoSync().windowWidth;
+    const win = Taro.getWindowInfo().windowWidth;
     return cap && cap.left ? Math.max(0, win - cap.left + 8) : 0;
   } catch {
     return 0;
