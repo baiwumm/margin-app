@@ -1,0 +1,103 @@
+/* 画廊详情（M3 步 5；margin [gallery].astro 同构）
+ * 数值溯源：头部卡与文章头是站点同一组类（rounded-3xl=--r-hero、border-border/20、
+ * bg-muted/5→端上 --c-muted-10、px-6 py-8=48/64rpx、mb-10=80rpx、text-3xl=60rpx、
+ * leading-tight=1.25、tracking-tight=-0.025em、tag 胶囊 px-2.5 py-0.5=20/8rpx +
+ * text-xs=--fs-cap、description mt-6=48rpx + text-lg=36rpx + leading-relaxed=1.625 +
+ * foreground/60=--c-fg-mid）。
+ * 网格 = 站点移动档 .gallery-grid/.gallery-item（:862-898）：2 列、gap .75rem=24rpx、
+ * 格子 1:1、radius .75rem=--r-card、底 foreground 5%=--c-fg-5、描边 border/25%=--c-border-25。 */
+
+.gallery-detail {
+  padding: 0 var(--sp-page) calc(140rpx + env(safe-area-inset-bottom, 0px));
+}
+
+.gallery-header {
+  margin-top: var(--sp-3);
+  margin-bottom: 80rpx;
+  padding: 64rpx 48rpx;
+  text-align: center;
+  border: 1rpx solid var(--c-border-20);
+  border-radius: var(--r-hero);
+  background-color: var(--c-muted-10);
+}
+.gallery-title {
+  display: block;
+  font-size: 60rpx;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--c-fg);
+}
+.gallery-desc {
+  display: block;
+  margin-top: 48rpx;
+  font-size: 36rpx;
+  line-height: 1.625;
+  color: var(--c-fg-mid);
+}
+.gallery-tags {
+  margin-top: 48rpx;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16rpx;
+}
+.gallery-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: 4rpx 20rpx;
+  border: 1rpx solid var(--c-accent-20);
+  border-radius: var(--r-full);
+  background-color: var(--c-accent-8); /* design.md §2 tint 底 8–10% 口径 */
+  font-size: var(--fs-cap);
+  color: var(--c-accent);
+}
+.gallery-tag-hash {
+  opacity: 0.5;
+}
+.gallery-count {
+  margin-top: 48rpx;
+  display: flex;
+  justify-content: center;
+}
+/* 类挂在自己的 Text 上，不用元素选择器（WXSS 里是 `<text>`，写 Text 不可靠） */
+.gallery-count-text {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 20rpx;
+  border: 1rpx solid var(--c-border-25);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  color: var(--c-fg-mid);
+}
+
+/* ── 照片网格（站点移动档 2 列方图）────────────────────────────── */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24rpx;
+}
+/* 方图靠定高算出来，不用 aspect-ratio（端上老 webview 支持面没验过）：
+ * 格宽 = (750 − 左右内边距 2×32 − 列间距 24) / 2 = 331rpx ⇒ 高取同值即 1:1。
+ * 圆角与裁切写在这层 —— 它是格子里唯一子元素（图）自己的盒（D47 那条规则）。 */
+.gallery-cell {
+  height: 331rpx;
+  overflow: hidden;
+  border-radius: var(--r-card);
+  border: 1rpx solid var(--c-border-25);
+  background-color: var(--c-fg-5);
+}
+.gallery-cell-img {
+  width: 100%;
+  height: 100%;
+}
+
+.gallery-retry {
+  margin-top: 32rpx;
+  padding: 12rpx 32rpx;
+  border: 1rpx solid var(--c-accent-30);
+  border-radius: var(--r-full);
+  font-size: var(--fs-sm);
+  color: var(--c-accent);
+}

@@ -13,7 +13,7 @@ export default defineAppConfig({
   subPackages: [
     {
       root: "pagesA",
-      pages: ["post/detail"],
+      pages: ["post/detail", "gallery-detail/index"],
     },
     {
       root: "pagesB",
@@ -21,8 +21,10 @@ export default defineAppConfig({
     },
   ],
   preloadRule: {
-    // 首页是详情页的唯一入口，预加载分包（WiFi/蜂窝都预取）
+    // 预加载分包（WiFi/蜂窝都预取）：首页 → 文章详情；图库 tab → 画廊详情（M3 步 4，
+    // 少了这条，从图库进详情要现拉分包）
     "pages/home/index": { network: "all", packages: ["pagesA"] },
+    "pages/gallery/index": { network: "all", packages: ["pagesA"] },
   },
   window: {
     backgroundTextStyle: "light",
