@@ -5,24 +5,26 @@
  * tint 卡）→ RECENT（[n/m] 等宽计数 + 纯文字卡）→ 「查看全部文章」outline
  * CTA。无 banner 图、无搜索胶囊、无公告条（margin 首页无对应物，Q 待定）；
  * 文章卡无图（站点 showCoverImages:false 一致）。
- * 数据接线不动：useManifest/useSiteData/usePostsIndex 原样；端上切片上拉加载。
+ * 数据接线：useManifest / useSiteData / usePostsIndex 原样；端上切片上拉加载。
+ * D50：mount 时 warmFirstScreen —— site/index 的 URL 不带 buildId，与 manifest 版本
+ * 比对同时发起（tab 页 launch 即挂载、切 tab 不重走；写完缓存键订阅侧即读即渲）。
  */
 import { View, Text } from "@tarojs/components";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useDidShow, usePageScroll, useReachBottom } from "@tarojs/taro";
+import Taro, { useDidShow, usePageScroll, useReachBottom } from "@tarojs/taro";
 
 import NavBar, { navAlpha } from "@/components/NavBar/NavBar";
 import PageBackdrop from "@/components/deco/PageBackdrop";
 import TerminalBadge from "@/components/deco/TerminalBadge";
 import SectionTitle from "@/components/deco/SectionTitle";
 import { usePostsIndex, useSiteData } from "@/hooks/useCollection";
+import { warmFirstScreen } from "@/services/api/collections";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
 import { setSelectedTab } from "@/custom-tab-bar/store";
 import { postDetailUrl } from "@/utils/routes";
 import { perfLog } from "@/utils/perf";
 import type { PostMeta } from "@/types/api";
-import Taro from "@tarojs/taro";
 import "./home.scss";
 
 /** RECENT 初始片量 = margin SITE.postPerIndex */
@@ -67,6 +69,11 @@ export default function Home() {
   const rootCls = useRootClass();
   // 同步 tabBar 选中态（组件内不可用页面级 hook）
   useDidShow(() => setSelectedTab(0));
+  // D50：首屏 site/index 与 manifest 并发 —— 与 useManifest 的 bootstrap 同一 flush
+  // 出发，冷启动首屏账从「manifest RTT + max(site,index)」变成三者取 max
+  useEffect(() => {
+    void warmFirstScreen();
+  }, []);
   const { manifest, loading, cacheHit } = useManifest();
   const buildId = manifest?.buildId ?? null;
   const site = useSiteData(buildId);

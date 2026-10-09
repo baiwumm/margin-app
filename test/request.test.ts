@@ -5,7 +5,7 @@ import {
   LocalErrorKind,
 } from "@/services/errors";
 import { setPlatformAdapter } from "@/services/platform";
-import { getJson } from "@/services/request";
+import { getJson, resetRequestMemo } from "@/services/request";
 import { resetMemoryCache } from "@/services/cache";
 import { MockPlatform } from "./helpers/mock-platform.ts";
 
@@ -15,6 +15,7 @@ beforeEach(() => {
   mp = new MockPlatform();
   setPlatformAdapter(mp.adapter);
   resetMemoryCache();
+  resetRequestMemo();
 });
 
 describe("request.getJson", () => {
@@ -92,6 +93,27 @@ describe("request.getJson", () => {
     const [a, b] = await Promise.all([getJson(URL), getJson(URL)]);
     expect(resolveCount).toBe(1);
     expect(a).toBe(b); // 同一 Promise 实例
+  });
+
+  it("memo：30s 内同 URL 已完成响应直接复用，不再打网络（D50 首屏并发）", async () => {
+    const U = "https://www.baiwumm.com/api/v1/memo-hit.json";
+    mp.json(U, mp.envelope({ n: 1 }));
+    const a = await getJson(U, { memo: true });
+    const b = await getJson(U, { memo: true });
+    expect(mp.requestLog.length).toBe(1);
+    expect(a).toBe(b); // 复用同一响应对象
+  });
+
+  it("memo：失败不进备忘（离线恢复后可立即重发）", async () => {
+    const U = "https://www.baiwumm.com/api/v1/memo-miss.json";
+    mp.route(U, () => new Error("down"));
+    await expect(getJson(U, { memo: true })).rejects.toMatchObject({
+      kind: LocalErrorKind.Network,
+    });
+    mp.json(U, mp.envelope({ n: 2 }));
+    const ok = await getJson(U, { memo: true });
+    expect("notModified" in ok).toBe(false);
+    expect(mp.requestLog.length).toBe(3); // 2 次失败（含 1 次重试）+ 1 次成功
   });
 
   it("LocalError kind 覆盖全枚举", () => {
