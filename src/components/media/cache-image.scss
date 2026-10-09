@@ -1,0 +1,15 @@
+/* CacheImage 的尺寸口径（真机缺陷：正文图只有 320px 宽、没铺满）。
+ * 微信 <image> 的默认尺寸是 320×240，而外层 .cache-image 上的 width/height **不会传给内层**
+ * —— 全仓此前没有任何 CSS 命中 .cache-image-img，于是：详情页（.block-img 只有 max-width:100%、
+ * 不裁切）直接露出右边缺的一截；画廊靠 .gallery-card{overflow:hidden} 把 320×240 硬裁进卡里，
+ * 看着像封面其实是从左上角裁的错图。尺寸按 mode 分两档给：
+ *   widthFix  → 只给宽，高让组件按原图比例自己算（官方口径：widthFix 配 height:auto）
+ *   其余（aspectFill 等）→ 铺满外层盒，裁切交给 mode 本身 */
+.cache-image-img-fix {
+  width: 100%;
+  height: auto;
+}
+.cache-image-img-fill {
+  width: 100%;
+  height: 100%;
+}

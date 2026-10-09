@@ -6,13 +6,18 @@
 import { Image, View } from "@tarojs/components";
 import { useState } from "react";
 
+import type { ComponentProps } from "react";
 import type { AssetRef } from "@/types/api";
+import "./cache-image.scss";
+
+/** Image 自己的 mode 联合类型（写 string 会让 tsc 在本文件报 TS2322，既有噪声顺手收掉） */
+type ImageMode = ComponentProps<typeof Image>["mode"];
 
 interface CacheImageProps {
   asset: AssetRef;
   /** 显示档位覆盖（省流模式列表用 thumb） */
   variant?: "thumb" | "md" | "src";
-  mode?: string;
+  mode?: ImageMode;
   className?: string;
   lazy?: boolean;
   /** 点击回调（正文图用来开预览）。默认不挂 ⇒ tab 页行为不变（M1-b 基线冻结） */
@@ -52,7 +57,9 @@ export function CacheImage({
         mode={mode}
         lazyLoad={lazy}
         showMenuByLongpress={longPressMenu}
-        className={`cache-image-img state-${state}`}
+        className={`cache-image-img ${
+          mode === "widthFix" ? "cache-image-img-fix" : "cache-image-img-fill"
+        } state-${state}`}
         onClick={onTap}
         onLoad={() => setState("loaded")}
         onError={() => setState("error")}
