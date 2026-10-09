@@ -208,15 +208,19 @@
 }
 .code-block-body {
   width: 100%;
-  padding: 24rpx 0;
   white-space: nowrap;
 }
 /* 行容器用 inline-flex 列（同 mine 页 heat-grid 的 ScrollView 模式）：宽随最长行，
  * ScrollView 才有确定的可滚区域。别在行上写 min-width:100%——百分比对着 shrink-to-fit
- * 父盒算，实测 178 行直接把渲染层卡死（selector query 全部超时）。 */
+ * 父盒算，实测 178 行直接把渲染层卡死（selector query 全部超时）。
+ * 上下 24rpx 内边距**必须写在这层而不是 .code-block-body**：那层是 <scroll-view>，
+ * 微信 webview 渲染模式下不支持它的 padding（IDE 告警原文：`<scroll-view>: the padding
+ * property is not yet supported in webview rendering mode`）—— 写在 ScrollView 上时
+ * 首行是贴着块顶边框渲出去的，真机就是这样。 */
 .code-block-rows {
   display: inline-flex;
   flex-direction: column;
+  padding: 24rpx 0;
 }
 .code-line {
   display: flex;
