@@ -6,28 +6,40 @@
  */
 import Taro from "@tarojs/taro";
 
-import { perfLog } from "./perf";
+import { perfLog, LAUNCH_T0 } from "./perf";
 
 type ObserveOption = Parameters<Taro.PerformanceObserver["observe"]>[0];
 
 /**
- * 把基础库实际给的性能条目原样打出来：不同基础库给的东西不一样，先量再定口径。
- * 我们要的 name 都在这里面 —— appLaunch（点图标 → 首页 onReady 的官方冷启动耗时）、
- * firstRender（逻辑层收到路由 → 首页 onReady）、firstPaint / firstContentfulPaint、
- * evaluateScript（JS 注入耗时）、route（路由处理）。
+ * 条目的 startTime 在这版基础库上是**绝对 epoch 毫秒**（实测 1.79e12），和 perfLog 的
+ * `+Nms`（相对 LAUNCH_T0）不同基 ⇒ 统一换算成后者，读的人只看一条时间轴。
+ * 若某版基础库给的是相对 timeOrigin 的小数（<1e11）则原样打印，不做减法 —— 减了会是个
+ * 一兆多的负数，一眼就能看出基线错了。
  */
-export function perfDumpEntries(tag: string): void {
+function at(start: number): string {
+  if (!Number.isFinite(start)) return "?";
+  return start > 1e11 ? `${Math.round(start - LAUNCH_T0)}ms` : `${start.toFixed(1)}(rel)`;
+}
+
+function line(e: Taro.PerformanceEntry): string {
+  const dur = e.duration && e.duration > 0 ? ` dur=${Math.round(e.duration)}` : "";
+  return `${e.entryType}:${e.name}@${at(e.startTime)}${dur}`;
+}
+
+/**
+ * 把基础库实际给的性能条目原样打出来：不同基础库给的东西不一样，先量再定口径。
+ * 实测这版（3.17.17）render 类给 firstPaint / firstRender / firstContentfulPaint /
+ * largestContentfulPaint，script 给 evaluateScript，navigation 给 route（+ appLaunch）
+ * —— LCP 就是我们要的「首屏真有内容」的官方口径。
+ * @param tail 冷启动要看最前面的 appLaunch（截尾会正好把它切掉）；页面级快照要看最新落的那几条
+ */
+export function perfDumpEntries(tag: string, tail = false): void {
   try {
     const p = typeof Taro.getPerformance === "function" ? Taro.getPerformance() : null;
     if (!p) return perfLog(`entries[${tag}] 无 getPerformance`);
     const es = p.getEntries() ?? [];
-    perfLog(
-      `entries[${tag}] n=${es.length} ` +
-        es
-          .slice(-10)
-          .map(e => `${e.entryType}:${e.name}@${Math.round(e.startTime)}`)
-          .join(" ")
-    );
+    const shown = tail ? es.slice(-8) : es.slice(0, 14);
+    perfLog(`entries[${tag}] n=${es.length} ${shown.map(line).join(" ")}`);
   } catch (e) {
     perfLog(`entries[${tag}] 读取失败 ${String(e).slice(0, 80)}`);
   }
@@ -41,15 +53,7 @@ export function perfWatchEntries(): void {
     p.createObserver((list: { getEntries(): Taro.PerformanceEntry[] }) => {
       const es = list?.getEntries?.() ?? [];
       if (es.length === 0) return;
-      perfLog(
-        "entries[obs] " +
-          es
-            .map(
-              e =>
-                `${e.entryType}:${e.name}@${Math.round(e.startTime)} dur=${Math.round(e.duration || 0)}`
-            )
-            .join(" ")
-      );
+      perfLog(`entries[obs] ${es.map(line).join(" ")}`);
       // Taro 的 Option 类型把 type 与 entryTypes 都标成必填（运行时是二选一），故断言绕过
     }).observe({ entryTypes: ["navigation", "render", "script"] } as unknown as ObserveOption);
   } catch {
