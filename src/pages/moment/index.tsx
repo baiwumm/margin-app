@@ -17,24 +17,16 @@ import AuroraHero from "@/components/deco/AuroraHero";
 import { getMoments } from "@/services/api/collections";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
+import {
+  monthBounds,
+  monthKey,
+  monthWindow,
+  shiftWindow as shiftStart,
+  windowStartFor,
+} from "@/utils/momentMonths";
 import { setSelectedTab } from "@/custom-tab-bar/store";
 import type { Moment } from "@/types/api";
 import "./moment.scss";
-
-/** 月份键（端上聚合，按 pubDatetime） */
-const monthKey = (iso: string) => iso.slice(0, 7); // "2026-09"
-
-function addMonths(key: string, n: number): string {
-  const [y, m] = key.split("-").map(Number);
-  const total = y * 12 + (m - 1) + n;
-  return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, "0")}`;
-}
-
-/** 6 月一屏的窗口起点（1-6 月 → 当年 1 月；7-12 月 → 当年 7 月） */
-function windowStartFor(key: string): string {
-  const y = Number(key.slice(0, 4));
-  return Number(key.slice(5, 7)) <= 6 ? `${y}-01` : `${y}-07`;
-}
 
 /** margin MomentCard 日期格式：YYYY年M月D日 */
 function formatMomentDate(iso: string): string {
@@ -69,28 +61,18 @@ export default function MomentPage() {
     });
   }, [buildId]);
 
-  /** 数据边界（窗口翻页钳制在此范围内；min = 最早年 1 月，max = 最晚年+1 的 7 月） */
-  const bounds = useMemo(() => {
-    const keys = (moments ?? []).map(m => monthKey(m.pubDatetime)).sort();
-    const thisYear = new Date().getFullYear();
-    const min = keys.length ? `${Number(keys[0].slice(0, 4))}-01` : `${thisYear}-01`;
-    const max = keys.length
-      ? `${Number(keys[keys.length - 1].slice(0, 4)) + 1}-07`
-      : `${thisYear}-07`;
-    return { min, max };
-  }, [moments]);
+  /** 数据边界与窗口月份：逻辑挪进 utils/momentMonths（那边单测覆盖跨年窗口与钳制边界） */
+  const bounds = useMemo(
+    () => monthBounds((moments ?? []).map(m => monthKey(m.pubDatetime))),
+    [moments]
+  );
 
   /** 当前窗口的 6 个月（连续日历月，空数据月照常显示，选中后展示空态） */
-  const cells = useMemo(() => {
-    if (!winStart) return [];
-    return Array.from({ length: 6 }, (_, i) => addMonths(winStart, i));
-  }, [winStart]);
+  const cells = useMemo(() => monthWindow(winStart), [winStart]);
 
   const shiftWindow = (dir: -1 | 1) => {
-    if (!winStart) return;
-    const next = addMonths(winStart, dir * 6);
-    if (next < bounds.min || next > bounds.max) return;
-    setWinStart(next);
+    const next = shiftStart(winStart, dir, bounds);
+    if (next) setWinStart(next);
   };
 
   const visible = useMemo(
