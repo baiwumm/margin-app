@@ -72,7 +72,11 @@ export default function LinkCardBlock({ data }: { data: CardData }) {
   );
 }
 
-export function VideoCard({ block }: { block: Extract<Block, { t: "video" }> }) {
+/** VideoCard 只消费 id / src / title 三个字段 ⇒ 入参收成结构子集，
+ *  瞬间卡的 video（与正文 video 块同形、只少一个 t 判别位）可直接复用，不必造二层适配 */
+export type VideoLike = { id?: string; src?: string; title?: string };
+
+export function VideoCard({ block }: { block: VideoLike }) {
   const bv = block.id;
   return (
     <LinkCardBlock

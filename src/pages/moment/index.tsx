@@ -9,12 +9,13 @@
  */
 import { View, Text } from "@tarojs/components";
 import { useEffect, useMemo, useState } from "react";
-import { useDidShow, usePageScroll } from "@tarojs/taro";
+import Taro, { useDidShow, usePageScroll } from "@tarojs/taro";
 
 import NavBar, { navAlpha } from "@/components/NavBar/NavBar";
 import PageBackdrop from "@/components/deco/PageBackdrop";
 import AuroraHero from "@/components/deco/AuroraHero";
 import { CacheImage } from "@/components/media/CacheImage";
+import { VideoCard } from "@/components/block/LinkCardBlock";
 import { getMoments } from "@/services/api/collections";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
@@ -27,7 +28,7 @@ import {
   windowStartFor,
 } from "@/utils/momentMonths";
 import { setSelectedTab } from "@/custom-tab-bar/store";
-import type { Moment } from "@/types/api";
+import type { AssetRef, Moment } from "@/types/api";
 import "./moment.scss";
 
 /** margin MomentCard 日期格式：YYYY年M月D日 */
@@ -157,27 +158,10 @@ export default function MomentPage() {
                 <Text className='moment-date'>{formatMomentDate(m.pubDatetime)}</Text>
               </View>
               <Text className='moment-text'>{m.text}</Text>
-              {m.images.length > 0 ? (
-                <View
-                  className={`moment-images ${m.images.length === 1 ? "moment-images-single" : ""}`}
-                  style={{
-                    gridTemplateColumns: `repeat(${Math.min(m.images.length, 3)}, 1fr)`,
-                  }}
-                >
-                  {m.images.slice(0, 9).map((img, idx) => (
-                    <View key={idx} className='moment-image-cell'>
-                      {/* 换成 CacheImage：三态与 avgColor 垫底归组件管，内层尺寸它也自己给（D49）。
-                          瞬间图档位只有 400/800 ⇒ 格子里取 thumb */}
-                      <CacheImage
-                        asset={img}
-                        variant='thumb'
-                        mode='aspectFill'
-                        className='moment-image'
-                      />
-                    </View>
-                  ))}
-                </View>
-              ) : null}
+              {m.images.length > 0 ? <MomentImages images={m.images} /> : null}
+              {/* 视频块（语料 9 条里 1 条有）：复用正文 video 的降级引用卡形态（D8 无 web-view
+                  一律降级），不内嵌播放器。音乐块按语料 0/9 判不做（D51 拍板 B） */}
+              {m.video ? <VideoCard block={m.video} /> : null}
               {m.tags.length > 0 ? (
                 <View className='moment-tags'>
                   {m.tags.map(tag => (
@@ -200,6 +184,51 @@ export default function MomentPage() {
 
         {/* 发布入口：一期隐藏（个人主体 UGC 风险，D8） */}
       </View>
+    </View>
+  );
+}
+
+/**
+ * 瞬间图组（margin MomentCard.astro:39-41/104-115 同规则）：1 图 = 全宽单格；2–3 图 =
+ * 按张数列；**>3 图 = 只显示前 2 张 + 第 3 格「+N」**（语料里那条 4 图的会真走到这支）。
+ * 点任意一格（含「+N」格）整组进 previewImage，列表 = **本条全部图**（不是屏上那两张），
+ * 预览取 src 档 —— 与正文图 D39 同一口径；格子显示仍 thumb（瞬间档位只有 400/800）。
+ */
+function MomentImages({ images }: { images: AssetRef[] }) {
+  const showAll = images.length <= 3;
+  const shown = showAll ? images : images.slice(0, 2);
+  const rest = showAll ? 0 : images.length - 2;
+  const urls = images.map(a => a.src);
+  const open = (at: number) => {
+    if (!urls[at]) return;
+    void Taro.previewImage({ current: urls[at], urls });
+  };
+  return (
+    <View
+      className={`moment-images ${images.length === 1 ? "moment-images-single" : ""}`}
+      style={{
+        gridTemplateColumns: `repeat(${showAll ? Math.min(images.length, 3) : 3}, 1fr)`,
+      }}
+    >
+      {shown.map((img, idx) => (
+        <View key={idx} className='moment-image-cell' onClick={() => open(idx)}>
+          <CacheImage
+            asset={img}
+            variant='thumb'
+            mode='aspectFill'
+            className='moment-image'
+          />
+        </View>
+      ))}
+      {rest > 0 ? (
+        <View
+          className='moment-image-cell moment-image-more'
+          hoverClass='row-press'
+          onClick={() => open(shown.length)}
+        >
+          <Text className='moment-image-more-text'>+{rest}</Text>
+        </View>
+      ) : null}
     </View>
   );
 }
