@@ -5,6 +5,12 @@
  * 看着像封面其实是从左上角裁的错图。尺寸按 mode 分两档给：
  *   widthFix  → 只给宽，高让组件按原图比例自己算（官方口径：widthFix 配 height:auto）
  *   其余（aspectFill 等）→ 铺满外层盒，裁切交给 mode 本身 */
+/* 内层必须是 block：`<image>` 默认按行内元素参与排版，行盒会在基线下方留一条缝隙，
+ * 而外层 .cache-image 的底是占位色 avgColor ⇒ 图铺满之后（widthFix 那档）缝里露出几像素
+ * 的图平均色（真机复验时用户指出）。display:block 一次解决两种 mode。 */
+.cache-image-img {
+  display: block;
+}
 .cache-image-img-fix {
   width: 100%;
   height: auto;
