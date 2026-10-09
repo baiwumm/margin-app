@@ -1,0 +1,55 @@
+/* 瞬间视频卡（margin video.css 画面区 + MomentCard.astro 嵌套间距同构）：
+ * 站点外层 .moment-video 只做 margin-top 1rem（视频卡自带的玻璃层在端上由
+ * 瞬间卡容器承担，不再套一层 —— 避免 D47 说的「圆角盒里放了别的东西」同款问题）；
+ * 画面区 = 16/9 近黑底（站点口径：light/dark 两态都压暗，letterbox 不露白）
+ * + --r-card 圆角（圆角盒就是视频自己的盒，D47 规则）+ border 40% 描边；
+ * 播放态 = accent 描边（站点 is-playing：border accent 45% + accent 5% 底）。
+ * 控制条走原生（D52），无自绘样式。 */
+
+.moment-video {
+  margin-top: 32rpx; /* 站点 .moment-video margin-top: 1rem */
+}
+
+.moment-video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9; /* ratio 字段合法时由组件内联覆盖 */
+  border-radius: var(--r-card);
+  border: 1rpx solid var(--c-border-40);
+  background-color: #0b0d10; /* 站点 color-mix(black 88%, fg)：两态近黑 */
+  overflow: hidden;
+}
+.moment-video-playing .moment-video-frame {
+  border-color: var(--c-accent);
+  box-shadow: 0 12rpx 32rpx -12rpx var(--c-accent-30);
+}
+
+.moment-video-el {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 标题行（站点 .video-head：VIDEO 等宽小字 + 标题，语料无 title ⇒ 平时不渲染） */
+.moment-video-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+  min-width: 0;
+}
+.moment-video-tag {
+  font-family: var(--font-mono);
+  font-size: 20rpx;
+  letter-spacing: 0.14em;
+  color: var(--c-fg-50);
+  flex-shrink: 0;
+}
+.moment-video-name {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--c-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

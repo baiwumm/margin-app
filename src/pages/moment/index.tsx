@@ -9,13 +9,13 @@
  */
 import { View, Text } from "@tarojs/components";
 import { useEffect, useMemo, useState } from "react";
-import Taro, { useDidShow, usePageScroll } from "@tarojs/taro";
+import Taro, { useDidHide, useDidShow, usePageScroll } from "@tarojs/taro";
 
 import NavBar, { navAlpha } from "@/components/NavBar/NavBar";
 import PageBackdrop from "@/components/deco/PageBackdrop";
 import AuroraHero from "@/components/deco/AuroraHero";
 import { CacheImage } from "@/components/media/CacheImage";
-import { VideoCard } from "@/components/block/LinkCardBlock";
+import MomentVideo, { pauseMomentVideo } from "@/components/media/MomentVideo";
 import { getMoments } from "@/services/api/collections";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
@@ -42,6 +42,8 @@ export default function MomentPage() {
   const rootCls = useRootClass();
   // 同步 tabBar 选中态（组件内不可用页面级 hook）
   useDidShow(() => setSelectedTab(3));
+  // D52：页面隐藏（app 后台等）时停掉内嵌视频；导航态由 autoPauseIfNavigate 负责
+  useDidHide(() => pauseMomentVideo());
   const { manifest } = useManifest();
   const buildId = manifest?.buildId ?? null;
   const [moments, setMoments] = useState<Moment[] | null>(null);
@@ -159,9 +161,11 @@ export default function MomentPage() {
               </View>
               <Text className='moment-text'>{m.text}</Text>
               {m.images.length > 0 ? <MomentImages images={m.images} /> : null}
-              {/* 视频块（语料 9 条里 1 条有）：复用正文 video 的降级引用卡形态（D8 无 web-view
-                  一律降级），不内嵌播放器。音乐块按语料 0/9 判不做（D51 拍板 B） */}
-              {m.video ? <VideoCard block={m.video} /> : null}
+              {/* 视频块（语料 9 条里 1 条有）：自托管 mp4 走原生 <video> 内嵌播放
+                   （D52）；非自托管（B 站 id 等）或播放出错时 MomentVideo 内部
+                   回退 VideoCard 降级引用卡（D8 无 web-view）。
+                   音乐块按语料 0/9 判不做（D51 拍板 B） */}
+              {m.video ? <MomentVideo video={m.video} /> : null}
               {m.tags.length > 0 ? (
                 <View className='moment-tags'>
                   {m.tags.map(tag => (
