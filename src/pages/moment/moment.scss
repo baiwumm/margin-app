@@ -59,8 +59,16 @@
   color: var(--c-fg-45);
 }
 .month-nav-cell-active .month-nav-name,
-.month-nav-cell-active .month-nav-year {
+.month-nav-cell-active .month-nav-year,
+.month-nav-cell-active .month-nav-count {
   color: var(--c-accent);
+}
+/* 逐月计数（验收②）：与年份同字号，空数据月渲染空串但保留行高 ⇒ 六格等高 */
+.month-nav-count {
+  font-family: var(--font-mono);
+  font-size: 20rpx;
+  line-height: 26rpx;
+  color: var(--c-fg-45);
 }
 
 /* ── 瞬间卡（margin MomentCard：border 35% + muted 12% 底 + blur 降级忽略）── */

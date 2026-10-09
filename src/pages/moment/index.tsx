@@ -7,17 +7,19 @@
  * 发布入口一期隐藏（D8）；点赞/收藏行不做（margin 卡无此物，likes 契约 null）；
  * featured ✦精选角标不做（契约 Moment 无 featured 字段，端点未导出）。
  */
-import { Image, View, Text } from "@tarojs/components";
+import { View, Text } from "@tarojs/components";
 import { useEffect, useMemo, useState } from "react";
 import { useDidShow, usePageScroll } from "@tarojs/taro";
 
 import NavBar, { navAlpha } from "@/components/NavBar/NavBar";
 import PageBackdrop from "@/components/deco/PageBackdrop";
 import AuroraHero from "@/components/deco/AuroraHero";
+import { CacheImage } from "@/components/media/CacheImage";
 import { getMoments } from "@/services/api/collections";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
 import {
+  countsByMonth,
   monthBounds,
   monthKey,
   monthWindow,
@@ -85,6 +87,9 @@ export default function MomentPage() {
     [moments]
   );
 
+  /** 逐月计数（验收②「月份切换计数正确」就是它，落在每个月份格的小字上） */
+  const monthCounts = useMemo(() => countsByMonth(moments ?? []), [moments]);
+
   return (
     <View className={`page page-bg ${rootCls}`}>
       <PageBackdrop />
@@ -119,6 +124,10 @@ export default function MomentPage() {
               >
                 <Text className='month-nav-name'>{Number(m.slice(5, 7))}月</Text>
                 <Text className='month-nav-year'>{m.slice(0, 4)}</Text>
+                {/* 空数据月也要占一行高，否则六格不齐 */}
+                <Text className='month-nav-count'>
+                  {monthCounts[m] ? `${monthCounts[m]} 条` : ""}
+                </Text>
               </View>
             ))}
           </View>
@@ -157,8 +166,14 @@ export default function MomentPage() {
                 >
                   {m.images.slice(0, 9).map((img, idx) => (
                     <View key={idx} className='moment-image-cell'>
-                      {/* 瞬间图 thumb 档（档位仅 400/800） */}
-                      <MomentImage url={img.thumb} color={img.avgColor} />
+                      {/* 换成 CacheImage：三态与 avgColor 垫底归组件管，内层尺寸它也自己给（D49）。
+                          瞬间图档位只有 400/800 ⇒ 格子里取 thumb */}
+                      <CacheImage
+                        asset={img}
+                        variant='thumb'
+                        mode='aspectFill'
+                        className='moment-image'
+                      />
                     </View>
                   ))}
                 </View>
@@ -186,17 +201,5 @@ export default function MomentPage() {
         {/* 发布入口：一期隐藏（个人主体 UGC 风险，D8） */}
       </View>
     </View>
-  );
-}
-
-function MomentImage({ url, color }: { url: string; color: string }) {
-  return (
-    <Image
-      src={url}
-      mode='aspectFill'
-      lazyLoad
-      className='moment-image'
-      style={{ backgroundColor: color }}
-    />
   );
 }
