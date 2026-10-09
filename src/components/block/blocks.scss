@@ -130,6 +130,15 @@
   border-radius: 24rpx;
   overflow: hidden;
 }
+/* 圆角与裁切必须**下沉到紧贴图片的那层**：.block-img 里除了图还有 .block-img-alt 图注，
+ * 容器底沿落在图注之下 ⇒ 只写在容器上，图只能圆到上两角、下两角是直边（真机实测形态；
+ * 语料 50/50 的 img 块都带 alt ⇒ 每张图都踩）。写在这层同时把占位底 avgColor 一起圆掉。
+ * 站点同形：margin `src/styles/typography.css:57` 是 `.app-prose img { rounded-xl }` ——
+ * 圆角挂在图片本身、`figcaption` 只给 opacity-75，本来就在圆角盒之外。 */
+.block-img .cache-image {
+  border-radius: 24rpx;
+  overflow: hidden;
+}
 .block-img-alt {
   margin-top: 8rpx;
   font-size: var(--fs-cap);
