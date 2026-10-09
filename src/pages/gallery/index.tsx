@@ -4,11 +4,12 @@
  * 画廊名(照片数)，激活 = accent 8% 底 + accent 字）+ 画廊卡双列（cover
  * aspect-video + gallery 紫 tint 描边 + 底部名称浮层 + 照片数角标）。
  * 数据接线不动：useGalleriesIndex 出画廊卡，「全部」即全部画廊卡；
- * 选中具体画廊走 getGalleryDetail 出照片网格（M3 详情页再细分）。
+ * 选中具体画廊走 getGalleryDetail 出照片网格（M3 步 7：卡也可点进 pagesA/gallery-detail，
+ * 两条入口都通 —— tab 内网格留作快速浏览，详情页给全尺寸头部与 2 列方图）。
  */
 import { ScrollView, View, Text } from "@tarojs/components";
 import { useEffect, useMemo, useState } from "react";
-import { useDidShow, usePageScroll } from "@tarojs/taro";
+import Taro, { useDidShow, usePageScroll } from "@tarojs/taro";
 
 import NavBar, { navAlpha } from "@/components/NavBar/NavBar";
 import PageBackdrop from "@/components/deco/PageBackdrop";
@@ -19,6 +20,7 @@ import { useGalleriesIndex } from "@/hooks/useCollection";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
 import { setSelectedTab } from "@/custom-tab-bar/store";
+import { galleryDetailUrl } from "@/utils/routes";
 import type { GalleryPhoto } from "@/types/api";
 import "./gallery.scss";
 
@@ -57,6 +59,14 @@ export default function Gallery() {
     () => (galleries ?? []).reduce((sum, g) => sum + g.photoCount, 0),
     [galleries]
   );
+
+  /** tab 内的照片格也进整组预览（验收① 的另一条入口）：列表 = 当前画廊全部图，
+   *  预览取 src 档、格子显示仍 thumb —— 与正文图 D39、画廊详情页同一口径 */
+  const openPhoto = (at: number) => {
+    const urls = photos.map(p => p.asset.src);
+    if (!urls[at]) return;
+    void Taro.previewImage({ current: urls[at], urls });
+  };
 
   return (
     <View className={`page page-bg ${rootCls}`}>
@@ -104,6 +114,7 @@ export default function Gallery() {
                 className='gallery-card card card-gallery'
                 hoverClass='card-press'
                 hoverStayTime={80}
+                onClick={() => void Taro.navigateTo({ url: galleryDetailUrl(g.slug) })}
                 style={{
                   animation: "rise-in 0.4s ease both",
                   animationDelay: `${Math.min(i * 50, 300)}ms`,
@@ -139,6 +150,9 @@ export default function Gallery() {
               <View
                 key={`${photo.name}-${i}`}
                 className='photo-cell'
+                hoverClass='card-press'
+                hoverStayTime={80}
+                onClick={() => openPhoto(i)}
                 style={{
                   animation: "rise-in 0.4s ease both",
                   animationDelay: `${Math.min(i * 50, 300)}ms`,
