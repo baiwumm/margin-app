@@ -4,6 +4,8 @@ export const GALLERY_DETAIL = "/pagesA/gallery-detail/index";
 export const PREFERENCE = "/pagesB/preference";
 export const ARCHIVE = "/pagesA/archive/index";
 export const TAG_DETAIL = "/pagesA/tag-detail/index";
+export const FRIENDS = "/pagesA/friends/index";
+export const PROJECTS = "/pagesA/projects/index";
 
 export function postDetailUrl(slug: string): string {
   return `${POST_DETAIL}?slug=${encodeURIComponent(slug)}`;
@@ -22,4 +24,14 @@ export function archiveUrl(): string {
 /** 标签详情（M4 步 2；对应站点 /tags/<tag>；参数 = 标签显示名） */
 export function tagDetailUrl(tag: string): string {
   return `${TAG_DETAIL}?tag=${encodeURIComponent(tag)}`;
+}
+
+/** 友链（M4 步 3；对应站点 /friends） */
+export function friendsUrl(): string {
+  return FRIENDS;
+}
+
+/** 项目（M4 步 4；对应站点 /projects） */
+export function projectsUrl(): string {
+  return PROJECTS;
 }

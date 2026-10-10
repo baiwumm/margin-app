@@ -1,0 +1,119 @@
+/**
+ * 项目页（M4 步 4；requirements §6.2 分包 A，对应站点 /projects）。
+ * 站点结构：hero（N 个开源项目 / Stars / Forks 徽章）+ ProjectCard 网格
+ * （语言点 + 名 + 描述 + topics + stars/forks + 打开钮）。
+ * 端上：D8 口径外链只复制；打开动作为「复制地址 + toast」。
+ */
+import { Text, View } from "@tarojs/components";
+import Taro, { usePageScroll } from "@tarojs/taro";
+import { useEffect, useMemo, useState } from "react";
+
+import PageBackdrop from "@/components/deco/PageBackdrop";
+import SubNavBar from "@/components/NavBar/SubNavBar";
+import { navAlpha } from "@/components/NavBar/NavBar";
+import { getProjects } from "@/services/api/collections";
+import { useManifest } from "@/hooks/useManifest";
+import { useRootClass } from "@/hooks/useTheme";
+import type { ProjectPayload } from "@/types/api";
+import "./index.scss";
+
+export default function ProjectsPage() {
+  const rootCls = useRootClass();
+  const { manifest } = useManifest();
+  const buildId = manifest?.buildId ?? null;
+  const [projects, setProjects] = useState<ProjectPayload[] | null>(null);
+  const [alpha, setAlpha] = useState(0);
+  usePageScroll(p => setAlpha(navAlpha(p.scrollTop)));
+
+  useEffect(() => {
+    if (!buildId) return;
+    // 既有 service 回调模式（同 getMoments/getGalleryDetail），不新增 hook
+    getProjects(buildId, setProjects);
+  }, [buildId]);
+
+  const sums = useMemo(
+    () => ({
+      stars: (projects ?? []).reduce((s, p) => s + p.stars, 0),
+      forks: (projects ?? []).reduce((s, p) => s + p.forks, 0),
+    }),
+    [projects]
+  );
+
+  const copy = (url: string) => {
+    void Taro.setClipboardData({ data: url });
+    void Taro.showToast({ title: "已复制项目地址", icon: "none" });
+  };
+
+  return (
+    <View className={`page page-bg ${rootCls}`}>
+      <PageBackdrop />
+      <SubNavBar title='项目' alpha={alpha} />
+      <View className='page-body projects'>
+        {projects === null ? (
+          <Text className='projects-loading'>加载中…</Text>
+        ) : (
+          <>
+            <View className='projects-stats'>
+              <Text className='projects-stats-text'>{projects.length} 个开源项目</Text>
+              {sums.stars > 0 ? (
+                <>
+                  <Text className='projects-stats-dot'>·</Text>
+                  <Text className='projects-stats-text'>{sums.stars} Stars</Text>
+                </>
+              ) : null}
+              {sums.forks > 0 ? (
+                <>
+                  <Text className='projects-stats-dot'>·</Text>
+                  <Text className='projects-stats-text'>{sums.forks} Forks</Text>
+                </>
+              ) : null}
+            </View>
+
+            <View className='projects-list'>
+              {projects.map(p => (
+                <View
+                  key={p.url}
+                  className='project-card'
+                  hoverClass='card-press'
+                  hoverStayTime={80}
+                  onClick={() => copy(p.url)}
+                >
+                  <View className='project-head'>
+                    {p.lang ? (
+                      <View className='project-lang'>
+                        <View className='project-lang-dot' />
+                        <Text className='project-lang-text'>{p.lang}</Text>
+                      </View>
+                    ) : null}
+                    <View className='project-stars'>
+                      <Text className='project-star-text'>★ {p.stars}</Text>
+                      <Text className='project-fork-text'>⑂ {p.forks}</Text>
+                    </View>
+                  </View>
+                  <Text className='project-name'>{p.name}</Text>
+                  <Text className='project-desc'>{p.desc}</Text>
+                  {p.topics.length > 0 ? (
+                    <View className='project-topics'>
+                      {p.topics.slice(0, 5).map(t => (
+                        <Text key={t} className='project-topic'>
+                          {t}
+                        </Text>
+                      ))}
+                    </View>
+                  ) : null}
+                </View>
+              ))}
+            </View>
+
+            {projects.length === 0 ? (
+              <View className='empty'>
+                <Text className='empty-title'>这里还什么都没有</Text>
+                <Text className='empty-desc'>项目正在路上，敬请期待。</Text>
+              </View>
+            ) : null}
+          </>
+        )}
+      </View>
+    </View>
+  );
+}

@@ -9,7 +9,7 @@
  */
 import { Image, View, Text } from "@tarojs/components";
 import { useEffect, useMemo, useState } from "react";
-import { useDidShow, usePageScroll } from "@tarojs/taro";
+import Taro, { useDidShow, usePageScroll } from "@tarojs/taro";
 
 import NavBar, { navAlpha } from "@/components/NavBar/NavBar";
 import PageBackdrop from "@/components/deco/PageBackdrop";
@@ -28,15 +28,16 @@ import {
 } from "@/config/accent";
 import { setSelectedTab } from "@/custom-tab-bar/store";
 import { setPrefs } from "@/utils/prefs";
-import { PREFERENCE } from "@/utils/routes";
+import { PREFERENCE, friendsUrl, projectsUrl } from "@/utils/routes";
 import type { Stats } from "@/types/api";
-import Taro from "@tarojs/taro";
 import "./mine.scss";
 
 /** 功能列表行（design.md §3；路由 M2 偏好 / M4 其余，先占位提示） */
 const ROWS = [
   { key: "favorites", label: "我的收藏" },
   { key: "history", label: "阅读记录" },
+  { key: "friends", label: "友链" },
+  { key: "projects", label: "项目" },
   { key: "prefs", label: "偏好设置" },
   { key: "contact", label: "联系站长" },
   { key: "disclaimer", label: "免责声明" },
@@ -135,9 +136,17 @@ export default function Mine() {
   );
 
   const onRow = (key: string, label: string) => {
-    // 偏好页 M2 已就绪；其余（收藏/历史/联系/免责声明）M4 前占位
+    // M2 偏好 / M4 步 3-4 友链·项目已就绪；其余（收藏/历史/联系/免责声明）后续步骤
     if (key === "prefs") {
       void Taro.navigateTo({ url: PREFERENCE });
+      return;
+    }
+    if (key === "friends") {
+      void Taro.navigateTo({ url: friendsUrl() });
+      return;
+    }
+    if (key === "projects") {
+      void Taro.navigateTo({ url: projectsUrl() });
       return;
     }
     void Taro.showToast({ title: `${label}即将上线`, icon: "none" });

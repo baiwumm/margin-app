@@ -10,10 +10,12 @@
  */
 import type {
   AssetRef,
+  FriendGroupPayload,
   Gallery,
   Moment,
   PostDetail,
   PostMeta,
+  ProjectPayload,
   SitePayload,
   Stats,
   Tag,
@@ -170,6 +172,30 @@ export const getMoments = (
 
 export const getTags = (buildId: string, onData: (d: Tag[]) => void) =>
   loadWithCache<Tag[]>("tags", "/api/v1/tags/index.json", buildId, onData);
+
+/** 友链分组（M4 步 3；站点 /friends，D8 口径：外链只复制不跳转） */
+export const getFriends = (
+  buildId: string,
+  onData: (d: FriendGroupPayload[]) => void
+) =>
+  loadWithCache<FriendGroupPayload[]>(
+    "friends",
+    "/api/v1/friends.json",
+    buildId,
+    onData
+  );
+
+/** 项目列表（M4 步 4；站点 /projects，stars/forks 构建期已刷新） */
+export const getProjects = (
+  buildId: string,
+  onData: (d: ProjectPayload[]) => void
+) =>
+  loadWithCache<ProjectPayload[]>(
+    "projects",
+    "/api/v1/projects.json",
+    buildId,
+    onData
+  );
 
 export const getStats = (buildId: string, onData: (d: Stats) => void) =>
   loadWithCache<Stats>("stats", "/api/v1/stats.json", buildId, onData);
