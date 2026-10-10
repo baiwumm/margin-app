@@ -22,7 +22,7 @@ import { warmFirstScreen } from "@/services/api/collections";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
 import { setSelectedTab } from "@/custom-tab-bar/store";
-import { postDetailUrl } from "@/utils/routes";
+import { postDetailUrl, archiveUrl } from "@/utils/routes";
 import { perfLog } from "@/utils/perf";
 import type { PostMeta } from "@/types/api";
 import "./home.scss";
@@ -188,15 +188,13 @@ export default function Home() {
             </View>
           ) : null}
 
-          {/* ⑦ outline CTA → 归档（M4 二级页就绪前提示） */}
+          {/* ⑦ outline CTA → 归档（M4 步 1 接真：pagesA/archive，preloadRule 首页→pagesA 覆盖） */}
           <View className='home-cta-row'>
             <View
               className='home-cta'
               hoverClass='home-cta-press'
               hoverStayTime={80}
-              onClick={() =>
-                void Taro.showToast({ title: "归档即将上线", icon: "none" })
-              }
+              onClick={() => void Taro.navigateTo({ url: archiveUrl() })}
             >
               <Text className='home-cta-text'>查看全部文章</Text>
               <Text className='home-cta-arrow'>→</Text>

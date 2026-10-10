@@ -2,6 +2,7 @@
 export const POST_DETAIL = "/pagesA/post/detail";
 export const GALLERY_DETAIL = "/pagesA/gallery-detail/index";
 export const PREFERENCE = "/pagesB/preference";
+export const ARCHIVE = "/pagesA/archive/index";
 
 export function postDetailUrl(slug: string): string {
   return `${POST_DETAIL}?slug=${encodeURIComponent(slug)}`;
@@ -10,4 +11,9 @@ export function postDetailUrl(slug: string): string {
 /** 画廊详情（M3 步 4；对应站点 /galleries/<slug>） */
 export function galleryDetailUrl(slug: string): string {
   return `${GALLERY_DETAIL}?slug=${encodeURIComponent(slug)}`;
+}
+
+/** 归档（M4 步 1；对应站点 /archives；首页「查看全部文章」CTA 的目标） */
+export function archiveUrl(): string {
+  return ARCHIVE;
 }
