@@ -22,48 +22,14 @@ import { warmFirstScreen } from "@/services/api/collections";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
 import { setSelectedTab } from "@/custom-tab-bar/store";
-import { postDetailUrl, archiveUrl } from "@/utils/routes";
+import { archiveUrl } from "@/utils/routes";
+import PostCard from "@/components/business/PostCard";
 import { perfLog } from "@/utils/perf";
 import type { PostMeta } from "@/types/api";
 import "./home.scss";
 
 /** RECENT 初始片量 = margin SITE.postPerIndex */
 const PAGE_SIZE = 6;
-
-function formatDate(iso: string): string {
-  return iso.slice(0, 10);
-}
-
-function PostCard({ post, featured }: { post: PostMeta; featured: boolean }) {
-  return (
-    <View
-      className={`post-card card ${featured ? "card-featured" : ""}`}
-      hoverClass='card-press'
-      hoverStayTime={80}
-      onClick={() => void Taro.navigateTo({ url: postDetailUrl(post.slug) })}
-    >
-      <Text className='post-card-title'>{post.title}</Text>
-      <View className='post-card-meta'>
-        <Text className='post-card-date'>{formatDate(post.pubDatetime)}</Text>
-        <Text className='post-card-time'>{post.readingTime} 分钟</Text>
-      </View>
-      <Text className='post-card-desc'>{post.description}</Text>
-      {post.tags.length > 0 ? (
-        <View className='post-card-tags'>
-          {post.tags.slice(0, 4).map(tag => (
-            <Text
-              key={tag}
-              className={`post-card-tag ${featured ? "post-card-tag-featured" : ""}`}
-            >
-              <Text className='post-card-tag-hash'># </Text>
-              {tag}
-            </Text>
-          ))}
-        </View>
-      ) : null}
-    </View>
-  );
-}
 
 export default function Home() {
   const rootCls = useRootClass();

@@ -17,7 +17,7 @@ export default defineAppConfig({
   subPackages: [
     {
       root: "pagesA",
-      pages: ["post/detail", "gallery-detail/index", "archive/index"],
+      pages: ["post/detail", "gallery-detail/index", "archive/index", "tag-detail/index"],
     },
     {
       root: "pagesB",

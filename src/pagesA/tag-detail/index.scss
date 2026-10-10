@@ -1,0 +1,123 @@
+/* 标签详情（M4 步 2；站点 tags/[tag] 的 Main 头同构 + §5.6 共现推荐区）
+ * 数值溯源：头卡 = 画廊详情同组类（--r-hero、border 20%、muted 10% 底、
+ * 64/48rpx 内边距、text-3xl=60rpx）；eyebrow「Tag:」= mono 小字 accent；
+ * 计数徽章 = gallery-count 同款。共现推荐 = 小节标题 + 渐隐线（月份导航
+ * 同族）+ chips（hash + 名 + 篇数，胶囊 border 30% + muted 15% 底）。 */
+
+.tag-detail {
+  padding: 0 var(--sp-page) calc(140rpx + env(safe-area-inset-bottom, 0px));
+}
+
+.tag-header {
+  margin-top: var(--sp-3);
+  margin-bottom: var(--sp-gap);
+  padding: 48rpx;
+  text-align: center;
+  border: 1rpx solid var(--c-border-20);
+  border-radius: var(--r-hero);
+  background-color: var(--c-muted-10);
+}
+.tag-header-eyebrow {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-cap);
+  letter-spacing: 0.08em;
+  color: var(--c-accent);
+}
+.tag-header-name {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 60rpx;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--c-fg);
+  word-break: break-all;
+}
+.tag-header-desc {
+  display: block;
+  margin-top: 24rpx;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--c-fg-mid);
+}
+.tag-header-count {
+  margin-top: 32rpx;
+  display: flex;
+  justify-content: center;
+}
+.tag-header-count-text {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 20rpx;
+  border: 1rpx solid var(--c-border-25);
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--c-fg-mid);
+}
+.tag-loading {
+  display: block;
+  margin-top: 64rpx;
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--c-fg-45);
+}
+
+.tag-posts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-gap);
+}
+
+/* ── 共现推荐（§5.6：站点无此区，端上加的）──────────────────── */
+.tag-related {
+  margin-top: 80rpx;
+}
+.tag-related-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+.tag-related-title {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--c-accent);
+}
+.tag-related-line {
+  flex: 1;
+  height: 1rpx;
+  background-color: var(--c-accent-15);
+}
+.tag-related-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+.tag-related-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 24rpx;
+  border: 1rpx solid var(--c-border-30);
+  border-radius: var(--r-full);
+  background-color: var(--c-muted-15);
+}
+.tag-related-hash {
+  font-size: var(--fs-cap);
+  color: var(--c-accent);
+  opacity: 0.7;
+}
+.tag-related-name {
+  font-size: var(--fs-cap);
+  font-weight: 500;
+  color: var(--c-fg-mid);
+}
+.tag-related-count {
+  font-family: var(--font-mono);
+  font-size: 20rpx;
+  color: var(--c-fg-45);
+}

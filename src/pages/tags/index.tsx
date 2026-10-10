@@ -6,8 +6,8 @@
  * 不用彩色块（D14：margin 标签卡 = 细边框 + accent 交互，契约三色字段不消费）。
  */
 import { View, Text } from "@tarojs/components";
-import { useMemo } from "react";
-import { useDidShow, usePageScroll } from "@tarojs/taro";
+import { useMemo, useState } from "react";
+import Taro, { useDidShow, usePageScroll } from "@tarojs/taro";
 
 import NavBar, { navAlpha } from "@/components/NavBar/NavBar";
 import PageBackdrop from "@/components/deco/PageBackdrop";
@@ -16,7 +16,7 @@ import { useTags } from "@/hooks/useCollection";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
 import { setSelectedTab } from "@/custom-tab-bar/store";
-import { useState } from "react";
+import { tagDetailUrl } from "@/utils/routes";
 import "./tags.scss";
 
 export default function Tags() {
@@ -53,6 +53,7 @@ export default function Tags() {
               className='tag-card'
               hoverClass='tag-card-press'
               hoverStayTime={80}
+              onClick={() => void Taro.navigateTo({ url: tagDetailUrl(tag.name) })}
               style={{
                 animation: "rise-in 0.4s ease both",
                 animationDelay: `${Math.min(i * 50, 300)}ms`,

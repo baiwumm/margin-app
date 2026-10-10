@@ -3,6 +3,7 @@ export const POST_DETAIL = "/pagesA/post/detail";
 export const GALLERY_DETAIL = "/pagesA/gallery-detail/index";
 export const PREFERENCE = "/pagesB/preference";
 export const ARCHIVE = "/pagesA/archive/index";
+export const TAG_DETAIL = "/pagesA/tag-detail/index";
 
 export function postDetailUrl(slug: string): string {
   return `${POST_DETAIL}?slug=${encodeURIComponent(slug)}`;
@@ -16,4 +17,9 @@ export function galleryDetailUrl(slug: string): string {
 /** 归档（M4 步 1；对应站点 /archives；首页「查看全部文章」CTA 的目标） */
 export function archiveUrl(): string {
   return ARCHIVE;
+}
+
+/** 标签详情（M4 步 2；对应站点 /tags/<tag>；参数 = 标签显示名） */
+export function tagDetailUrl(tag: string): string {
+  return `${TAG_DETAIL}?tag=${encodeURIComponent(tag)}`;
 }

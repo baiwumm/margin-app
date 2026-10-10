@@ -1,0 +1,62 @@
+/* 文章卡（M4 步 2 从 home.scss 原样抽出；margin Card.astro 同构）── */
+.post-card {
+  padding: var(--sp-3);
+  animation: rise-in 0.4s ease both;
+}
+.post-card-title {
+  font-size: var(--fs-card);
+  font-weight: 600;
+  color: var(--c-fg);
+  line-height: 1.4;
+}
+.post-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-top: 12rpx;
+}
+.post-card-date {
+  font-size: var(--fs-sm);
+  color: var(--c-fg-mid);
+  font-family: var(--font-mono);
+}
+.post-card-time {
+  font-size: var(--fs-sm);
+  color: var(--c-fg-55);
+}
+.post-card-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: var(--sp-1);
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--c-fg-75); /* margin text-foreground/75 */
+}
+.post-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: var(--sp-2);
+}
+.post-card-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--r-full);
+  padding: 4rpx 20rpx;
+  font-size: var(--fs-cap);
+  font-weight: 500;
+  border: 1rpx solid var(--c-border-30);
+  background-color: var(--c-muted-15);
+  color: var(--c-fg-mid);
+}
+.post-card-tag-featured {
+  border-color: var(--c-featured-25);
+  background-color: var(--c-featured-8);
+  color: var(--c-featured); /* margin text-featured/80，端上用实色保对比 */
+}
+.post-card-tag-hash {
+  opacity: 0.6;
+}
