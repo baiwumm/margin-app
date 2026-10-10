@@ -1,6 +1,6 @@
 /* 返回顶部圆钮（margin BackToTopButton：size-11=44px=88rpx、end-4=32rpx、
  * bottom-8=64rpx、border-accent/15、shadow 0 4px 20px rgba(0,0,0,.2)、
- * 隐藏态 translate-y-8(32rpx)+opacity 0，300ms 过渡） */
+ * 隐藏态 translate-y-8=2rem=64rpx + opacity 0，300ms 过渡） */
 .btt {
   position: fixed;
   right: 32rpx;
@@ -17,15 +17,19 @@
   border-radius: var(--r-full);
   background-color: var(--c-surface);
   box-shadow: 0 8rpx 40rpx rgba(0, 0, 0, 0.2);
-  /* 只做淡入，不做 margin 那段 translate-y-8 上滑：transform 里的 rpx 不换算（D20⑥），
-   * 换 px 或改 bottom 位移都量不到生效（.btt-on 的类已挂上、规则也在产物里，rect 不动），
-   * 属不可验证的装饰，砍掉；浮现与否由 opacity + pointer-events 表达 */
+  /* D31 一度判定「transform 内 rpx 不换算」而砍掉 margin 的上滑位移；D36 复测
+   * 推翻该判定（光球振幅实测成立，当年的「不动」是模拟器没重编译的误判）⇒
+   * 按设计值恢复 64rpx 上滑 + 300ms 过渡（transform 内与全站一律 rpx） */
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transform: translateY(64rpx);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
   pointer-events: none;
 }
 .btt-on {
   opacity: 1;
+  transform: translateY(0);
   pointer-events: auto;
 }
 .btt-press {
