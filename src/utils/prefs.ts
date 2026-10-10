@@ -21,6 +21,8 @@ export interface Prefs {
   readMode: boolean;
   /** 代码块换行（关 = 横向滚动，margin 原站默认） */
   codeWrap: boolean;
+  /** 站点字体（D4：开 = 等宽场景加载 Maple Mono CN ASCII 切片；默认系统栈） */
+  siteFont: boolean;
 }
 
 /** margin .app-prose 正文 = 16px/1.75 @375 → 32rpx；行距同 --lh-body 默认 */
@@ -31,6 +33,7 @@ export const DEFAULT_PREFS: Prefs = {
   leading: 1.75,
   readMode: false,
   codeWrap: false,
+  siteFont: false,
 };
 
 export const BODY_RPX_MIN = 26;
@@ -69,6 +72,7 @@ export function normalize(raw: unknown): Prefs {
     leading: snapLeading(o.leading),
     readMode: o.readMode === true,
     codeWrap: o.codeWrap === true,
+    siteFont: o.siteFont === true,
   };
 }
 

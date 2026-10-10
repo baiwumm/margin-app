@@ -14,6 +14,7 @@ import {
   setPrefs,
   snapLeading,
   subscribePrefs,
+  type Prefs,
 } from "@/utils/prefs";
 import { MockPlatform } from "./helpers/mock-platform.ts";
 
@@ -62,13 +63,14 @@ describe("解析与校验", () => {
   });
 
   it("序列化回环保真", () => {
-    const p = {
-      theme: "dark" as const,
-      accent: "rose" as const,
+    const p: Prefs = {
+      theme: "dark",
+      accent: "rose",
       bodyRpx: 34,
       leading: 1.9,
       readMode: true,
       codeWrap: true,
+      siteFont: true,
     };
     expect(parsePrefs(serializePrefs(p))).toEqual(p);
   });
@@ -79,11 +81,13 @@ describe("解析与校验", () => {
       accent: "chartreuse",
       readMode: "yes",
       codeWrap: 1,
+      siteFont: "yes",
     });
     expect(n.theme).toBe("system");
     expect(n.accent).toBe("blue");
     expect(n.readMode).toBe(false);
     expect(n.codeWrap).toBe(false);
+    expect(n.siteFont).toBe(false);
   });
 });
 
@@ -118,5 +122,14 @@ describe("运行时单例与落盘", () => {
     off();
     setPrefs({ bodyRpx: 26 });
     expect(seen).toEqual([40]); // 取消订阅后不再收通知
+  });
+
+  it("siteFont：默认 false；缺省/非 true 值回落 false", () => {
+    expect(DEFAULT_PREFS.siteFont).toBe(false);
+    setPrefs({ siteFont: true });
+    expect(getPrefs().siteFont).toBe(true);
+    // 落盘文本Round-trip后应保持
+    setPrefs({ siteFont: false });
+    expect(getPrefs().siteFont).toBe(false);
   });
 });

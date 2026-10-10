@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 设计令牌层 —— 唯一事实源 = margin 博客原设计（D1）。
  * 主令牌 = margin global.css 原值；color-mix()/oklab 全部按 design.md §2
  * 预计算为固定 rgba（WXSS 兼容，D20③）；alpha 档位对齐 margin 使用习惯：
@@ -463,7 +463,9 @@ page,
 
   --font-body: -apple-system, "PingFang SC", "HarmonyOS Sans SC",
     "Microsoft YaHei", sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* 前两个家族 = 站点字体偏好加载的 Maple Mono CN ASCII 切片（utils/siteFont.ts，D4）；
+     未加载时这两个名字不命中任何已装字体，自动穿透到系统等宽栈 ⇒ 关偏好零变化 */
+  --font-mono: "Maple Mono CN", "Maple Mono CN Ext", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --lh-body: 1.75;
   --lh-loose: 1.85; /* 瞬间正文（margin moment-text） */

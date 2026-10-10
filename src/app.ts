@@ -13,6 +13,7 @@ import { KEY_PREFS } from "./services/cache";
 import { setAccent } from "./config/accent";
 import { setThemePreference } from "./hooks/useTheme";
 import { getPrefs, hydratePrefs } from "./utils/prefs";
+import { loadSiteFont } from "./utils/siteFont";
 import "./app.scss";
 
 setPlatformAdapter(taroAdapter);
@@ -30,6 +31,8 @@ hydratePrefs(Taro.getStorageSync(KEY_PREFS) || null);
 const bootPrefs = getPrefs();
 setThemePreference(bootPrefs.theme);
 setAccent(bootPrefs.accent);
+// D4：站点字体偏好开 ⇒ 启动即异步取 ASCII 切片（不等首帧、失败静默、关偏好不取）
+if (bootPrefs.siteFont) loadSiteFont();
 
 function App({ children }: PropsWithChildren) {
   useLaunch(() => {

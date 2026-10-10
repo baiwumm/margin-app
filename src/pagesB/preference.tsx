@@ -3,8 +3,9 @@
  * （启动水合见 app.ts），本页只负责改值。
  * 形态取 margin mobile-menu 的 Preferences 小节 + ReadMode.astro 的缩放交互
  * （margin 桌面是 −/+ 缩放 80–140%，端上按 requirements §10 落 26–40rpx 步进 2）。
- * 站点字体开关不做：字体子集从未生成（/fonts/*.woff2 实测 404），D25 步骤 10 跳过，
- * 做成开关就是骗人的（D26 第 5 项继续挂未验）。
+ * 站点字体开关（D4）：等宽场景（代码/日期/终端角标）异步加载 Maple Mono CN 的
+ * ASCII 切片（约 34KB，同域、免白名单新增）；未加载时 CSS 栈自动穿透系统等宽，
+ * 加载失败静默。中文仍随系统（全量子集 MB 级，D4 红线不变）。
  */
 import { Switch, Text, View } from "@tarojs/components";
 import { useEffect, useState } from "react";
@@ -35,6 +36,7 @@ import {
   subscribePrefs,
   type Prefs,
 } from "@/utils/prefs";
+import { loadSiteFont } from "@/utils/siteFont";
 import "./preference.scss";
 
 const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
@@ -62,6 +64,8 @@ export default function Preference() {
   const patch = (p: Partial<Prefs>) => {
     if (p.accent) setAccent(p.accent);
     if (p.theme) setThemePreference(p.theme);
+    // D4：站点字体开 ⇒ 立即发起切片加载（幂等；关时不卸载，本会话留着无感）
+    if (p.siteFont) loadSiteFont();
     setPrefs(p);
   };
 
@@ -139,6 +143,15 @@ export default function Preference() {
             hint='关闭则横向滚动（margin 原站默认）'
             color={accentHex(prefs.accent, theme)}
             onChange={v => patch({ codeWrap: v })}
+          />
+        </Group>
+
+        <Group title='站点字体'>
+          <SwitchRow
+            checked={prefs.siteFont}
+            hint='等宽场景用 Maple Mono CN（ASCII 切片约 34KB，中文随系统）'
+            color={accentHex(prefs.accent, theme)}
+            onChange={v => patch({ siteFont: v })}
           />
         </Group>
       </View>
