@@ -28,12 +28,13 @@ import {
 } from "@/config/accent";
 import { setSelectedTab } from "@/custom-tab-bar/store";
 import { setPrefs } from "@/utils/prefs";
-import { PREFERENCE, friendsUrl, projectsUrl } from "@/utils/routes";
+import { PREFERENCE, archiveUrl, friendsUrl, projectsUrl } from "@/utils/routes";
 import type { Stats } from "@/types/api";
 import "./mine.scss";
 
 /** 功能列表行（design.md §3；路由 M2 偏好 / M4 其余，先占位提示） */
 const ROWS = [
+  { key: "archive", label: "归档" },
   { key: "favorites", label: "我的收藏" },
   { key: "history", label: "阅读记录" },
   { key: "friends", label: "友链" },
@@ -136,9 +137,13 @@ export default function Mine() {
   );
 
   const onRow = (key: string, label: string) => {
-    // M2 偏好 / M4 步 3-4 友链·项目已就绪；其余（收藏/历史/联系/免责声明）后续步骤
+    // M2 偏好 / M4 步 1/3/4 归档·友链·项目已就绪；其余（收藏/历史/联系/免责声明）后续步骤
     if (key === "prefs") {
       void Taro.navigateTo({ url: PREFERENCE });
+      return;
+    }
+    if (key === "archive") {
+      void Taro.navigateTo({ url: archiveUrl() });
       return;
     }
     if (key === "friends") {
