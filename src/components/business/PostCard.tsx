@@ -8,13 +8,9 @@ import { Text, View } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 
 import { postDetailUrl } from "@/utils/routes";
+import { formatDateLocal } from "@/utils/date";
 import type { PostMeta } from "@/types/api";
 import "./PostCard.scss";
-
-/** margin 文章卡日期格式（与 home/详情头同为 UTC slice 口径，D60 记档） */
-function formatDate(iso: string): string {
-  return iso.slice(0, 10);
-}
 
 export default function PostCard({
   post,
@@ -32,7 +28,7 @@ export default function PostCard({
     >
       <Text className='post-card-title'>{post.title}</Text>
       <View className='post-card-meta'>
-        <Text className='post-card-date'>{formatDate(post.pubDatetime)}</Text>
+        <Text className='post-card-date'>{formatDateLocal(post.pubDatetime)}</Text>
         <Text className='post-card-time'>{post.readingTime} 分钟</Text>
       </View>
       <Text className='post-card-desc'>{post.description}</Text>

@@ -9,17 +9,14 @@
 import { Text, View } from "@tarojs/components";
 import { memo } from "react";
 
+import { dayKeyLocal, formatDateLocal } from "@/utils/date";
 import type { PostMeta } from "@/types/api";
 import "./PostHeader.scss";
 
-function formatDate(iso: string): string {
-  return iso.slice(0, 10);
-}
-
 function PostHeader({ meta }: { meta: PostMeta }) {
   const updated =
-    meta.modDatetime && meta.modDatetime.slice(0, 10) !== meta.pubDatetime.slice(0, 10)
-      ? formatDate(meta.modDatetime)
+    meta.modDatetime && dayKeyLocal(meta.modDatetime) !== dayKeyLocal(meta.pubDatetime)
+      ? formatDateLocal(meta.modDatetime)
       : null;
 
   return (
@@ -37,7 +34,7 @@ function PostHeader({ meta }: { meta: PostMeta }) {
       ) : null}
       <View className='post-header-meta'>
         <View className='post-header-chip'>
-          <Text>{formatDate(meta.pubDatetime)}</Text>
+          <Text>{formatDateLocal(meta.pubDatetime)}</Text>
         </View>
         <View className='post-header-chip'>
           <Text>{meta.readingTime} 分钟</Text>
