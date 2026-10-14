@@ -24,6 +24,7 @@ export default defineAppConfig({
         "tag-detail/index",
         "friends/index",
         "projects/index",
+        "search/index",
       ],
     },
     {

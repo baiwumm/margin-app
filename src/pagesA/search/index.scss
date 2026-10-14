@@ -1,0 +1,114 @@
+/* 搜索页（M4 步 7；对应站点 /search 的端上双层实现，design §9）
+ * 视觉 = margin 终端语言：mono 提示符输入行（~ /search $，border 40% 胶囊）+
+ * 既有卡片语言（结果复用 PostCard）；历史 chips = 友链页 chip 同族。
+ * 高亮 = accent 字色（.post-card-hl 在 PostCard.scss）。 */
+
+.search {
+  padding: 0 var(--sp-page) calc(140rpx + env(safe-area-inset-bottom, 0px));
+}
+.search-loading {
+  display: block;
+  margin-top: 64rpx;
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--c-fg-45);
+}
+
+/* ── 输入行（终端提示符 + mono 输入）── */
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 20rpx 24rpx;
+  border: 1rpx solid var(--c-border-40, var(--c-border-25));
+  border-radius: var(--r-full);
+  background-color: var(--c-surface-2);
+}
+.search-prompt {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--c-accent);
+}
+.search-input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--c-fg);
+}
+.search-placeholder {
+  color: var(--c-fg-45);
+}
+.search-clear {
+  flex-shrink: 0;
+  padding: 0 8rpx;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--c-fg-45);
+}
+
+/* ── 未输入：历史 ── */
+.search-idle {
+  margin-top: var(--sp-3);
+}
+.search-hist {
+  margin-bottom: var(--sp-4);
+}
+.search-hist-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-3);
+}
+.search-hist-title {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--c-fg-mid);
+}
+.search-hist-clear {
+  font-size: var(--fs-sm);
+  color: var(--c-accent);
+}
+.search-hist-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+.search-chip {
+  padding: 10rpx 24rpx;
+  border: 1rpx solid var(--c-border-25);
+  border-radius: var(--r-full);
+  background-color: var(--c-surface-2);
+  font-size: var(--fs-sm);
+  color: var(--c-fg-mid);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── 结果 ── */
+.search-meta {
+  margin: var(--sp-2) 0 var(--sp-gap);
+}
+.search-meta-text {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cap);
+  letter-spacing: 0.06em;
+  color: var(--c-fg-45);
+}
+.search-badges {
+  display: flex;
+  gap: 8rpx;
+  margin: var(--sp-2) 0 8rpx;
+}
+.search-badge {
+  padding: 4rpx 16rpx;
+  border: 1rpx solid var(--c-accent-15);
+  border-radius: var(--r-full);
+  background-color: var(--c-accent-8);
+  font-family: var(--font-mono);
+  font-size: 20rpx;
+  color: var(--c-accent);
+}

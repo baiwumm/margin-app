@@ -6,6 +6,7 @@ export const ARCHIVE = "/pagesA/archive/index";
 export const TAG_DETAIL = "/pagesA/tag-detail/index";
 export const FRIENDS = "/pagesA/friends/index";
 export const PROJECTS = "/pagesA/projects/index";
+export const SEARCH = "/pagesA/search/index";
 export const ABOUT = "/pagesB/about";
 export const DISCLAIMER = "/pagesB/disclaimer";
 export const STATS = "/pagesB/stats";
@@ -52,4 +53,9 @@ export function disclaimerUrl(): string {
 /** 数据看板（M4 步 6；站点贡献日历/统计的端上版，数据 = stats + posts + tags） */
 export function statsUrl(): string {
   return STATS;
+}
+
+/** 搜索（M4 步 7；NavBar 放大镜的落点，双层检索） */
+export function searchUrl(): string {
+  return SEARCH;
 }

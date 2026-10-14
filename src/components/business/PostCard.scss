@@ -60,3 +60,8 @@
 .post-card-tag-hash {
   opacity: 0.6;
 }
+
+/* 搜索结果高亮（步 7；highlightTokens 传入时生效） */
+.post-card-hl {
+  color: var(--c-accent);
+}
