@@ -86,6 +86,17 @@ describe("fullHeatmap（全时段热力图网格）", () => {
     expect(g.rendered).toBeGreaterThanOrEqual(365);
   });
 
+  it("右缘护栏：末 2 列不渲染标签（标签宽约 40rpx，末列槽位不足会溢出）", () => {
+    // 窗口 2 周：10-11 那列是「10月」列且是末列 ⇒ 应被护栏清掉
+    const days = [{ date: key(2026, 10, 12), count: 1 }];
+    const g = fullHeatmap(days, 2);
+    expect(g.months[g.months.length - 1]).toBeNull();
+    expect(g.months[g.months.length - 2]).toBeNull();
+    // 窗口拉长到 6 周，「10月」列离右缘 ≥2 列 ⇒ 保留
+    const g6 = fullHeatmap(days, 6);
+    expect(g6.months).toContain("10月");
+  });
+
   it("单日最大值为强度分档分母（mine 页同款）", () => {
     const days = [
       { date: key(2026, 10, 1), count: 1 },

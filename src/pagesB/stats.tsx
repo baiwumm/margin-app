@@ -177,7 +177,8 @@ export default function Stats() {
               scrollIntoView={anchor}
               scrollWithAnimation={false}
             >
-              <View className='heat-inner'>
+              {/* 近一年（53 列放得下）走填充模式撑满容器；宽窗口定宽横滚 */}
+              <View className={`heat-inner ${win === "1y" ? "heat-inner--fill" : ""}`}>
                 {/* 年份标签行（含当年 1 月 1 号的列标年） */}
                 <View className='heat-labels'>
                   {heat.years.map((y, i) => (

@@ -88,6 +88,13 @@ export function fullHeatmap(days: HeatDay[], recentWeeks?: number): HeatGrid {
     months.push(monthStart >= 0 ? `${monthStart + 1}月` : null);
     years.push(yearStart >= 0 ? String(yearStart) : null);
   }
+  // 右缘护栏：末 2 列的标签不渲染 —— 标签约 40rpx 宽而末列剩余槽位不足，
+  // 会溢出网格右缘（填充模式下还会多出一小段横滚）。与 mine 页「末列右对齐」
+  // 同意图，纯函数里一把清。
+  for (let i = Math.max(0, cols.length - 2); i < cols.length; i++) {
+    months[i] = null;
+    years[i] = null;
+  }
   return { cols, months, years, max, total, rendered };
 }
 

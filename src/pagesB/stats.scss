@@ -75,6 +75,21 @@
   /* 全量 ~145 列 × 12rpx ≈ 1740rpx，窄卡内横滚（列宽与 mine 页一致） */
   flex-direction: column;
 }
+/* 填充模式（仅「近一年」= 53 列必定放得下）：列/槽 flex-1 均分容器宽度，
+ * 消掉右侧积白（站点 ContributionCalendar 即 flex-1 撑满；不用 aspect-ratio
+ * —— iOS 14 不支持会塌高，D28）。格子 ≈10.7rpx 宽 × 10rpx 高，近方。 */
+.heat-inner--fill .heat-grid,
+.heat-inner--fill .heat-labels {
+  width: 100%;
+}
+.heat-inner--fill .heat-col,
+.heat-inner--fill .heat-slot {
+  flex: 1;
+  width: auto;
+}
+.heat-inner--fill .heat-cell {
+  width: 100%;
+}
 .heat-labels {
   display: flex;
   gap: 2rpx;
