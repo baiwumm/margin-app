@@ -2,9 +2,10 @@
  * 站点字体加载器（D4）：偏好「站点字体」开启时，异步加载 Maple Mono CN 的
  * ASCII 切片（数据与 URL 构造在同级 siteFontData.ts，纯数据可单测）。
  *
- * CSS 侧 --font-mono 栈常驻两个家族名、未加载时自动穿透到系统等宽栈
- * ⇒ 关偏好零成本、零视觉变化；中文仍随系统（全量子集 MB 级，D4 红线）。
- * 加载不阻塞首屏、失败静默（fail 回调只吞，渲染层无感）。
+ * CSS 侧 --font-body / --font-mono 栈常驻两个家族名、未加载时自动穿透
+ * （D64 扩展：正文/标题的拉丁字符也走 Maple —— margin global.css 即全站
+ * Maple；中文仍随系统：loadFontFace 无 unicode-range，CJK 全量 MB 级，D4 红线）。
+ * 加载不阻塞首屏、失败静默（留 [siteFont] 日志，渲染层无感）。
  */
 import Taro from "@tarojs/taro";
 

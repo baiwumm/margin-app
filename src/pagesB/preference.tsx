@@ -149,7 +149,7 @@ export default function Preference() {
         <Group title='站点字体'>
           <SwitchRow
             checked={prefs.siteFont}
-            hint='等宽场景用 Maple Mono CN（ASCII 切片约 34KB，中文随系统）'
+            hint='正文拉丁与等宽场景用 Maple Mono CN（ASCII 约 34KB，中文随系统；重进生效）'
             color={accentHex(prefs.accent, theme)}
             onChange={v => patch({ siteFont: v })}
           />

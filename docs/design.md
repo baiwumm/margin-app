@@ -85,11 +85,10 @@
 | 空态 | 区分「未输入」与「无结果」；margin EmptyState 文案风格 |
 | 导航 | 顶栏滚动态：bg → `surface` + 发丝线；标题居中 |
 
-## 5. 字体策略（D4）
+## 5. 字体策略（D4，D64 扩展口径）
 
-- **不打包中文字体**。默认系统栈：`-apple-system, "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif`；等宽场景（计数器/徽章/代码）用 `ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`——终端气质由颜色/边框/版式承载。
-- 偏好项「站点字体」= **Maple Mono CN**：`wx.loadFontFace({ global: true, family: "MapleMonoCN", source: "url(https://www.baiwumm.com/fonts/<subset>.woff2)" })`，**首屏渲染后异步加载**（不阻塞 TTI），CDN 缓存；失败静默回落系统栈，不重试超过 2 次。
-- ⚠️ margin 侧配套（M1-b 交付，走 margin 仓库流程）：常用字子集 woff2（约 1.5–2MB）放 `public/fonts/` + `_headers` 加 CORS（`Access-Control-Allow-Origin: *`，仅 fonts 路径）。
+- **不打包中文字体**（D4 红线：CJK 全量 MB 级；`wx.loadFontFace` 不支持 unicode-range，站点那套 229 片渐进加载端上做不了）。**偏好项「站点字体」开启 ⇒ 全 app 拉丁变装**：`--font-body` 与 `--font-mono` 栈常驻「Maple Mono CN」「Maple Mono CN Ext」两个家族名（ASCII 切片 2 片 ≈34KB，`app.ts` 水合即 `loadSiteFont()` 异步加载，不阻塞首屏）；未加载时两个名字不命中任何字体、自动穿透系统栈 ⇒ 关偏好零成本零视觉变化。**中文永远随系统**（Maple 的 CJK 字形需全量子集，MB 级，见上）；正文观感 = 拉丁/数字 Maple + 中文系统栈，与 margin global.css「全站字体统一为 Maple Mono CN」的差距只剩 CJK 部分。加载失败静默回落（`[siteFont]` 日志留证），不重试超过 2 次；重进小程序后生效（D63：global 字体对已渲染页不保证生效）。
+- 系统栈：`-apple-system, "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif`；等宽穿透栈 `ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`。
 - 代码块同 family；Shiki 配色 = margin typography.css 的 `--shiki-light/dark` 变量值（构建期 tokens 已带，端上按主题取色）。
 
 ## 6. 装饰元素实现规范（margin 装饰 → 端上）

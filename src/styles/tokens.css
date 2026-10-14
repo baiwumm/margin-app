@@ -461,10 +461,13 @@ page,
   --fs-card: 34rpx; /* 卡标题 */
   --fs-hero: 96rpx; /* hero 大标题（text-5xl @375） */
 
-  --font-body: -apple-system, "PingFang SC", "HarmonyOS Sans SC",
-    "Microsoft YaHei", sans-serif;
-  /* 前两个家族 = 站点字体偏好加载的 Maple Mono CN ASCII 切片（utils/siteFont.ts，D4）；
-     未加载时这两个名字不命中任何已装字体，自动穿透到系统等宽栈 ⇒ 关偏好零变化 */
+  /* 站点字体（D64 扩展）：前两个家族 = 偏好「站点字体」加载的 Maple Mono CN
+     ASCII 切片（utils/siteFont.ts）——偏好开启后正文/标题的拉丁字符与数字
+     随之变装（margin global.css 即「全站字体统一为 Maple Mono CN」）；未加载
+     时穿透系统栈，关偏好零变化。中文永远随系统：loadFontFace 不支持
+     unicode-range，CJK 全量 MB 级（D4 红线） */
+  --font-body: "Maple Mono CN", "Maple Mono CN Ext", -apple-system, "PingFang SC",
+    "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
   --font-mono: "Maple Mono CN", "Maple Mono CN Ext", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --lh-body: 1.75;
