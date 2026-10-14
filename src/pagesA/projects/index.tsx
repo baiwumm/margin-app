@@ -3,6 +3,10 @@
  * 站点结构：hero（N 个开源项目 / Stars / Forks 徽章）+ ProjectCard 网格
  * （语言点 + 名 + 描述 + topics + stars/forks + 打开钮）。
  * 端上：D8 口径外链只复制；打开动作为「复制地址 + toast」。
+ * D66 同步口径：站点 hero 徽章已改「全账号 Stars + 加入 GitHub 时长」
+ * （margin 6927f08）——两个值未进 projects.json 契约 ⇒ 端上统计行维持
+ * 「N 个开源项目 · 已列项目 Stars/Forks 合计」口径（与站点数字不可比，
+ * 记档待定）；卡片 topics 对齐站点「≤3 + +N」。
  */
 import { Text, View } from "@tarojs/components";
 import Taro, { usePageScroll } from "@tarojs/taro";
@@ -94,11 +98,15 @@ export default function ProjectsPage() {
                   <Text className='project-desc'>{p.desc}</Text>
                   {p.topics.length > 0 ? (
                     <View className='project-topics'>
-                      {p.topics.slice(0, 5).map(t => (
+                      {/* 站点 ProjectCard 口径（D66 同步）：最多 3 个 + “+N” */}
+                      {p.topics.slice(0, 3).map(t => (
                         <Text key={t} className='project-topic'>
                           {t}
                         </Text>
                       ))}
+                      {p.topics.length > 3 ? (
+                        <Text className='project-topic'>+{p.topics.length - 3}</Text>
+                      ) : null}
                     </View>
                   ) : null}
                 </View>

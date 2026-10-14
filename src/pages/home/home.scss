@@ -7,11 +7,15 @@
 }
 
 /* ── Hero ─────────────────────────────────────────────────────── */
+/* Hero 居中（D66 同步 margin `8ee7572`：站点 hero 改 flex-col items-center
+ * text-center；描述行位置端上本就与站点新序一致——徽章→标题→描述→作者行，
+ * 站点在描述与作者行之间的 IntroAudio 播放器端上没有，D6/D7） */
 .home-hero {
   padding-top: var(--sp-3);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
 }
 .home-title {
   margin-top: var(--sp-2);
@@ -30,6 +34,7 @@
   margin-top: var(--sp-4);
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 .home-author {
   font-size: var(--fs-sm);
@@ -45,6 +50,7 @@
   margin-top: var(--sp-3);
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: var(--sp-3);
 }
 .home-social {

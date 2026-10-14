@@ -61,7 +61,7 @@
 
 | 屏 | 结构（自上而下） |
 | --- | --- |
-| **首页** | ① 终端徽章（ping 圆点 + `~` accent + `/ready-to-go` + 半透明 `$`）② glow 渐变大标题「Margin」 ③ 描述行（fg 75%）④ 作者 + 社交行（虚线下划线链接）⑤ **FEATURED** 小节（大写 accent 标题 ★ + 横线）= featured 琥珀 tint 卡 ⑥ **RECENT** 小节（横线 + `[n/74]` 等宽计数）= 纯文字卡列表 ⑦ 「查看全部文章」outline CTA（→ 归档）⑧ 底部留白。无 banner 图、无搜索框（搜索在顶栏放大镜，M4 页）；文章卡无图（站点 `showCoverImages:false` 本然一致） |
+| **首页** | ① 终端徽章（ping 圆点 + `~` accent + `/ready-to-go` + 半透明 `$`）② glow 渐变大标题「Margin」 ③ 描述行（fg 75%）④ 作者 + 社交行（虚线下划线链接）⑤ **FEATURED** 小节（大写 accent 标题 ★ + 横线）= featured 琥珀 tint 卡 ⑥ **RECENT** 小节（横线 + `[n/74]` 等宽计数）= 纯文字卡列表（单列，D66 对齐 margin `f78b4cd`）⑦ 「查看全部文章」outline CTA（→ 归档）⑧ 底部留白。**hero 整体居中**（徽章/标题/描述/作者行/社交行，D66 对齐 margin `8ee7572`；站点 hero 里的 IntroAudio 播放器端上没有，D6/D7）。无 banner 图、无搜索框（搜索在顶栏放大镜，M4 页）；文章卡无图（站点 `showCoverImages:false` 本然一致） |
 | **标签** | aurora hero 容器（`~ ls -la $` 徽章 + glow 标题「Tags」+ 斜体描述 + 统计 hero-badge ×2）+ tag 卡双列网格（`surface-2` 底 + fg 6% 描边 + rounded-2xl：标签名 + 「N 篇」；按压 = accent 30% 描边 + accent 4% 底） |
 | **图库** | aurora hero（同构，标题「Galleries」）+ 画廊卡双列（cover `aspect-video` + 底部名称/描述浮层；gallery 紫罗兰 tint 描边）+ 筛选胶囊（全部 + 画廊名 + 照片数） |
 | **瞬间** | aurora hero（标题「Moments」）+ 月份导航（端上组件：细边框容器 + 左右箭头 + 月份格，选中 = accent 底）+ 瞬间卡（日期 + featured ★ + 正文 + 1/2/3 列图网格 + tag pill；margin 卡规格） |
