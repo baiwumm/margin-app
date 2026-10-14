@@ -36,17 +36,19 @@ import {
   disclaimerUrl,
   friendsUrl,
   projectsUrl,
+  statsUrl,
 } from "@/utils/routes";
 import type { Stats } from "@/types/api";
 import "./mine.scss";
 
-/** 功能列表行（design.md §3；路由 M2 偏好 / M4 已就绪七行，「关于」为步 5 新增） */
+/** 功能列表行（design.md §3；路由 M2 偏好 / M4 已就绪八行，「关于」为步 5 新增） */
 const ROWS = [
   { key: "archive", label: "归档" },
   { key: "favorites", label: "我的收藏" },
   { key: "history", label: "阅读记录" },
   { key: "friends", label: "友链" },
   { key: "projects", label: "项目" },
+  { key: "stats", label: "数据看板" },
   { key: "prefs", label: "偏好设置" },
   { key: "contact", label: "联系站长" },
   { key: "about", label: "关于" },
@@ -161,6 +163,10 @@ export default function Mine() {
     }
     if (key === "projects") {
       void Taro.navigateTo({ url: projectsUrl() });
+      return;
+    }
+    if (key === "stats") {
+      void Taro.navigateTo({ url: statsUrl() });
       return;
     }
     if (key === "about") {

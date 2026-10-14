@@ -1,0 +1,263 @@
+/* 数据看板（M4 步 6；requirements §6.2 分包 B「stats（对应 margin 贡献日历/
+ * 统计）」——站点版拉 GitHub 贡献需 token，端上改用博客自身发文数据）
+ * 数值溯源：总览格 = SiteStats.astro（mono text-2xl accent + fg60 标签）；
+ * 热力图 = mine 页贡献日历同族（10rpx 格 + 2rpx 距、周日起始、四档 accent
+ * 强度 + fg-16 空格，D28），全量版 ~145 列走 ScrollView scrollX（D45：横滚
+ * 一律 ScrollView、padding 写内层）；节奏柱 / 标签条 = 端上自绘（accent 32%
+ * 轨道填充 + 78% 柱）。 */
+
+.stats {
+  padding: 0 var(--sp-page) calc(64rpx + env(safe-area-inset-bottom, 0px));
+}
+.stats-loading {
+  display: block;
+  margin: var(--sp-2) 0 var(--sp-gap);
+  font-size: var(--fs-sm);
+  color: var(--c-fg-45);
+}
+
+/* ── ① 站点总览（3×2 格） ── */
+.stats-overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-gap);
+}
+.stat-cell {
+  padding: 24rpx 8rpx;
+  border: 1rpx solid var(--c-border-25);
+  border-radius: var(--r-card);
+  background-color: var(--c-muted-12);
+  text-align: center;
+}
+.stat-num {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--c-accent);
+}
+.stat-label {
+  display: block;
+  margin-top: 4rpx;
+  font-size: var(--fs-sm);
+  color: var(--c-fg-mid);
+}
+
+/* ── ② 全时段热力图 ── */
+.heat-card {
+  padding: var(--sp-2);
+  border: 1rpx solid var(--c-border-25);
+  border-radius: var(--r-card);
+  background-color: var(--c-surface);
+}
+.heat-scroll {
+  width: 100%;
+}
+.heat-inner {
+  /* 全量 ~145 列 × 12rpx ≈ 1740rpx，窄卡内横滚（列宽与 mine 页一致） */
+  flex-direction: column;
+}
+.heat-labels {
+  display: flex;
+  gap: 2rpx;
+  height: 26rpx;
+}
+.heat-slot {
+  position: relative;
+  width: 10rpx;
+  height: 26rpx;
+  flex-shrink: 0;
+}
+.heat-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 18rpx;
+  line-height: 26rpx;
+  color: var(--c-fg-45);
+}
+.heat-label-year {
+  color: var(--c-fg-mid);
+  font-weight: 600;
+}
+.heat-grid {
+  display: flex;
+  gap: 2rpx;
+  margin-top: 6rpx;
+}
+.heat-col {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 2rpx;
+}
+.heat-cell {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 2rpx;
+}
+.heat-cell-legend {
+  flex-shrink: 0;
+}
+.heat-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+.heat-legend {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+}
+.heat-legend-text {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cap);
+  color: var(--c-fg-45);
+}
+.heat-note {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cap);
+  color: var(--c-fg-45);
+}
+
+/* ── ③ 发文节奏（按年 12 月柱） ── */
+.rhythm-card {
+  padding: var(--sp-3);
+  border: 1rpx solid var(--c-border-25);
+  border-radius: var(--r-card);
+  background-color: var(--c-surface);
+}
+.rhythm-year + .rhythm-year {
+  margin-top: var(--sp-3);
+}
+.rhythm-year-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+.rhythm-year-label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--c-fg);
+}
+.rhythm-year-total {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--c-fg-45);
+}
+.rhythm-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8rpx;
+}
+.rhythm-slot {
+  flex: 1;
+  min-width: 0;
+}
+.rhythm-track {
+  height: 140rpx;
+  border-radius: 4rpx 4rpx 0 0;
+  background-color: var(--c-fg-5);
+  display: flex;
+  align-items: flex-end;
+}
+.rhythm-fill {
+  width: 100%;
+  border-radius: 4rpx 4rpx 0 0;
+}
+.rhythm-month {
+  display: block;
+  margin-top: 6rpx;
+  font-family: var(--font-mono);
+  font-size: 16rpx;
+  color: var(--c-fg-45);
+  text-align: center;
+}
+
+/* ── ④ 标签 Top 10 ── */
+.tag-rank {
+  padding: var(--sp-2) var(--sp-3);
+  border: 1rpx solid var(--c-border-25);
+  border-radius: var(--r-card);
+  background-color: var(--c-surface);
+}
+.tag-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 14rpx 0;
+}
+.tag-row + .tag-row {
+  border-top: 1rpx solid var(--c-border-25);
+}
+.tag-rank-num {
+  flex-shrink: 0;
+  width: 36rpx;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--c-fg-45);
+  text-align: right;
+}
+.tag-name {
+  flex-shrink: 0;
+  width: 200rpx;
+  font-size: var(--fs-sm);
+  color: var(--c-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tag-bar-track {
+  flex: 1;
+  min-width: 0;
+  height: 12rpx;
+  border-radius: var(--r-full);
+  background-color: var(--c-fg-5);
+}
+.tag-bar-fill {
+  height: 100%;
+  border-radius: var(--r-full);
+}
+.tag-count {
+  flex-shrink: 0;
+  width: 56rpx;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--c-fg-mid);
+  text-align: right;
+}
+
+/* ── ⑤ 数字小结 ── */
+.summary-card {
+  padding: var(--sp-2) var(--sp-3);
+  border: 1rpx solid var(--c-border-25);
+  border-radius: var(--r-card);
+  background-color: var(--c-surface-2);
+}
+.summary-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 14rpx 0;
+}
+.summary-row + .summary-row {
+  border-top: 1rpx solid var(--c-border-25);
+}
+.summary-label {
+  font-size: var(--fs-sm);
+  color: var(--c-fg-mid);
+}
+.summary-value {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--c-fg);
+}

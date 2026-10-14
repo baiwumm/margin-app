@@ -8,6 +8,7 @@ export const FRIENDS = "/pagesA/friends/index";
 export const PROJECTS = "/pagesA/projects/index";
 export const ABOUT = "/pagesB/about";
 export const DISCLAIMER = "/pagesB/disclaimer";
+export const STATS = "/pagesB/stats";
 
 export function postDetailUrl(slug: string): string {
   return `${POST_DETAIL}?slug=${encodeURIComponent(slug)}`;
@@ -46,4 +47,9 @@ export function aboutUrl(): string {
 /** 免责声明（M4 步 5；文案 = compliance §11 初稿按倾向落定） */
 export function disclaimerUrl(): string {
   return DISCLAIMER;
+}
+
+/** 数据看板（M4 步 6；站点贡献日历/统计的端上版，数据 = stats + posts + tags） */
+export function statsUrl(): string {
+  return STATS;
 }
