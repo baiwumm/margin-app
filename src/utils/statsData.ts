@@ -32,28 +32,40 @@ export interface HeatGrid {
 const dayKey = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
-/** 稀疏有文日 → 全时段密集网格（首文日所在周的周日 → 今天） */
-export function fullHeatmap(days: HeatDay[]): HeatGrid {
+/** 稀疏有文日 → 密集网格。recentWeeks 省略 = 全时段（起点 = 最早有文日
+ *  所在周周日）；传入 = 只渲染最近 N 周（margin ContributionCalendar「过去
+ *  一年」同款，起点 = 本周周日回退 N-1 周）。两者周日起始/缺日补 0/未来日
+ *  不渲染的口径一致（D28）。 */
+export function fullHeatmap(days: HeatDay[], recentWeeks?: number): HeatGrid {
   if (days.length === 0) {
     return { cols: [], months: [], years: [], max: 0, total: 0, rendered: 0 };
   }
   const counts = new Map(days.map(d => [d.date, d.count]));
-  const total = days.reduce((s, d) => s + d.count, 0);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // 起点 = 最早有文日所在周的周日（D28：周日起始；首文日之前不渲染）。
-  // 不假定 days 有序 —— 取全量最小日期（date 为 YYYY-MM-DD 字典序即时序）。
-  const earliest = days.reduce((m, d) => (d.date < m ? d.date : m), days[0].date);
-  const first = new Date(`${earliest}T00:00:00`);
-  const start = new Date(first);
-  start.setDate(start.getDate() - start.getDay());
-  start.setHours(0, 0, 0, 0);
+  let start: Date;
+  if (recentWeeks) {
+    // 窗口模式：以「今天」锚定回退，不看最早有文日（窗口外的有文日不计入
+    // total —— 计数徽章显示的是窗口值，与网格所见一致）
+    start = new Date(today);
+    start.setDate(start.getDate() - start.getDay() - (recentWeeks - 1) * 7);
+    start.setHours(0, 0, 0, 0);
+    if (start > today) start = new Date(today);
+  } else {
+    // 全时段：起点 = 最早有文日所在周的周日。不假定 days 有序 —— 取全量最小
+    // 日期（date 为 YYYY-MM-DD，字典序即时序）
+    const earliest = days.reduce((m, d) => (d.date < m ? d.date : m), days[0].date);
+    start = new Date(`${earliest}T00:00:00`);
+    start.setDate(start.getDate() - start.getDay());
+    start.setHours(0, 0, 0, 0);
+  }
 
   const cols: number[][] = [];
   const months: (string | null)[] = [];
   const years: (string | null)[] = [];
   let max = 0;
+  let total = 0;
   let rendered = 0;
   const cur = new Date(start);
   while (cur <= today) {
@@ -67,6 +79,7 @@ export function fullHeatmap(days: HeatDay[]): HeatGrid {
       }
       const c = counts.get(dayKey(cur)) ?? 0;
       if (c > max) max = c;
+      if (c > 0) total += c;
       col.push(c);
       rendered++;
       cur.setDate(cur.getDate() + 1);

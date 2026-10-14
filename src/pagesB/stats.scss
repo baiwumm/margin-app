@@ -44,6 +44,24 @@
 }
 
 /* ── ② 全时段热力图 ── */
+.stats-seg {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: var(--sp-3);
+}
+.stats-seg-item {
+  padding: 8rpx 24rpx;
+  border: 1rpx solid var(--c-border-25);
+  border-radius: var(--r-full);
+  background-color: var(--c-surface);
+  font-size: var(--fs-sm);
+  color: var(--c-fg-mid);
+}
+.stats-seg-on {
+  border-color: var(--c-accent-15);
+  background-color: var(--c-accent-8);
+  color: var(--c-accent);
+}
 .heat-card {
   padding: var(--sp-2);
   border: 1rpx solid var(--c-border-25);

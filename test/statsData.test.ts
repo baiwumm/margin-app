@@ -65,6 +65,27 @@ describe("fullHeatmap（全时段热力图网格）", () => {
     expect(g.months.filter(Boolean).length).toBeGreaterThan(1);
   });
 
+  it("窗口模式：只渲染最近 N 周（今天锚定回退），窗口外有文日不计入", () => {
+    const days = [
+      { date: key(2026, 10, 14), count: 1 }, // 今天（周三）
+      { date: key(2026, 10, 12), count: 2 }, // 本周一
+      { date: key(2026, 1, 1), count: 9 }, // 窗口外
+    ];
+    const g = fullHeatmap(days, 2); // 最近 2 周
+    // 今天周三 ⇒ 本周周日 = 10-11；回退 1 周 = 10-04 ⇒ 2 列（7 + 4，末列到今天截断）
+    expect(g.cols.length).toBe(2);
+    expect(g.cols[0]).toEqual([0, 0, 0, 0, 0, 0, 0]); // 10-04~10-10：窗口内无文
+    expect(g.cols[1]).toEqual([0, 2, 0, 1]); // 10-11~10-14：周一 2、周三 1
+    expect(g.total).toBe(3); // 窗口外那 9 篇不计入
+    expect(g.max).toBe(2);
+  });
+
+  it("窗口 = 53 周 ⇒ 恰好 53 列（margin「过去一年」口径；与 mine 页窗口同构）", () => {
+    const g = fullHeatmap([{ date: key(2026, 1, 1), count: 1 }], 53);
+    expect(g.cols.length).toBe(53);
+    expect(g.rendered).toBeGreaterThanOrEqual(365);
+  });
+
   it("单日最大值为强度分档分母（mine 页同款）", () => {
     const days = [
       { date: key(2026, 10, 1), count: 1 },

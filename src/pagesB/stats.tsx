@@ -40,6 +40,16 @@ import "./stats.scss";
 /** 强度四档 alpha（mine 页贡献日历同款：margin gh-level-1..4 原值） */
 const LEVEL_ALPHA = [0.32, 0.56, 0.78, 1];
 
+/** 热力图窗口（D65 追加：格子数随时间线性增长 ≈ 每周 +7 ——默认「近一年」
+ *  铺满卡片不滚动，与 margin ContributionCalendar「过去一年」同口径；宽窗口
+ *  初始定位到最近端，格子总量始终有界） */
+const WINDOWS = [
+  { key: "1y", label: "近一年", weeks: 53 },
+  { key: "3y", label: "近三年", weeks: 157 },
+  { key: "all", label: "全部", weeks: 0 },
+] as const;
+type WinKey = (typeof WINDOWS)[number]["key"];
+
 /** 总览六格（SiteStats 语言：mono accent 大数 + fg-mid 标签） */
 const OVERVIEW = [
   { key: "postCount", label: "篇文章" },
@@ -64,6 +74,8 @@ export default function Stats() {
   const posts = usePostsIndex(buildId);
   const tags = useTags(buildId);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [win, setWin] = useState<WinKey>("1y");
+  const [anchor, setAnchor] = useState("");
   const [alpha, setAlpha] = useState(0);
   usePageScroll(p => setAlpha(navAlpha(p.scrollTop)));
 
@@ -73,7 +85,20 @@ export default function Stats() {
     getStats(buildId, setStats);
   }, [buildId]);
 
-  const heat = useMemo(() => fullHeatmap(stats?.heatmap ?? []), [stats]);
+  const heat = useMemo(() => {
+    const w = WINDOWS.find(x => x.key === win);
+    return fullHeatmap(stats?.heatmap ?? [], w?.weeks || undefined);
+  }, [stats, win]);
+
+  /** 宽窗口（近三年/全部）内容超出卡片 ⇒ 初始定位到最近端（最右列 = 现在）；
+   *  id 随窗口变化，scrollIntoView 属性变化即重新滚动（免 px 换算，D40 同族） */
+  useEffect(() => {
+    if (win === "1y" || heat.cols.length === 0) {
+      setAnchor("");
+      return;
+    }
+    setAnchor(`heat-end-${win}`);
+  }, [win, heat.cols.length]);
   const years = useMemo(
     () => postsByYear(monthlyPosts(posts ?? [])),
     [posts]
@@ -121,11 +146,22 @@ export default function Stats() {
           })}
         </View>
 
-        {/* ② 全时段发文热力图（全量版，mine 53 周窗口的超集） */}
+        {/* ② 全时段发文热力图（窗口化：默认近一年，可切近三年/全部） */}
         <SectionTitle
-          title='全时段贡献'
+          title='发文热力图'
           count={stats ? `[${heat.total}/${stats.postCount}]` : undefined}
         />
+        <View className='stats-seg'>
+          {WINDOWS.map(w => (
+            <Text
+              key={w.key}
+              className={`stats-seg-item ${win === w.key ? "stats-seg-on" : ""}`}
+              onClick={() => setWin(w.key)}
+            >
+              {w.label}
+            </Text>
+          ))}
+        </View>
         {stats === null ? (
           <Text className='stats-loading'>加载中…</Text>
         ) : heat.cols.length === 0 ? (
@@ -134,7 +170,13 @@ export default function Stats() {
           </View>
         ) : (
           <View className='heat-card'>
-            <ScrollView className='heat-scroll' scrollX showScrollbar={false}>
+            <ScrollView
+              className='heat-scroll'
+              scrollX
+              showScrollbar={false}
+              scrollIntoView={anchor}
+              scrollWithAnimation={false}
+            >
               <View className='heat-inner'>
                 {/* 年份标签行（含当年 1 月 1 号的列标年） */}
                 <View className='heat-labels'>
@@ -168,6 +210,8 @@ export default function Stats() {
                     </View>
                   ))}
                 </View>
+                {/* 最近端锚点（宽窗口 scrollIntoView 目标；零尺寸） */}
+                <View id={anchor || "heat-end-none"} />
               </View>
             </ScrollView>
             <View className='heat-foot'>
@@ -184,7 +228,7 @@ export default function Stats() {
                 <Text className='heat-legend-text'>多</Text>
               </View>
               <Text className='heat-note'>
-                共 {heat.total} 篇 · {heat.rendered} 天
+                {win === "all" ? "共" : "窗口内"} {heat.total} 篇 · {heat.rendered} 天
               </Text>
             </View>
           </View>
