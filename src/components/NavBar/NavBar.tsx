@@ -9,7 +9,6 @@
 import { View, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { setThemePreference, useTheme } from "@/hooks/useTheme";
-import "./NavBar.scss";
 
 import markLight from "@/assets/logo/mark-light.png";
 import markDark from "@/assets/logo/mark-dark.png";
@@ -19,6 +18,8 @@ import searchLight from "@/assets/deco/icon-search-light.png";
 import searchDark from "@/assets/deco/icon-search-dark.png";
 import moonLight from "@/assets/deco/icon-moon-light.png";
 import sunDark from "@/assets/deco/icon-sun-dark.png";
+
+import "./NavBar.scss";
 
 /** 状态栏高度（px）——SubNavBar 复用同一套顶栏几何 */
 export const STATUS_BAR = (() => {

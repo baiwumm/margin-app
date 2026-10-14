@@ -64,8 +64,10 @@ export default function FriendsPage() {
             {groups.map(g => (
               <View key={g.title} className='friends-group'>
                 <View className='friends-group-head'>
+                  <View className='friends-group-dot' />
                   <Text className='friends-group-title'>{g.title}</Text>
                   <View className='friends-group-line' />
+                  <Text className='friends-group-count'>{g.items.length} 个</Text>
                 </View>
                 <View className='friends-grid'>
                   {g.items.map(f => (
@@ -76,22 +78,24 @@ export default function FriendsPage() {
                       hoverStayTime={80}
                       onClick={() => copy(f.url)}
                     >
-                      <View className='friend-avatar'>
-                        {f.avatar ? (
-                          <Image
-                            className='friend-avatar-img'
-                            src={f.avatar}
-                            mode='aspectFill'
-                          />
-                        ) : (
-                          <Text className='friend-avatar-fallback'>
-                            {f.name.slice(0, 1)}
-                          </Text>
-                        )}
-                      </View>
-                      <View className='friend-info'>
-                        <Text className='friend-name'>{f.name}</Text>
-                        <Text className='friend-host'>{host(f.url)}</Text>
+                      <View className='friend-row'>
+                        <View className='friend-avatar'>
+                          {f.avatar ? (
+                            <Image
+                              className='friend-avatar-img'
+                              src={f.avatar}
+                              mode='aspectFill'
+                            />
+                          ) : (
+                            <Text className='friend-avatar-fallback'>
+                              {f.name.slice(0, 1)}
+                            </Text>
+                          )}
+                        </View>
+                        <View className='friend-info'>
+                          <Text className='friend-name'>{f.name}</Text>
+                          <Text className='friend-host'>{host(f.url)}</Text>
+                        </View>
                       </View>
                       <Text className='friend-desc'>{f.desc}</Text>
                     </View>

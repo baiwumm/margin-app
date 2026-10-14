@@ -14,7 +14,9 @@ import { siteFontUrls } from "./siteFontData";
 /** 本会话是否已发起过加载（幂等；不在意失败 —— 下一次冷启动会再试） */
 let requested = false;
 
-/** 偏好开启时调用；幂等、失败静默 */
+/** 偏好开启时调用；幂等、失败不打断 UI（留 [siteFont] 日志供 vConsole 取证：
+ * 真机已知「global 对已打开页面不保证生效，冷启动路径才可靠」——
+ * 若日志 loaded 而当前页无变化，属平台已渲染页不重绘，重进即好转） */
 export function loadSiteFont(): void {
   if (requested) return;
   requested = true;
@@ -23,8 +25,8 @@ export function loadSiteFont(): void {
       family,
       source: `url("${url}")`,
       global: true,
-      success: () => undefined,
-      fail: () => undefined,
+      success: () => console.log(`[siteFont] loaded ${family}`),
+      fail: ({ errMsg }) => console.warn(`[siteFont] fail ${family}: ${errMsg}`),
     }).catch(() => undefined);
   }
 }

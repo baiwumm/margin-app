@@ -1,12 +1,14 @@
 /* 友链页（M4 步 3；站点 friends.astro 的组 + 友卡同构，准则面板不做）
- * 数值溯源：统计行 = 归档页同族（mono 小字）；组标题 + 渐隐线 = 标签详情
- * 共现区同族；友卡 = 端上卡片语言（border 35% + muted 12% + --r-card）+
- * 头像 88rpx 方圆（站点 size-11 同级）、名 26rpx 600、域名 mono 20rpx
- * fg-45、描述 fs-sm fg-mid 两行截断；双列网格 gap 24rpx。
- * D62 真机反馈「文案溢出导致布局被裁剪」后的加固：轨道 minmax(0,1fr) 防
- * 长不可断内容把列宽顶爆（1fr 的 auto 最小值经典坑）、卡片自身
- * min-width:0 + overflow:hidden、名/域名 word-break:break-all、
- * 描述 overflow-wrap:break-word —— 与 D45/D47 同族原语纪律。 */
+ * D63 真机反馈「双列右侧空白太多」⇒ 对齐 margin 原版（≤sm 即单列）：
+ * FriendCard = 上行「圆形小头像 72rpx（2.25rem）+ 右侧 mono 名称/域名」+
+ * 下行描述两行截断；组头 = 圆点（accent + 8px glow）+ 大写小标题 +
+ * 渐隐线 +「N 个」计数（FriendGroup.astro 原构）。
+ * 数值溯源：卡 p-4 = 32rpx / 行内 gap-3 = 24rpx / 描述 mt-3 = 24rpx
+ * text-sm = 28rpx fg 60% / 域名 text-xs = 24rpx fg 50%；
+ * 头像兜底 = accent 字 + accent→gallery tint 渐变（margin 24%/18% 的
+ * 现有 token 近似），底 muted 20%。
+ * D62 溢出加固保留：轨道 minmax(0,1fr)、卡 min-width:0 + overflow:hidden、
+ * 名/域名 break-all、描述 overflow-wrap:break-word。 */
 
 .friends {
   padding: 0 var(--sp-page) calc(140rpx + env(safe-area-inset-bottom, 0px));
@@ -42,42 +44,63 @@
 .friends-group-head {
   display: flex;
   align-items: center;
-  gap: var(--sp-3);
+  gap: 16rpx;
   margin-bottom: var(--sp-3);
+}
+.friends-group-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: var(--r-full);
+  background-color: var(--c-accent);
+  box-shadow: 0 0 8px var(--c-accent);
 }
 .friends-group-title {
   font-family: var(--font-mono);
-  font-size: var(--fs-sm);
+  font-size: 20rpx;
   font-weight: 600;
   letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--c-accent);
 }
 .friends-group-line {
   flex: 1;
   height: 1rpx;
-  background-color: var(--c-accent-15);
+  background: linear-gradient(90deg, var(--c-accent-15), transparent);
+}
+.friends-group-count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--c-fg-45);
 }
 
 .friends-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 24rpx;
 }
 .friend-card {
-  padding: 24rpx;
-  border: 1rpx solid var(--c-border-35);
+  display: flex;
+  flex-direction: column;
+  padding: 32rpx;
+  border: 1rpx solid var(--c-border-25);
   border-radius: var(--r-card);
   background-color: var(--c-muted-12);
   min-width: 0;
   overflow: hidden;
 }
+.friend-row {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  min-width: 0;
+}
 .friend-avatar {
-  width: 88rpx;
-  height: 88rpx;
-  border-radius: var(--r-sm);
-  border: 1rpx solid var(--c-border-25);
-  background-color: var(--c-fg-5);
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: var(--r-full);
+  background-color: var(--c-muted-20);
   overflow: hidden;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -85,18 +108,28 @@
 .friend-avatar-img {
   width: 100%;
   height: 100%;
+  display: block;
 }
 .friend-avatar-fallback {
-  font-size: 40rpx;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 34rpx;
   font-weight: 700;
-  color: var(--c-fg-45);
+  color: var(--c-accent);
+  background: linear-gradient(135deg, var(--c-accent-15), var(--c-gallery-8));
 }
 .friend-info {
-  margin-top: 20rpx;
+  flex: 1;
+  min-width: 0;
 }
 .friend-name {
   display: block;
-  font-size: var(--fs-body);
+  font-family: var(--font-mono);
+  font-size: 28rpx;
   font-weight: 600;
   color: var(--c-fg);
   overflow: hidden;
@@ -108,8 +141,8 @@
   display: block;
   margin-top: 4rpx;
   font-family: var(--font-mono);
-  font-size: 20rpx;
-  color: var(--c-fg-45);
+  font-size: var(--fs-sm);
+  color: var(--c-fg-50);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -117,9 +150,9 @@
 }
 .friend-desc {
   display: -webkit-box;
-  margin-top: 16rpx;
-  font-size: var(--fs-sm);
-  line-height: 1.5;
+  margin-top: 24rpx;
+  font-size: 28rpx;
+  line-height: 1.625;
   color: var(--c-fg-mid);
   overflow: hidden;
   text-overflow: ellipsis;

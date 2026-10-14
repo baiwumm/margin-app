@@ -15,8 +15,6 @@ import {
   type AccentKey,
 } from "@/config/accent";
 import { useEffect, useState } from "react";
-import TerminalBadge from "./TerminalBadge";
-import "./AuroraHero.scss";
 
 import orb1BlueLight from "@/assets/aurora/orb-1-blue-light.png";
 import orb1BlueDark from "@/assets/aurora/orb-1-blue-dark.png";
@@ -40,6 +38,9 @@ import orb3RoseLight from "@/assets/aurora/orb-3-rose-light.png";
 import orb3RoseDark from "@/assets/aurora/orb-3-rose-dark.png";
 import orb2Light from "@/assets/aurora/orb-2-light.png";
 import orb2Dark from "@/assets/aurora/orb-2-dark.png";
+
+import TerminalBadge from "./TerminalBadge";
+import "./AuroraHero.scss";
 
 /** 光球素材表：orb1/orb3 跟 accent（margin 25%/12% 峰值已烘焙），orb2 跟主题 */
 const ORB1: Record<AccentKey, { light: string; dark: string }> = {
