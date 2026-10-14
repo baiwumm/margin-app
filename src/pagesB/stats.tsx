@@ -99,6 +99,15 @@ export default function Stats() {
     }
     setAnchor(`heat-end-${win}`);
   }, [win, heat.cols.length]);
+
+  /** 标签行内最后一个标签的列号（贴右收口用；-1 = 无标签）。
+   *  只贴最后一个：其余标签距右缘 ≥4 列槽位（≈48rpx）放得下 40rpx 标签，
+   *  而两个标签不可能同时落进末 4 列（月距 ≥28 天 = 4 列）。 */
+  const lastMonthCol = heat.months.reduce(
+    (acc, m, i) => (m ? i : acc),
+    -1
+  );
+  const lastYearCol = heat.years.reduce((acc, y, i) => (y ? i : acc), -1);
   const years = useMemo(
     () => postsByYear(monthlyPosts(posts ?? [])),
     [posts]
@@ -179,23 +188,35 @@ export default function Stats() {
             >
               {/* 近一年（53 列放得下）走填充模式撑满容器；宽窗口定宽横滚 */}
               <View className={`heat-inner ${win === "1y" ? "heat-inner--fill" : ""}`}>
-                {/* 年份标签行（含当年 1 月 1 号的列标年） */}
+                {/* 年份标签行（含当年 1 月 1 号的列标年；行内最后一个贴右收口） */}
                 <View className='heat-labels'>
                   {heat.years.map((y, i) => (
                     <View key={`y${i}`} className='heat-slot'>
-                      {y ? (
+                      {y && i !== lastYearCol ? (
                         <Text className='heat-label heat-label-year'>{y}</Text>
                       ) : null}
                     </View>
                   ))}
+                  {lastYearCol >= 0 ? (
+                    <Text className='heat-label heat-label-year heat-label--flush'>
+                      {heat.years[lastYearCol]}
+                    </Text>
+                  ) : null}
                 </View>
-                {/* 月份标签行（含当月 1 号的列标月，5 列防碰撞） */}
+                {/* 月份标签行（含当月 1 号的列标月；同上贴右收口） */}
                 <View className='heat-labels'>
                   {heat.months.map((m, i) => (
                     <View key={`m${i}`} className='heat-slot'>
-                      {m ? <Text className='heat-label'>{m}</Text> : null}
+                      {m && i !== lastMonthCol ? (
+                        <Text className='heat-label'>{m}</Text>
+                      ) : null}
                     </View>
                   ))}
+                  {lastMonthCol >= 0 ? (
+                    <Text className='heat-label heat-label--flush'>
+                      {heat.months[lastMonthCol]}
+                    </Text>
+                  ) : null}
                 </View>
                 {/* 网格：每列一周（周日起） */}
                 <View className='heat-grid'>

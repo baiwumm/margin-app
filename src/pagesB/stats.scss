@@ -77,7 +77,11 @@
 }
 /* 填充模式（仅「近一年」= 53 列必定放得下）：列/槽 flex-1 均分容器宽度，
  * 消掉右侧积白（站点 ContributionCalendar 即 flex-1 撑满；不用 aspect-ratio
- * —— iOS 14 不支持会塌高，D28）。格子 ≈10.7rpx 宽 × 10rpx 高，近方。 */
+ * —— iOS 14 不支持会塌高，D28）。格子 ≈10.7rpx 宽 × 10rpx 高，近方。
+ * width:100% 显式给出：ScrollView 内容盒宽度确定，子级百分比才不打滑。 */
+.heat-inner--fill {
+  width: 100%;
+}
 .heat-inner--fill .heat-grid,
 .heat-inner--fill .heat-labels {
   width: 100%;
@@ -91,6 +95,7 @@
   width: 100%;
 }
 .heat-labels {
+  position: relative;
   display: flex;
   gap: 2rpx;
   height: 26rpx;
@@ -114,6 +119,13 @@
 .heat-label-year {
   color: var(--c-fg-mid);
   font-weight: 600;
+}
+/* 行内最后一个标签贴右收口（站点 flushRight 同法）：右缘剩余槽位容不下
+ * ~40rpx 标签 ⇒ 绝对定位贴网格右边界、向左溢出到空槽，消除横滚溢出 */
+.heat-label--flush {
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 .heat-grid {
   display: flex;
