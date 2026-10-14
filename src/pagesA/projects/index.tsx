@@ -19,6 +19,7 @@ import { getProjects } from "@/services/api/collections";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
 import type { ProjectPayload } from "@/types/api";
+import { projectsHeroBadges } from "@/utils/projectsHero";
 import "./index.scss";
 
 export default function ProjectsPage() {
@@ -35,11 +36,9 @@ export default function ProjectsPage() {
     getProjects(buildId, setProjects);
   }, [buildId]);
 
-  const sums = useMemo(
-    () => ({
-      stars: (projects ?? []).reduce((s, p) => s + p.stars, 0),
-      forks: (projects ?? []).reduce((s, p) => s + p.forks, 0),
-    }),
+  /** hero 徽章（D66：站点新口径 = 全账号 Stars + 加入 GitHub 时长；旧数据自动回退合计口径） */
+  const badges = useMemo(
+    () => projectsHeroBadges(projects ?? [], new Date()),
     [projects]
   );
 
@@ -58,19 +57,12 @@ export default function ProjectsPage() {
         ) : (
           <>
             <View className='projects-stats'>
-              <Text className='projects-stats-text'>{projects.length} 个开源项目</Text>
-              {sums.stars > 0 ? (
-                <>
-                  <Text className='projects-stats-dot'>·</Text>
-                  <Text className='projects-stats-text'>{sums.stars} Stars</Text>
-                </>
-              ) : null}
-              {sums.forks > 0 ? (
-                <>
-                  <Text className='projects-stats-dot'>·</Text>
-                  <Text className='projects-stats-text'>{sums.forks} Forks</Text>
-                </>
-              ) : null}
+              {badges.map((b, i) => (
+                <Text key={b}>
+                  {i > 0 ? <Text className='projects-stats-dot'>· </Text> : null}
+                  <Text className='projects-stats-text'>{b}</Text>
+                </Text>
+              ))}
             </View>
 
             <View className='projects-list'>

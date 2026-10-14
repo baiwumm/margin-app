@@ -174,6 +174,9 @@ export interface ProjectPayload {
   stars: number;
   forks: number;
   topics: string[];
+  /** 账号级加性字段（D66；margin `8079583` 起逐项冗余下发，旧 build 数据缺席 ⇒ 回退旧口径） */
+  accountStars?: number;
+  joinedAt?: string;
 }
 
 /* ── 统计与清单 ───────────────────────────────────────────────────── */

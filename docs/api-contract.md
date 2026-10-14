@@ -125,7 +125,11 @@ interface Tag {
                                                    // 三色字段端上暂不消费，契约不动
 }
 interface FriendGroup { title: string; items: { name: string; url: string; desc: string; avatar: string | null }[] }
-interface Project { name: string; url: string; desc: string; lang: string | null; stars: number; forks: number; topics: string[] }
+interface Project { name: string; url: string; desc: string; lang: string | null; stars: number; forks: number; topics: string[]; accountStars?: number; joinedAt?: string }
+// accountStars/joinedAt = 账号级加性可选字段（D66，margin 8079583 起逐项冗余下发：
+// 站点 hero 徽章口径「全账号 Stars + 加入 GitHub 时长」）。GitHub 拉取失败时整组
+// 缺席 ⇒ 端上回退旧口径（已列项目 Stars/Forks 合计），schemaVersion 保持 1。
+// url = repoUrl（D66 起不再回退 homepage）。
 ```
 
 ### 3.3 统计与清单
