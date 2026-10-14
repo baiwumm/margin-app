@@ -102,7 +102,7 @@ margin 站点页脚已展示 ICP 与公安备案（`SITE.beian` 驱动、链接�
   判据组合（`mp-probe-work/code-step9/dl-only.mjs`）：`downloadFile` 200 + 有 tempFilePath ✓、`requirePrivacyAuthorize` **9ms 返回 ok**（⇒ 声明层已通，不再报 not declared）✓、`getSetting().authSetting` 里**没有** `scope.writePhotosAlbum` ⇒ 用户层尚未点过「允许」⇒ 剩下的挂起是弹窗等待人工，不是缺陷。
 - 附带结论：`saveImageToPhotosAlbum` 只吃**本地路径**，远程图必须先 `downloadFile`（www 已在 downloadFile 白名单，D9）；测试图取 `abb988gt` 的 `/_astro/*.webp` 实测 200 可下（webp 能否落相册仍待真机，端上优先给 jpg/png 档）。
 
-## 11. 免责声明初稿（待用户审）
+## 11. 免责声明文案（✅ 已审定 2026-10-14，D64）
 
 写法约束：① 给「审核 + 用户」双读者，只陈述事实与权属；② 全文不含「资讯 / 出版 / 博客 / 媒体」字样；③ 不写「未经授权禁止转载」类会反过来约束站长自己的强承诺。
 
