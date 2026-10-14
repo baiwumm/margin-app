@@ -16,6 +16,8 @@ import type {
   PostDetail,
   PostMeta,
   ProjectPayload,
+  SearchTermsPayload,
+  SearchTitlesPayload,
   SitePayload,
   Stats,
   Tag,
@@ -199,3 +201,48 @@ export const getProjects = (
 
 export const getStats = (buildId: string, onData: (d: Stats) => void) =>
   loadWithCache<Stats>("stats", "/api/v1/stats.json", buildId, onData);
+
+/* ── 检索（M4 步 7；D15 双层索引）────────────────────────────────── */
+
+/** 检索第一层 titles（46.3KB，标题/标签/摘要/小标题 + 构建期拼音）。
+ * 预热走 warmSearchTitles（首屏渲染后），本封装兜底：进搜索页缓存命中即渲。 */
+export const getSearchTitles = (
+  buildId: string,
+  onData: (d: SearchTitlesPayload) => void
+) =>
+  loadWithCache<SearchTitlesPayload>(
+    "search-titles",
+    "/api/v1/search/titles.json",
+    buildId,
+    onData
+  );
+
+/**
+ * titles 后台预热（步 7）：首页 mount 首屏渲染完成后调用——46.3KB 不进首屏关键
+ * 路径（D48 冷启动 FCP 基线优先），失败静默。与 warmFirstScreen 分开：那个是 D50
+ * 首屏关键路径单元，行为一行不改；键同 getSearchTitles ⇒ 订阅侧天然共用同一发。
+ */
+export function warmSearchTitles(): Promise<void> {
+  return fetchAndCache<SearchTitlesPayload>(
+    "search-titles",
+    "/api/v1/search/titles.json",
+    null
+  ).then(() => undefined);
+}
+
+/**
+ * 检索第二层 terms 全文倒排（376KB，≤400KB 硬线）：只在查询 ≥ termsMinChars（=2）
+ * 字时由搜索页首次触发，cache-first 后续复用。prefetch:true = 沿用水位纪律
+ * （>90% 存储停拉取）——此时第二层缺席，搜索仍可用（titles 层）。
+ */
+export const getSearchTerms = (
+  buildId: string,
+  onData: (d: SearchTermsPayload) => void
+) =>
+  loadWithCache<SearchTermsPayload>(
+    "search-terms",
+    "/api/v1/search/terms.json",
+    buildId,
+    onData,
+    { prefetch: true }
+  );

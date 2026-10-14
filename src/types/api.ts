@@ -259,3 +259,30 @@ export interface SitePayload {
   announcement: null;
   theme: { accent: string; accentDark: string };
 }
+
+/* ── 检索（M4 步 7；D15 双层索引，端上不引 pinyin-pro：拼音构建期已烘）──── */
+
+/** titles 文档（构建期检索面；pinyin = 标题/标签全拼连写串，含原样保留的非 ASCII） */
+export interface SearchTitleDoc {
+  slug: string;
+  title: string;
+  tags: string[];
+  desc: string;
+  headings: string[];
+  pinyin: string;
+}
+
+export interface SearchTitlesPayload {
+  /** margin 未填充（实测恒空串）——真实 buildId 在信封上 */
+  buildId: string;
+  docs: SearchTitleDoc[];
+}
+
+/** terms 全文倒排（≤400KB 硬线）：term → 紧凑 postings "docId:weight,…"；
+ * docId = titles.docs 数组下标（线上实证 max docId = docs.length − 1，索引含正文 body） */
+export interface SearchTermsPayload {
+  buildId: string;
+  fields: string[];
+  terms: Record<string, string>;
+  strategy: "bigram";
+}

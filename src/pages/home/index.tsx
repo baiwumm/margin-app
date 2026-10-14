@@ -8,6 +8,7 @@
  * 数据接线：useManifest / useSiteData / usePostsIndex 原样；端上切片上拉加载。
  * D50：mount 时 warmFirstScreen —— site/index 的 URL 不带 buildId，与 manifest 版本
  * 比对同时发起（tab 页 launch 即挂载、切 tab 不重走；写完缓存键订阅侧即读即渲）。
+ * 步 7：warmSearchTitles 在同一 mount 后台预热检索第一层（46.3KB 不进首屏关键路径）。
  */
 import { View, Text } from "@tarojs/components";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -18,7 +19,7 @@ import PageBackdrop from "@/components/deco/PageBackdrop";
 import TerminalBadge from "@/components/deco/TerminalBadge";
 import SectionTitle from "@/components/deco/SectionTitle";
 import { usePostsIndex, useSiteData } from "@/hooks/useCollection";
-import { warmFirstScreen } from "@/services/api/collections";
+import { warmFirstScreen, warmSearchTitles } from "@/services/api/collections";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
 import { setSelectedTab } from "@/custom-tab-bar/store";
@@ -39,6 +40,8 @@ export default function Home() {
   // 出发，冷启动首屏账从「manifest RTT + max(site,index)」变成三者取 max
   useEffect(() => {
     void warmFirstScreen();
+    // 步 7：检索第一层后台预热（不在 Promise.all 里——46.3KB 慢网也不得拖首屏取数）
+    void warmSearchTitles();
   }, []);
   const { manifest, loading, cacheHit } = useManifest();
   const buildId = manifest?.buildId ?? null;
