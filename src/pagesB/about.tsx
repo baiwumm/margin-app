@@ -19,6 +19,11 @@ import SectionTitle from "@/components/deco/SectionTitle";
 import SubNavBar from "@/components/NavBar/SubNavBar";
 import { navAlpha } from "@/components/NavBar/NavBar";
 import { MINI_PROGRAM_BEIAN, BEIAN_SITE_URL } from "@/config/site";
+import {
+  getAccent,
+  subscribeAccent,
+  type AccentKey,
+} from "@/config/accent";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass, useTheme } from "@/hooks/useTheme";
 import { getStats } from "@/services/api/collections";
@@ -82,9 +87,50 @@ import uiGamepadD from "@/assets/about/icon-gamepad-dark.png";
 import uiDumbbellL from "@/assets/about/icon-dumbbell-light.png";
 import uiDumbbellD from "@/assets/about/icon-dumbbell-dark.png";
 
+/* 光球（margin hero-aurora 同款预渲染 PNG：orb1/orb3 跟 accent，orb2 跟主题；
+ * 与 AuroraHero 用同一批资产，映射表在此复制一份、不动冻结组件） */
+import orb1BlueL from "@/assets/aurora/orb-1-blue-light.png";
+import orb1BlueD from "@/assets/aurora/orb-1-blue-dark.png";
+import orb1GreenL from "@/assets/aurora/orb-1-green-light.png";
+import orb1GreenD from "@/assets/aurora/orb-1-green-dark.png";
+import orb1PurpleL from "@/assets/aurora/orb-1-purple-light.png";
+import orb1PurpleD from "@/assets/aurora/orb-1-purple-dark.png";
+import orb1OrangeL from "@/assets/aurora/orb-1-orange-light.png";
+import orb1OrangeD from "@/assets/aurora/orb-1-orange-dark.png";
+import orb1RoseL from "@/assets/aurora/orb-1-rose-light.png";
+import orb1RoseD from "@/assets/aurora/orb-1-rose-dark.png";
+import orb3BlueL from "@/assets/aurora/orb-3-blue-light.png";
+import orb3BlueD from "@/assets/aurora/orb-3-blue-dark.png";
+import orb3GreenL from "@/assets/aurora/orb-3-green-light.png";
+import orb3GreenD from "@/assets/aurora/orb-3-green-dark.png";
+import orb3PurpleL from "@/assets/aurora/orb-3-purple-light.png";
+import orb3PurpleD from "@/assets/aurora/orb-3-purple-dark.png";
+import orb3OrangeL from "@/assets/aurora/orb-3-orange-light.png";
+import orb3OrangeD from "@/assets/aurora/orb-3-orange-dark.png";
+import orb3RoseL from "@/assets/aurora/orb-3-rose-light.png";
+import orb3RoseD from "@/assets/aurora/orb-3-rose-dark.png";
+import orb2Light from "@/assets/aurora/orb-2-light.png";
+import orb2Dark from "@/assets/aurora/orb-2-dark.png";
+
 import "./about.scss";
 
 type Pair = { light: string; dark: string };
+
+/** 光球素材表（与 AuroraHero 同一批资产、同映射；accent 跟偏好，orb2 跟主题） */
+const HERO_ORB1: Record<AccentKey, Pair> = {
+  blue: { light: orb1BlueL, dark: orb1BlueD },
+  green: { light: orb1GreenL, dark: orb1GreenD },
+  purple: { light: orb1PurpleL, dark: orb1PurpleD },
+  orange: { light: orb1OrangeL, dark: orb1OrangeD },
+  rose: { light: orb1RoseL, dark: orb1RoseD },
+};
+const HERO_ORB3: Record<AccentKey, Pair> = {
+  blue: { light: orb3BlueL, dark: orb3BlueD },
+  green: { light: orb3GreenL, dark: orb3GreenD },
+  purple: { light: orb3PurpleL, dark: orb3PurpleD },
+  orange: { light: orb3OrangeL, dark: orb3OrangeD },
+  rose: { light: orb3RoseL, dark: orb3RoseD },
+};
 
 const SKILL_ICONS: Record<string, Pair> = {
   nextdotjs: { light: skillNextL, dark: skillNextD },
@@ -130,6 +176,8 @@ const STATS_CELLS = [
 export default function About() {
   const rootCls = useRootClass();
   const theme = useTheme();
+  const [accent, setAccentState] = useState<AccentKey>(getAccent());
+  useEffect(() => subscribeAccent(setAccentState), []);
   const { manifest } = useManifest();
   const buildId = manifest?.buildId ?? null;
   const [stats, setStats] = useState<Stats | null>(null);
@@ -154,24 +202,39 @@ export default function About() {
       <PageBackdrop />
       <SubNavBar title='关于' alpha={alpha} />
       <View className='page-body about'>
-        {/* hero：accent 环头像 + Hi! I'm + glow 名 + 三徽章 */}
-        <View className='about-hero'>
-          <View className='about-avatar-ring'>
-            <Image
-              className='about-avatar'
-              src='https://www.baiwumm.com/avatar.png'
-              mode='aspectFill'
-            />
-          </View>
-          <Text className='about-greeting'>Hi! I&apos;m</Text>
-          <Text className='about-name glow-text'>白雾茫茫丶</Text>
-          <View className='about-badges'>
-            {HERO_BADGES.map(b => (
-              <View key={b.label} className='about-badge'>
-                <Image className='about-badge-icon' src={pick(UI_ICONS, b.icon)} />
-                <Text className='about-badge-label'>{b.label}</Text>
-              </View>
-            ))}
+        {/* hero：margin about-hero 同款容器（surface 底 + accent 12% 描边 +
+            r-hero 圆角 + 光球 PNG 跟 accent/主题）内坐 avatar + 名字 + 徽章 */}
+        <View className='about-hero-card'>
+          <Image
+            className='about-orb about-orb-1'
+            src={HERO_ORB1[accent][theme]}
+          />
+          <Image
+            className='about-orb about-orb-2'
+            src={theme === "dark" ? orb2Dark : orb2Light}
+          />
+          <Image
+            className='about-orb about-orb-3'
+            src={HERO_ORB3[accent][theme]}
+          />
+          <View className='about-hero'>
+            <View className='about-avatar-ring'>
+              <Image
+                className='about-avatar'
+                src='https://www.baiwumm.com/avatar.png'
+                mode='aspectFill'
+              />
+            </View>
+            <Text className='about-greeting'>Hi! I&apos;m</Text>
+            <Text className='about-name glow-text'>白雾茫茫丶</Text>
+            <View className='about-badges'>
+              {HERO_BADGES.map(b => (
+                <View key={b.label} className='about-badge'>
+                  <Image className='about-badge-icon' src={pick(UI_ICONS, b.icon)} />
+                  <Text className='about-badge-label'>{b.label}</Text>
+                </View>
+              ))}
+            </View>
           </View>
         </View>
 

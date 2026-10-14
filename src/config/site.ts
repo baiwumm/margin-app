@@ -5,8 +5,7 @@
  * 以内页面底部显著位置」标明小程序自己的备案编号（与网站 ICP 备案号是两回事，
  * compliance.md §1/§9）；落点 = mine 页脚 + 关于页脚，点击复制备案号 +
  * 工信部网址（个人主体无 web-view，外链一律剪贴板，D8）。
- * ⚠️ 占位值 —— 待用户从「公众平台 → 设置 → 小程序备案」抄录真实号码替换（D64），
- * M5 提审前必须核对。
+ * 真实号码由用户提供（2026-10-14，验收④ PASS）。
  */
-export const MINI_PROGRAM_BEIAN = "粤ICP备2023007649号-X";
+export const MINI_PROGRAM_BEIAN = "粤ICP备2023007649号-4X";
 export const BEIAN_SITE_URL = "https://beian.miit.gov.cn";

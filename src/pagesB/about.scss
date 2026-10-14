@@ -12,12 +12,76 @@
   padding: 0 var(--sp-page) calc(140rpx + env(safe-area-inset-bottom, 0px));
 }
 
-/* ── hero ── */
+/* ── hero ──
+ * 容器与光球 = AuroraHero.scss 原值镜像（D64 真机反馈：hero 改 margin 同款
+ * 背景 —— surface 底 + accent 12% 描边 + r-hero 圆角 + 光球 PNG 跟
+ * accent/主题；类名独立，不耦合冻结组件的样式表）。 */
+.about-hero-card {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: var(--sp-4);
+  padding: 56rpx 32rpx;
+  border: 1rpx solid var(--c-accent-12);
+  border-radius: var(--r-hero);
+  background-color: var(--c-surface);
+}
+.about-orb {
+  position: absolute;
+  pointer-events: none;
+}
+.about-orb-1 {
+  width: 600rpx;
+  height: 600rpx;
+  top: -30%;
+  left: -10%;
+  animation: aurora-orb-1 7s ease-in-out infinite alternate;
+}
+.about-orb-2 {
+  width: 500rpx;
+  height: 500rpx;
+  top: 10%;
+  right: -5%;
+  animation: aurora-orb-2 9s ease-in-out infinite alternate;
+}
+.about-orb-3 {
+  width: 400rpx;
+  height: 400rpx;
+  bottom: -20%;
+  left: 40%;
+  animation: aurora-orb-3 11s ease-in-out infinite alternate;
+}
+/* 光球漂移帧 = AuroraHero.scss 同值（keyframes 页面级作用域，需在本页重声明；
+ * rpx 在 transform 内生效，D36） */
+@keyframes aurora-orb-1 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(80rpx, 40rpx) scale(1.2);
+  }
+}
+@keyframes aurora-orb-2 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(-60rpx, 60rpx) scale(1.15);
+  }
+}
+@keyframes aurora-orb-3 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(40rpx, -50rpx) scale(1.1);
+  }
+}
 .about-hero {
+  position: relative;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 48rpx 0 16rpx;
   text-align: center;
 }
 .about-avatar-ring {
@@ -43,7 +107,7 @@
 }
 .about-name {
   margin-top: 4rpx;
-  font-size: var(--fs-hero);
+  font-size: 72rpx; /* D64 真机反馈：96rpx（--fs-hero）偏大，降 design §2 hero 档下限 */
   font-weight: 700;
 }
 .about-badges {
