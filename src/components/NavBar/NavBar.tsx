@@ -1,7 +1,7 @@
 /**
  * 顶栏（margin Header.astro 同族，design.md §3 / §10 步骤 6）：
  * 居左 logo lockup（mark 56rpx + 字标 40rpx，明暗两版 PNG），
- * 居右搜索（M4 检索页就绪前占位提示）与主题切换（轻/暗直接翻转偏好，
+ * 居右搜索（步 7 接真 → pagesA/search 双层检索页）与主题切换（轻/暗直接翻转偏好，
  * 恢复跟随系统走 M2 偏好页）；滚动态 bg → surface + 底部发丝线，
  * 透明度随 navAlpha 渐显（页面 usePageScroll 传入，0.05 档量化控制重渲染）。
  * 高度 = 状态栏 + 88rpx。
@@ -9,6 +9,7 @@
 import { View, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { setThemePreference, useTheme } from "@/hooks/useTheme";
+import { searchUrl } from "@/utils/routes";
 
 import markLight from "@/assets/logo/mark-light.png";
 import markDark from "@/assets/logo/mark-dark.png";
@@ -61,8 +62,8 @@ export default function NavBar({ alpha = 0 }: NavBarProps) {
   const dark = theme === "dark";
 
   const onSearch = () => {
-    // M4 检索页（双层索引）就绪前占位
-    void Taro.showToast({ title: "搜索即将上线", icon: "none" });
+    // 步 7 接真：双层检索页（titles 后台预热已由首页 mount 发起）
+    void Taro.navigateTo({ url: searchUrl() });
   };
   const onToggleTheme = () => {
     setThemePreference(dark ? "light" : "dark");
