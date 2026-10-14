@@ -6,6 +6,8 @@ export const ARCHIVE = "/pagesA/archive/index";
 export const TAG_DETAIL = "/pagesA/tag-detail/index";
 export const FRIENDS = "/pagesA/friends/index";
 export const PROJECTS = "/pagesA/projects/index";
+export const ABOUT = "/pagesB/about";
+export const DISCLAIMER = "/pagesB/disclaimer";
 
 export function postDetailUrl(slug: string): string {
   return `${POST_DETAIL}?slug=${encodeURIComponent(slug)}`;
@@ -34,4 +36,14 @@ export function friendsUrl(): string {
 /** 项目（M4 步 4；对应站点 /projects） */
 export function projectsUrl(): string {
   return PROJECTS;
+}
+
+/** 关于（M4 步 5；对应站点 /about；备案号展示落点之一，验收④） */
+export function aboutUrl(): string {
+  return ABOUT;
+}
+
+/** 免责声明（M4 步 5；文案 = compliance §11 初稿按倾向落定） */
+export function disclaimerUrl(): string {
+  return DISCLAIMER;
 }

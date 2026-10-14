@@ -3,8 +3,8 @@
  * 同构）：hero（圆形头像 accent 描边 + glow 昵称 + 简介 + 社交行，外链复制 =
  * D8）+ 统计卡（文章/字数/连续月，margin SiteStats 规格：mono accent 大数 +
  * fg60 标签）+ 贡献日历（stats heatmap 视图网格，accent 强度分级横向滚动）+
- * 功能列表行（surface-2 底圆角行；路由 M2/M4 接线，先占位提示）+ 版权行
- * （备案号展示挂 M4，D10）。
+ * 功能列表行（surface-2 底圆角行；M4 步 5 起归档/友链/项目/偏好/关于/免责
+ * 六行接真，收藏/历史/联系仍占位）+ 版权/备案行（小程序备案号点击复制，验收④）。
  * 数据接线不动：useSiteData + getStats（既有 service 回调模式，不新增 hook）。
  */
 import { Image, View, Text } from "@tarojs/components";
@@ -27,12 +27,20 @@ import {
   type AccentKey,
 } from "@/config/accent";
 import { setSelectedTab } from "@/custom-tab-bar/store";
+import { BEIAN_SITE_URL, MINI_PROGRAM_BEIAN } from "@/config/site";
 import { setPrefs } from "@/utils/prefs";
-import { PREFERENCE, archiveUrl, friendsUrl, projectsUrl } from "@/utils/routes";
+import {
+  PREFERENCE,
+  aboutUrl,
+  archiveUrl,
+  disclaimerUrl,
+  friendsUrl,
+  projectsUrl,
+} from "@/utils/routes";
 import type { Stats } from "@/types/api";
 import "./mine.scss";
 
-/** 功能列表行（design.md §3；路由 M2 偏好 / M4 其余，先占位提示） */
+/** 功能列表行（design.md §3；路由 M2 偏好 / M4 已就绪七行，「关于」为步 5 新增） */
 const ROWS = [
   { key: "archive", label: "归档" },
   { key: "favorites", label: "我的收藏" },
@@ -41,6 +49,7 @@ const ROWS = [
   { key: "projects", label: "项目" },
   { key: "prefs", label: "偏好设置" },
   { key: "contact", label: "联系站长" },
+  { key: "about", label: "关于" },
   { key: "disclaimer", label: "免责声明" },
 ];
 
@@ -137,7 +146,7 @@ export default function Mine() {
   );
 
   const onRow = (key: string, label: string) => {
-    // M2 偏好 / M4 步 1/3/4 归档·友链·项目已就绪；其余（收藏/历史/联系/免责声明）后续步骤
+    // M2 偏好 / M4 步 1/3/4/5 归档·友链·项目·关于·免责已就绪；其余（收藏/历史/联系）后续步骤
     if (key === "prefs") {
       void Taro.navigateTo({ url: PREFERENCE });
       return;
@@ -154,7 +163,23 @@ export default function Mine() {
       void Taro.navigateTo({ url: projectsUrl() });
       return;
     }
+    if (key === "about") {
+      void Taro.navigateTo({ url: aboutUrl() });
+      return;
+    }
+    if (key === "disclaimer") {
+      void Taro.navigateTo({ url: disclaimerUrl() });
+      return;
+    }
     void Taro.showToast({ title: `${label}即将上线`, icon: "none" });
+  };
+
+  /** 备案号复制（验收④：可见可复制；备案号 + 工信部网址一并进剪贴板，compliance §9） */
+  const copyBeian = () => {
+    void Taro.setClipboardData({
+      data: `${MINI_PROGRAM_BEIAN}\n${BEIAN_SITE_URL}`,
+    });
+    void Taro.showToast({ title: "已复制备案号", icon: "none" });
   };
 
   const copyLink = (url: string) => {
@@ -280,10 +305,13 @@ export default function Mine() {
           ))}
         </View>
 
-        {/* 版权行（备案号展示挂 M4，D10） */}
+        {/* 版权/备案行（验收④落点之一：备案号可见可复制，M4 步 5） */}
         <View className='mine-footer'>
           <Text className='mine-footer-text'>
             © {new Date().getFullYear()} {site?.title ?? "Margin"} · {site?.author}
+          </Text>
+          <Text className='mine-footer-beian' onClick={copyBeian}>
+            {MINI_PROGRAM_BEIAN}
           </Text>
         </View>
       </View>

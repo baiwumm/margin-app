@@ -28,14 +28,16 @@ export default defineAppConfig({
     },
     {
       root: "pagesB",
-      pages: ["preference"],
+      pages: ["preference", "about", "disclaimer"],
     },
   ],
   preloadRule: {
     // 预加载分包（WiFi/蜂窝都预取）：首页 → 文章详情；图库 tab → 画廊详情（M3 步 4，
-    // 少了这条，从图库进详情要现拉分包）
+    // 少了这条，从图库进详情要现拉分包）；我的 tab → 分包 B（M4 步 5：偏好/关于/
+    // 免责都在 B，mine 列表是唯一入口）
     "pages/home/index": { network: "all", packages: ["pagesA"] },
     "pages/gallery/index": { network: "all", packages: ["pagesA"] },
+    "pages/mine/index": { network: "all", packages: ["pagesB"] },
   },
   window: {
     backgroundTextStyle: "light",

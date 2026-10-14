@@ -189,7 +189,53 @@ async function genAurora() {
   console.log("aurora orbs →", path.join(ASSETS, "aurora"));
 }
 
-const jobs = { noise: genNoise, tabbar: genTabbar, navicons: genNavIcons, logo: genLogo, aurora: genAurora };
+/* ── 关于页图标（M4 步 5，D64）：技能跑马灯 11 枚（margin simple-icons 单路径，
+ *    fill 烘焙为 fg 单色 —— 站点同为 mono 观感）+ 内容图标 10 枚（about.mdx /
+ *    AboutLayout 内联 lucide 字形，stroke 2）。各明暗两版 @96px ── */
+const SKILL_FILES = [
+  "nextdotjs", "nuxtdotjs", "react", "vuedotjs", "nestjs", "typescript",
+  "javascript", "html5", "prisma", "postgresql", "vercel",
+];
+const ABOUT_GLYPHS = {
+  code: `<path d="M10 9l-6 5 6 5"/><path d="M14 9l6 5-6 5"/>`,
+  terminal: `<path d="M4 17l6-5-6-5"/><path d="M12 19h8"/>`,
+  mappin: `<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>`,
+  sprout: `<path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/>`,
+  rocket: `<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>`,
+  pencil: `<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>`,
+  phone: `<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>`,
+  music: `<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>`,
+  gamepad: `<rect width="20" height="12" x="2" y="6" rx="2"/><path d="M6 12h4"/><path d="M8 10v4"/><path d="M15 13h.01"/><path d="M18 11h.01"/>`,
+  dumbbell: `<path d="M14.4 14.4 9.6 9.6"/><path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"/><path d="m21.5 21.5-1.4-1.4"/><path d="M3.9 3.9 2.5 2.5"/><path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"/>`,
+};
+
+async function genAboutIcons() {
+  const margin = process.env.MARGIN_REPO || path.resolve(ROOT, "..", "margin");
+  const outDir = path.join(ASSETS, "about");
+  for (const theme of ["light", "dark"]) {
+    const fg = FG[theme];
+    for (const name of SKILL_FILES) {
+      const raw = readFileSync(
+        path.join(margin, "src", "assets", "icons", "skills", `${name}.svg`),
+        "utf8"
+      );
+      const svg = raw
+        .replace(/<title>[^<]*<\/title>/, "")
+        .replace("<svg ", `<svg fill="${fg}" `);
+      const out = path.join(outDir, `skill-${name}-${theme}.png`);
+      ensureDir(out);
+      await sharp(Buffer.from(svg)).resize(96, 96).png({ compressionLevel: 9 }).toFile(out);
+    }
+    for (const [name, g] of Object.entries(ABOUT_GLYPHS)) {
+      const out = path.join(outDir, `icon-${name}-${theme}.png`);
+      ensureDir(out);
+      await sharp(Buffer.from(iconSvg(g, fg))).resize(96, 96).png({ compressionLevel: 9 }).toFile(out);
+    }
+  }
+  console.log("about icons →", outDir);
+}
+
+const jobs = { noise: genNoise, tabbar: genTabbar, navicons: genNavIcons, logo: genLogo, aurora: genAurora, about: genAboutIcons };
 const what = process.argv[2] || "all";
 if (what === "all") {
   for (const fn of Object.values(jobs)) await fn();

@@ -1,0 +1,42 @@
+/* 免责声明页（M4 步 5，D64；文案 = compliance.md §11 初稿按倾向落定）
+ * 形态 = 单卡 prose（surface-2 底 + border 25% + r-card，preference 卡同族）；
+ * 小节标题 28rpx 600 + 正文 fs-sm 1.75 行高 fg-mid。 */
+
+.disclaimer {
+  padding: 0 var(--sp-page) calc(64rpx + env(safe-area-inset-bottom, 0px));
+}
+.disclaimer-card {
+  padding: 40rpx 32rpx;
+  border: 1rpx solid var(--c-border-25);
+  border-radius: var(--r-card);
+  background-color: var(--c-surface-2);
+}
+.disclaimer-title {
+  display: block;
+  font-size: var(--fs-card);
+  font-weight: 700;
+  color: var(--c-fg);
+}
+.disclaimer-intro {
+  display: block;
+  margin-top: 20rpx;
+  font-size: var(--fs-sm);
+  line-height: 1.75;
+  color: var(--c-fg-mid);
+}
+.disclaimer-section {
+  margin-top: 40rpx;
+}
+.disclaimer-section-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--c-fg);
+}
+.disclaimer-para {
+  display: block;
+  margin-top: 12rpx;
+  font-size: var(--fs-sm);
+  line-height: 1.75;
+  color: var(--c-fg-mid);
+}

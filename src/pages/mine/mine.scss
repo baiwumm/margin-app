@@ -173,14 +173,22 @@
   padding: var(--sp-1) 0;
 }
 
-/* ── 版权行 ───────────────────────────────────────────────────── */
+/* ── 版权/备案行（备案号 = 小程序自己的编号，点击复制，验收④；M4 步 5） ── */
 .mine-footer {
   padding: var(--sp-4) 0 var(--sp-2);
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
 }
 .mine-footer-text {
   font-family: var(--font-mono);
   font-size: var(--fs-cap);
   color: var(--c-fg-45);
+}
+.mine-footer-beian {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cap);
+  color: var(--c-fg-45);
+  text-decoration: underline;
 }
