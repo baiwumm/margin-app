@@ -1,0 +1,64 @@
+/* 我的收藏（M4 步 8）：列表 = PostCard 逐项 + 右下「移除」；已失效文章降级行
+ * （不静默清用户的收藏）；空态 = app.scss .empty 同款。 */
+
+.fav {
+  padding: 0 var(--sp-page) calc(140rpx + env(safe-area-inset-bottom, 0px));
+}
+.fav-loading {
+  display: block;
+  margin-top: 64rpx;
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--c-fg-45);
+}
+.fav-meta {
+  margin: var(--sp-2) 0 var(--sp-gap);
+}
+.fav-meta-text {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cap);
+  letter-spacing: 0.06em;
+  color: var(--c-fg-45);
+}
+.fav-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-gap);
+}
+.fav-item {
+  position: relative;
+}
+.fav-remove {
+  margin-top: 8rpx;
+  align-self: flex-end;
+  font-size: var(--fs-sm);
+  color: var(--c-fg-45);
+  padding: 4rpx 12rpx;
+}
+.fav-item .fav-remove {
+  position: absolute;
+  top: 12rpx;
+  right: 12rpx;
+  margin-top: 0;
+  background-color: var(--c-bg);
+  border: 1rpx solid var(--c-border-25);
+  border-radius: var(--r-full);
+}
+.fav-gone {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 24rpx;
+  border: 1rpx dashed var(--c-border-25);
+  border-radius: var(--r-card);
+}
+.fav-gone-slug {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--c-fg-45);
+}
+.fav-gone-hint {
+  flex: 1;
+  font-size: var(--fs-sm);
+  color: var(--c-fg-45);
+}

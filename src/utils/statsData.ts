@@ -35,13 +35,17 @@ const dayKey = (d: Date) =>
 /** 稀疏有文日 → 密集网格。recentWeeks 省略 = 全时段（起点 = 最早有文日
  *  所在周周日）；传入 = 只渲染最近 N 周（margin ContributionCalendar「过去
  *  一年」同款，起点 = 本周周日回退 N-1 周）。两者周日起始/缺日补 0/未来日
- *  不渲染的口径一致（D28）。 */
-export function fullHeatmap(days: HeatDay[], recentWeeks?: number): HeatGrid {
+ *  不渲染的口径一致（D28）。now 可注入（单测钉死日期，防真实时钟漂移）。 */
+export function fullHeatmap(
+  days: HeatDay[],
+  recentWeeks?: number,
+  now: Date = new Date()
+): HeatGrid {
   if (days.length === 0) {
     return { cols: [], months: [], years: [], max: 0, total: 0, rendered: 0 };
   }
   const counts = new Map(days.map(d => [d.date, d.count]));
-  const today = new Date();
+  const today = new Date(now);
   today.setHours(0, 0, 0, 0);
 
   let start: Date;

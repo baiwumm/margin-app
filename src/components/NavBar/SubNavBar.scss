@@ -31,6 +31,20 @@
   width: 64rpx;
   flex-shrink: 0;
 }
+/* 右槽动作（步 8 收藏开关等）：mono 星标，激活态 accent（margin featured ★ 同族） */
+.sub-nav-action {
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  line-height: 1;
+  color: var(--c-fg-45);
+}
+.sub-nav-action-on {
+  color: var(--c-accent);
+}
 
 /* 阅读进度（margin PostDetails.astro createProgressBar：容器 h-0.5 w-full
  * bg-background，条 h-0.5 rounded-full + accent 20%→60%→100% 横向渐变） */

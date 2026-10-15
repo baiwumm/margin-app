@@ -12,6 +12,9 @@ import {
 const key = (y: number, m: number, d: number) =>
   `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 
+/** 测试锚定日期（2026-10-14 周三）——fullHeatmap 的 now 注入，防真实时钟漂移 */
+const NOW = new Date("2026-10-14T00:00:00+08:00");
+
 describe("fullHeatmap（全时段热力图网格）", () => {
   it("空输入 → 空网格", () => {
     const g = fullHeatmap([]);
@@ -28,7 +31,7 @@ describe("fullHeatmap（全时段热力图网格）", () => {
       { date: key(2026, 10, 6), count: 1 }, // 周二
       { date: key(2026, 10, 14), count: 3 }, // 今天（周三）
     ];
-    const g = fullHeatmap(days);
+    const g = fullHeatmap(days, undefined, NOW);
     // 2026-10-04（周日）→ 2026-10-14（今天）共 11 天 = 2 列（7 + 4）
     expect(g.cols.length).toBe(2);
     expect(g.cols[0].length).toBe(7);
@@ -47,7 +50,7 @@ describe("fullHeatmap（全时段热力图网格）", () => {
       { date: key(2026, 10, 14), count: 1 },
       { date: key(2026, 9, 28), count: 1 }, // 周一（更早）
     ];
-    const g = fullHeatmap(days);
+    const g = fullHeatmap(days, undefined, NOW);
     // 2026-09-28 是周一 → 所在周周日 = 09-27；到今天 18 天 = 3 列（7+7+4）
     expect(g.cols.length).toBe(3);
     expect(g.total).toBe(2);
@@ -55,7 +58,7 @@ describe("fullHeatmap（全时段热力图网格）", () => {
 
   it("月份标签 = 含当月 1 号的列；年份标签只落在 1 月 1 号的列", () => {
     const days = [{ date: key(2026, 1, 1), count: 1 }];
-    const g = fullHeatmap(days);
+    const g = fullHeatmap(days, undefined, NOW);
     // 2026-01-01 是周四 → 所在周周日 = 2025-12-28 ⇒ 首列即「1月」且跨年
     const firstMonthCol = g.months.findIndex(m => m === "1月");
     const firstYearCol = g.years.findIndex(y => y === "2026");
@@ -71,7 +74,7 @@ describe("fullHeatmap（全时段热力图网格）", () => {
       { date: key(2026, 10, 12), count: 2 }, // 本周一
       { date: key(2026, 1, 1), count: 9 }, // 窗口外
     ];
-    const g = fullHeatmap(days, 2); // 最近 2 周
+    const g = fullHeatmap(days, 2, NOW); // 最近 2 周
     // 今天周三 ⇒ 本周周日 = 10-11；回退 1 周 = 10-04 ⇒ 2 列（7 + 4，末列到今天截断）
     expect(g.cols.length).toBe(2);
     expect(g.cols[0]).toEqual([0, 0, 0, 0, 0, 0, 0]); // 10-04~10-10：窗口内无文
@@ -81,7 +84,7 @@ describe("fullHeatmap（全时段热力图网格）", () => {
   });
 
   it("窗口 = 53 周 ⇒ 恰好 53 列（margin「过去一年」口径；与 mine 页窗口同构）", () => {
-    const g = fullHeatmap([{ date: key(2026, 1, 1), count: 1 }], 53);
+    const g = fullHeatmap([{ date: key(2026, 1, 1), count: 1 }], 53, NOW);
     expect(g.cols.length).toBe(53);
     expect(g.rendered).toBeGreaterThanOrEqual(365);
   });
@@ -91,7 +94,7 @@ describe("fullHeatmap（全时段热力图网格）", () => {
       { date: key(2026, 10, 1), count: 1 },
       { date: key(2026, 10, 2), count: 5 },
     ];
-    expect(fullHeatmap(days).max).toBe(5);
+    expect(fullHeatmap(days, undefined, NOW).max).toBe(5);
     expect(heatLevel(1, 5)).toBe(1); // ceil(1/5*4)=1
     expect(heatLevel(2, 5)).toBe(2); // ceil(2/5*4)=2
     expect(heatLevel(4, 5)).toBe(4); // ceil(4/5*4)=4

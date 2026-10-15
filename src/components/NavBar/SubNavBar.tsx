@@ -2,10 +2,12 @@
  * 二级页顶栏（design.md §4「标题居中」）：返回 + 居中标题 + 右侧动作槽。
  * 几何/滚动态复用 NavBar.scss 的 .nav-root/.nav-bg/.nav-row（同一套 margin Header
  * 语言），NavBar 的 alpha-only 契约与五 tab 页用法不动。
- * 右槽留给后续单元（TOC / 阅读模式），本轮不放动作。
+ * action = 右槽动作（步 8 起收藏页用：详情页传 ★ 收藏开关；不传时槽位保留、
+ * 几何与旧版一致）。
  */
 import { Text, View } from "@tarojs/components";
 import Taro from "@tarojs/taro";
+import type { ReactNode } from "react";
 
 import { CAP_RIGHT, STATUS_BAR } from "./NavBar";
 import "./NavBar.scss";
@@ -17,9 +19,11 @@ interface SubNavBarProps {
   alpha?: number;
   /** 阅读进度 0–1（margin .progress-container：顶栏底沿 4rpx 渐变条） */
   progress?: number;
+  /** 右槽动作（如详情页的收藏开关） */
+  action?: ReactNode;
 }
 
-export default function SubNavBar({ title, alpha = 0, progress = 0 }: SubNavBarProps) {
+export default function SubNavBar({ title, alpha = 0, progress = 0, action }: SubNavBarProps) {
   return (
     <>
       <View className='nav-root'>
@@ -34,7 +38,7 @@ export default function SubNavBar({ title, alpha = 0, progress = 0 }: SubNavBarP
             <View className='sub-nav-chevron' />
           </View>
           <Text className='sub-nav-title'>{title}</Text>
-          <View className='sub-nav-slot' />
+          <View className='sub-nav-slot'>{action}</View>
         </View>
         <View className='nav-progress'>
           <View

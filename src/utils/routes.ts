@@ -2,6 +2,7 @@
 export const POST_DETAIL = "/pagesA/post/detail";
 export const GALLERY_DETAIL = "/pagesA/gallery-detail/index";
 export const PREFERENCE = "/pagesB/preference";
+export const FAVORITE = "/pagesB/favorite";
 export const ARCHIVE = "/pagesA/archive/index";
 export const TAG_DETAIL = "/pagesA/tag-detail/index";
 export const FRIENDS = "/pagesA/friends/index";
@@ -58,4 +59,9 @@ export function statsUrl(): string {
 /** 搜索（M4 步 7；NavBar 放大镜的落点，双层检索） */
 export function searchUrl(): string {
   return SEARCH;
+}
+
+/** 我的收藏（M4 步 8；本地 store，端上特有——margin 站点无收藏） */
+export function favoriteUrl(): string {
+  return FAVORITE;
 }

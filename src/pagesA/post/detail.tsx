@@ -24,9 +24,17 @@ import { BlockAssetsProvider } from "@/components/block/BlockImage";
 import { BlockRenderer } from "@/components/block/BlockRenderer";
 import { setCodeColors } from "@/components/block/CodeBlock";
 import { readCodeColors } from "@/utils/codeColors";
+import {
+  FAVORITES_KEY,
+  hydrateFavorites,
+  isFavorite,
+  subscribeFavorites,
+  toggleFavorite,
+} from "@/utils/favorites";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
 import { getPostDetail } from "@/services/api/collections";
+import { readCache } from "@/services/cache";
 import { perfLog } from "@/utils/perf";
 import { perfDumpEntries } from "@/utils/perfBoot";
 import { postDetailUrl } from "@/utils/routes";
@@ -58,6 +66,13 @@ export default function PostDetailPage() {
   const [detail, setDetail] = useState<PostDetail | null>(null);
   const [failed, setFailed] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  // 收藏（步 8）：惰性水合 + 订阅（mine/收藏页同源，跨页即时同步）
+  const [faved, setFaved] = useState(false);
+  useEffect(() => {
+    void readCache(FAVORITES_KEY).then(hydrateFavorites);
+    setFaved(slug ? isFavorite(slug) : false);
+    return subscribeFavorites(() => setFaved(slug ? isFavorite(slug) : false));
+  }, [slug]);
   // 字号/行距偏好（M2 步 3 机制）：订阅即时生效，落到 root 的 .fs-*/.lead-* 类
   const [prefs, setPrefsState] = useState(getPrefs);
   useEffect(() => subscribePrefs(setPrefsState), []);
@@ -220,7 +235,28 @@ export default function PostDetailPage() {
       }`}
     >
       <PageBackdrop />
-      <SubNavBar title={detail?.meta.title ?? ""} alpha={alpha} progress={progress} />
+      <SubNavBar
+        title={detail?.meta.title ?? ""}
+        alpha={alpha}
+        progress={progress}
+        action={
+          <View
+            className={`sub-nav-action ${faved ? "sub-nav-action-on" : ""}`}
+            hoverClass='row-press'
+            hoverStayTime={80}
+            onClick={() => {
+              if (!slug) return;
+              const on = toggleFavorite(slug);
+              void Taro.showToast({
+                title: on ? "已收藏" : "已取消收藏",
+                icon: "none",
+              });
+            }}
+          >
+            <Text>{faved ? "★" : "☆"}</Text>
+          </View>
+        }
+      />
       <View className='page-body detail'>
         {detail ? (
           <>

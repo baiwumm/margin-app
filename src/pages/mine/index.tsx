@@ -34,6 +34,7 @@ import {
   aboutUrl,
   archiveUrl,
   disclaimerUrl,
+  favoriteUrl,
   friendsUrl,
   projectsUrl,
   statsUrl,
@@ -151,6 +152,10 @@ export default function Mine() {
     // M2 偏好 / M4 步 1/3/4/5 归档·友链·项目·关于·免责已就绪；其余（收藏/历史/联系）后续步骤
     if (key === "prefs") {
       void Taro.navigateTo({ url: PREFERENCE });
+      return;
+    }
+    if (key === "favorites") {
+      void Taro.navigateTo({ url: favoriteUrl() });
       return;
     }
     if (key === "archive") {
