@@ -33,6 +33,7 @@ import {
   PREFERENCE,
   aboutUrl,
   archiveUrl,
+  contactUrl,
   disclaimerUrl,
   favoriteUrl,
   friendsUrl,
@@ -177,6 +178,10 @@ export default function Mine() {
     }
     if (key === "stats") {
       void Taro.navigateTo({ url: statsUrl() });
+      return;
+    }
+    if (key === "contact") {
+      void Taro.navigateTo({ url: contactUrl() });
       return;
     }
     if (key === "about") {

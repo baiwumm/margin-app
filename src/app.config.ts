@@ -29,7 +29,15 @@ export default defineAppConfig({
     },
     {
       root: "pagesB",
-      pages: ["preference", "about", "disclaimer", "stats", "favorite", "history"],
+      pages: [
+        "preference",
+        "about",
+        "disclaimer",
+        "stats",
+        "favorite",
+        "history",
+        "contact",
+      ],
     },
   ],
   preloadRule: {

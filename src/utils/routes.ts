@@ -4,6 +4,7 @@ export const GALLERY_DETAIL = "/pagesA/gallery-detail/index";
 export const PREFERENCE = "/pagesB/preference";
 export const FAVORITE = "/pagesB/favorite";
 export const HISTORY = "/pagesB/history";
+export const CONTACT = "/pagesB/contact";
 export const ARCHIVE = "/pagesA/archive/index";
 export const TAG_DETAIL = "/pagesA/tag-detail/index";
 export const FRIENDS = "/pagesA/friends/index";
@@ -70,4 +71,9 @@ export function favoriteUrl(): string {
 /** 阅读记录（M4 步 9；本地 store，详情页自动记录） */
 export function historyUrl(): string {
   return HISTORY;
+}
+
+/** 联系站长（M4 步 10；D8 复制剪贴板口径，含友链申请模板） */
+export function contactUrl(): string {
+  return CONTACT;
 }
