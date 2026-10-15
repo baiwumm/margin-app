@@ -326,7 +326,7 @@ export default function About() {
         </View>
 
         {/* 这个博客（段落 + 站点统计四格） */}
-        <SectionTitle title='这个博客' />
+        <SectionTitle title='这个站点' />
         {ABOUT_BLOG.map((para, i) => (
           <View key={i} className='about-para'>
             {para.map((seg, j) => (

@@ -43,7 +43,7 @@ export default function Tags() {
           path='/tags'
           trail='ls -la'
           title='Tags'
-          desc='浏览全部博客话题，每个标签都是一个内容宇宙。'
+          desc='浏览全部话题，每个标签都是一个内容宇宙。'
           badges={[`${tags?.length ?? 0} 个标签`]}
         />
         <View className='tag-grid'>
