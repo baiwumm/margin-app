@@ -102,6 +102,30 @@ margin 站点页脚已展示 ICP 与公安备案（`SITE.beian` 驱动、链接�
   判据组合（`mp-probe-work/code-step9/dl-only.mjs`）：`downloadFile` 200 + 有 tempFilePath ✓、`requirePrivacyAuthorize` **9ms 返回 ok**（⇒ 声明层已通，不再报 not declared）✓、`getSetting().authSetting` 里**没有** `scope.writePhotosAlbum` ⇒ 用户层尚未点过「允许」⇒ 剩下的挂起是弹窗等待人工，不是缺陷。
 - 附带结论：`saveImageToPhotosAlbum` 只吃**本地路径**，远程图必须先 `downloadFile`（www 已在 downloadFile 白名单，D9）；测试图取 `abb988gt` 的 `/_astro/*.webp` 实测 200 可下（webp 能否落相册仍待真机，端上优先给 jpg/png 档）。
 
+### 10.2 提审前逐项核对报告（2026-10-15，D72 / M5 步 1）
+
+**核对方法（三方对照）**：① src/ 全量 API 调用面（26 个 wx/Taro 接口 + 组件 + package.json 依赖）；② 官方《小程序用户隐私保护指引内容介绍》接口清单（21 个信息项，从官方文档站 SPA 正文 chunk 脚本抽取，证据 `mp-probe-work/code-step9/evidence/privacy-official-table.txt`）；③ 后台已声明项（仅「相册（仅写入）」，2026-10-08 配）。**官方口径原文**：「微信会根据小程序版本隐私接口调用情况展示**必填项**，开发者可自主勾选其他项目」；提审时「若提交审核的开发版本，其隐私接口调用情况与隐私协议内容有出入……则在提审时会提醒开发者进行更新」。
+
+**结论表**：
+
+| # | 信息项（官方清单） | 代码实况 | 声明实况 | 判定 |
+| --- | --- | --- | --- | --- |
+| 1 | 读取你的剪切板（`wx.setClipboardData`、`wx.getClipboardData`） | **调用 10 处**（`Taro.setClipboardData`：CodeBlock 代码复制 / MusicBlock / LinkCardBlock / home 作者社交行 / mine×2 / friends / projects / contact / about 备案号；均为把站内公开信息写入剪贴板） | **未声明** | ❌ **缺口**：调用即必填项未配 ⇒ **提审前必须补**（见处置 1） |
+| 2 | 使用你的相册（仅写入）权限（`wx.saveImageToPhotosAlbum`、`wx.saveVideoToPhotosAlbum`、`wx.authorize({scope:'scope.writePhotosAlbum'})`） | **零调用**（src 全量 grep 零命中；全 git 历史 `-S` 双向零命中 ⇒ 仓库代码从未调用过） | 已声明（2026-10-08） | ⚠️ 声明未调用；但官方允许自选勾选 + 有用户可见行为支撑（正文图长按**系统菜单**存图，D39 口径，D42 用户真机闭环「保存图片真落相册」）⇒ **保留**（见处置 2） |
+| 3 | 官方清单其余 19 项（位置/地址/发票/微信运动/车牌/选中照片视频/选中文件/麦克风/摄像头/蓝牙/通讯录/日历/四类传感器等） | 零命中（逐接口 grep + 组件面 `<camera>/<map>/<live-pusher>/<voip-room>/<web-view>` + `open-type` 按钮全零） | 未声明 | ✅ 一致，无需动作 |
+| 4 | 不在官方清单的端上调用（navigate*/switchTab/redirectTo/navigateBack、showToast/showModal、previewImage×6、getWindowInfo×4、getAppBaseInfo、getMenuButtonBoundingClientRect、request×2、pageScrollTo×2、createSelectorQuery×2、createIntersectionObserver、createInnerAudioContext×3、createVideoContext×2、loadFontFace、storage 五件套、on/nextTick/getCurrentInstance）+ `<Input>`（搜索页）+ 依赖面（纯 `@tarojs/*` + react + tailwind，无第三方 SDK/埋点） | 调用 | 不适用 | ✅ 均不在 21 项清单 ⇒ 无需声明 |
+
+**两项处置**：
+
+1. **[用户后台操作 · 提审前必办]** 小程序后台 → 设置 → 服务内容声明 → 用户隐私保护指引 → 修改：**增加「读取你的剪切板」**（官方接口 `wx.setClipboardData`、`wx.getClipboardData`），用途写「复制站内公开信息（联系方式、备案号、链接、代码）到剪贴板」。依据：官方清单将剪贴板读写归入该信息项，代码 10 处调用 ⇒ 该项为提审比对必填项。
+2. **[保留]** 「相册（仅写入）」不撤。将来若想清理自选项，**先真机复验正文图长按系统菜单「保存图片」仍可用**再撤——该链路 D42 已由用户真机闭环，勿凭「代码零调用」的推理直接撤。
+
+**运行时 vs 提审两条线（本次核对的关键判读）**：D70 探针在仅声明相册的开发版上实测 `setClipboardData` 运行正常（`getClipboardData` 内容断言 PASS）⇒ 运行时的 declaration enforcement 未拦截剪贴板；但提审比对的是「接口调用情况 vs 协议内容」，与运行时是两回事，**不能以运行正常代替声明一致**。
+
+**隐私口径三条复核（§10）**：不采集设备信息 ✓（无清单内设备/传感器类调用）；不接第三方埋点 ✓（D21 探针已拆，依赖零 SDK）；不请求非必要权限 ✓（位置/摄像头/麦克风/相册读取/通讯录/日历/传感器全零命中）。
+
+**前瞻（M5 步 3 开工检查单）**：云开发落地将新增 `wx.cloud` 调用、登录（openid）、订阅消息 ⇒ 届时要复核并补对应声明项 + 订阅消息模板配置，别重蹈「调用先行、声明后补」。
+
 ## 11. 免责声明文案（✅ 已审定 2026-10-14，D64）
 
 写法约束：① 给「审核 + 用户」双读者，只陈述事实与权属；② 全文不含「资讯 / 出版 / 博客 / 媒体」字样；③ 不写「未经授权禁止转载」类会反过来约束站长自己的强承诺。
@@ -157,7 +181,7 @@ margin 站点页脚已展示 ICP 与公安备案（`SITE.beian` 驱动、链接�
 | # | 事项 | 时点 |
 | --- | --- | --- |
 | 1 | 取消「暂停服务」 | 新版上线时 |
-| 2 | 《用户隐私保护指引》配置 | ✅ **已配置（2026-10-08，相册仅写入 + 用途，状态「已更新」）**；提审前只需复核声明项与代码逐项一致（§10.1） |
+| 2 | 《用户隐私保护指引》配置 | ✅ 已配置（2026-10-08，相册仅写入 + 用途，状态「已更新」）；**逐项核对已完成（2026-10-15，D72，见 §10.2）**：发现剪贴板 1 项缺口（`setClipboardData` 10 处调用未声明，提审必填项）⇒ **待用户后台补配「读取你的剪切板」后方可提审**；「相册（仅写入）」保留（自选项 + D42 真机闭环支撑，勿撤）；其余接口/组件/依赖均不在官方 21 项清单 |
 | 3 | 「关于」页备案号展示 | ✅ **已落地（M4 步 5，D64）：mine 页脚 + 关于页脚两处，真实备案号「粤ICP备2023007649号-4X」，点击复制，验收④ PASS** |
 | 4 | 内容文案口径（「个人技术笔记记录」，避开资讯/出版/博客字样） | ✅ **已审查销账（2026-10-15，D71）：全量扫 src 用户可见文案，3 处端上原创文案的「博客」字样已改（站点引文偏差，合规优先）；about 页尾审核员豁免句（负向声明）按倾向保留** |
 | 5 | M5 提审前移除 A1 打点探针 | ✅ **已拆除（2026-10-15，D21/D71）：perf/perfBoot 模块删除、6 文件调用点清零、产物 `[perf` 绝迹 + 自洽性 ALL PASS** |
