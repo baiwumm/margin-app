@@ -110,14 +110,14 @@ margin 站点页脚已展示 ICP 与公安备案（`SITE.beian` 驱动、链接�
 
 | # | 信息项（官方清单） | 代码实况 | 声明实况 | 判定 |
 | --- | --- | --- | --- | --- |
-| 1 | 读取你的剪切板（`wx.setClipboardData`、`wx.getClipboardData`） | **调用 10 处**（`Taro.setClipboardData`：CodeBlock 代码复制 / MusicBlock / LinkCardBlock / home 作者社交行 / mine×2 / friends / projects / contact / about 备案号；均为把站内公开信息写入剪贴板） | **未声明** | ❌ **缺口**：调用即必填项未配 ⇒ **提审前必须补**（见处置 1） |
+| 1 | 读取你的剪切板（`wx.setClipboardData`、`wx.getClipboardData`） | **调用 10 处**（`Taro.setClipboardData`：CodeBlock 代码复制 / MusicBlock / LinkCardBlock / home 作者社交行 / mine×2 / friends / projects / contact / about 备案号；均为把站内公开信息写入剪贴板） | **已声明**（2026-10-15 用户后台补配） | ✅ 已补齐：后台补配「读取你的剪切板」（用途：复制站内公开信息到剪贴板）⇒ 必填项闭环 |
 | 2 | 使用你的相册（仅写入）权限（`wx.saveImageToPhotosAlbum`、`wx.saveVideoToPhotosAlbum`、`wx.authorize({scope:'scope.writePhotosAlbum'})`） | **零调用**（src 全量 grep 零命中；全 git 历史 `-S` 双向零命中 ⇒ 仓库代码从未调用过） | 已声明（2026-10-08） | ⚠️ 声明未调用；但官方允许自选勾选 + 有用户可见行为支撑（正文图长按**系统菜单**存图，D39 口径，D42 用户真机闭环「保存图片真落相册」）⇒ **保留**（见处置 2） |
 | 3 | 官方清单其余 19 项（位置/地址/发票/微信运动/车牌/选中照片视频/选中文件/麦克风/摄像头/蓝牙/通讯录/日历/四类传感器等） | 零命中（逐接口 grep + 组件面 `<camera>/<map>/<live-pusher>/<voip-room>/<web-view>` + `open-type` 按钮全零） | 未声明 | ✅ 一致，无需动作 |
 | 4 | 不在官方清单的端上调用（navigate*/switchTab/redirectTo/navigateBack、showToast/showModal、previewImage×6、getWindowInfo×4、getAppBaseInfo、getMenuButtonBoundingClientRect、request×2、pageScrollTo×2、createSelectorQuery×2、createIntersectionObserver、createInnerAudioContext×3、createVideoContext×2、loadFontFace、storage 五件套、on/nextTick/getCurrentInstance）+ `<Input>`（搜索页）+ 依赖面（纯 `@tarojs/*` + react + tailwind，无第三方 SDK/埋点） | 调用 | 不适用 | ✅ 均不在 21 项清单 ⇒ 无需声明 |
 
 **两项处置**：
 
-1. **[用户后台操作 · 提审前必办]** 小程序后台 → 设置 → 服务内容声明 → 用户隐私保护指引 → 修改：**增加「读取你的剪切板」**（官方接口 `wx.setClipboardData`、`wx.getClipboardData`），用途写「复制站内公开信息（联系方式、备案号、链接、代码）到剪贴板」。依据：官方清单将剪贴板读写归入该信息项，代码 10 处调用 ⇒ 该项为提审比对必填项。
+1. **[用户后台操作 · 提审前必办]** 小程序后台 → 设置 → 服务内容声明 → 用户隐私保护指引 → 修改：**增加「读取你的剪切板」**（官方接口 `wx.setClipboardData`、`wx.getClipboardData`），用途写「复制站内公开信息（联系方式、备案号、链接、代码）到剪贴板」。依据：官方清单将剪贴板读写归入该信息项，代码 10 处调用 ⇒ 该项为提审比对必填项。**✅ 已于 2026-10-15 由用户后台配好，缺口闭环。**
 2. **[保留]** 「相册（仅写入）」不撤。将来若想清理自选项，**先真机复验正文图长按系统菜单「保存图片」仍可用**再撤——该链路 D42 已由用户真机闭环，勿凭「代码零调用」的推理直接撤。
 
 **运行时 vs 提审两条线（本次核对的关键判读）**：D70 探针在仅声明相册的开发版上实测 `setClipboardData` 运行正常（`getClipboardData` 内容断言 PASS）⇒ 运行时的 declaration enforcement 未拦截剪贴板；但提审比对的是「接口调用情况 vs 协议内容」，与运行时是两回事，**不能以运行正常代替声明一致**。
@@ -181,7 +181,7 @@ margin 站点页脚已展示 ICP 与公安备案（`SITE.beian` 驱动、链接�
 | # | 事项 | 时点 |
 | --- | --- | --- |
 | 1 | 取消「暂停服务」 | 新版上线时 |
-| 2 | 《用户隐私保护指引》配置 | ✅ 已配置（2026-10-08，相册仅写入 + 用途，状态「已更新」）；**逐项核对已完成（2026-10-15，D72，见 §10.2）**：发现剪贴板 1 项缺口（`setClipboardData` 10 处调用未声明，提审必填项）⇒ **待用户后台补配「读取你的剪切板」后方可提审**；「相册（仅写入）」保留（自选项 + D42 真机闭环支撑，勿撤）；其余接口/组件/依赖均不在官方 21 项清单 |
+| 2 | 《用户隐私保护指引》配置 | ✅ **已配置并逐项核对销账（D72）**：相册（仅写入）2026-10-08 配好；**「读取你的剪切板」2026-10-15 用户后台补配**（对应 `wx.setClipboardData`/`wx.getClipboardData`，代码 10 处调用，核对报告见 §10.2）⇒ **声明项与代码调用逐项一致，#2 关闭**；「相册（仅写入）」保留（自选项 + D42 真机闭环的系统菜单存图支撑，勿撤）；其余接口/组件/依赖均不在官方 21 项清单 |
 | 3 | 「关于」页备案号展示 | ✅ **已落地（M4 步 5，D64）：mine 页脚 + 关于页脚两处，真实备案号「粤ICP备2023007649号-4X」，点击复制，验收④ PASS** |
 | 4 | 内容文案口径（「个人技术笔记记录」，避开资讯/出版/博客字样） | ✅ **已审查销账（2026-10-15，D71）：全量扫 src 用户可见文案，3 处端上原创文案的「博客」字样已改（站点引文偏差，合规优先）；about 页尾审核员豁免句（负向声明）按倾向保留** |
 | 5 | M5 提审前移除 A1 打点探针 | ✅ **已拆除（2026-10-15，D21/D71）：perf/perfBoot 模块删除、6 文件调用点清零、产物 `[perf` 绝迹 + 自洽性 ALL PASS** |
