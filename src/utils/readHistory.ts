@@ -5,7 +5,7 @@
  * 滚动淘汰（读旧的自动出局，不需要手动上限管理）、支持一键清空。
  * 惰性水合（详情页/history 页首次用到才读存储）；写盘失败静默。
  */
-import { readCache, writeCache } from "@/services/cache";
+import { writeCache } from "@/services/cache";
 
 export const READ_HISTORY_KEY = "read-history";
 export const READ_HISTORY_MAX = 50;

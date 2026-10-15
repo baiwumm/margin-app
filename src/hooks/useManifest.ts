@@ -9,8 +9,6 @@ import {
   checkForUpdate,
   loadLocalManifest,
 } from "@/services/api/manifest";
-import { perfLog } from "@/utils/perf";
-import { platform } from "@/services/platform";
 
 export function useManifest() {
   const [manifest, setManifest] = useState<Manifest | null>(null);
@@ -21,18 +19,6 @@ export function useManifest() {
     // ① 读缓存渲染（0 等待）
     const local = await loadLocalManifest();
     setCacheHit(Boolean(local));
-    perfLog(
-      local
-        ? `manifest 缓存命中（buildId=${local.buildId}）`
-        : "manifest 无本地缓存（冷启动）"
-    );
-    // R16：真机存储配额实测（getStorageInfo，不写死）
-    try {
-      const info = await platform().getStorageInfo();
-      perfLog(`存储配额: ${info.currentSize}/${info.limitSize} KB`);
-    } catch {
-      /* 配额读取失败不阻塞 */
-    }
     if (local) {
       setManifest(local);
       setLoading(false);

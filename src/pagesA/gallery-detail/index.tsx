@@ -15,7 +15,6 @@ import { CacheImage } from "@/components/media/CacheImage";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
 import { getGalleryDetail } from "@/services/api/collections";
-import { perfLog } from "@/utils/perf";
 import type { Gallery } from "@/types/api";
 import "./index.scss";
 
@@ -38,7 +37,6 @@ export default function GalleryDetailPage() {
     void getGalleryDetail(buildId, slug, g => {
       if (!alive) return;
       got = true;
-      perfLog("画廊详情数据到达");
       if (!g) {
         setFailed(true);
         return;
@@ -54,13 +52,6 @@ export default function GalleryDetailPage() {
       clearTimeout(timer);
     };
   }, [buildId, slug, reloadKey]);
-
-  /* 基线同款三段打点里的后两段：47 张图那一档是全站最重的列表，渲染账要能拆开看 */
-  useEffect(() => {
-    if (!gallery) return;
-    perfLog("画廊详情可渲");
-    Taro.nextTick(() => perfLog("画廊详情首屏落地"));
-  }, [gallery]);
 
   const photos = gallery?.photos ?? [];
   const urls = photos.map(p => p.asset.src);

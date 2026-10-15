@@ -11,7 +11,7 @@
  * 步 7：warmSearchTitles 在同一 mount 后台预热检索第一层（46.3KB 不进首屏关键路径）。
  */
 import { View, Text } from "@tarojs/components";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Taro, { useDidShow, usePageScroll, useReachBottom } from "@tarojs/taro";
 
 import NavBar, { navAlpha } from "@/components/NavBar/NavBar";
@@ -25,7 +25,6 @@ import { useRootClass } from "@/hooks/useTheme";
 import { setSelectedTab } from "@/custom-tab-bar/store";
 import { archiveUrl } from "@/utils/routes";
 import PostCard from "@/components/business/PostCard";
-import { perfLog } from "@/utils/perf";
 import type { PostMeta } from "@/types/api";
 import "./home.scss";
 
@@ -43,7 +42,7 @@ export default function Home() {
     // 步 7：检索第一层后台预热（不在 Promise.all 里——46.3KB 慢网也不得拖首屏取数）
     void warmSearchTitles();
   }, []);
-  const { manifest, loading, cacheHit } = useManifest();
+  const { manifest, loading } = useManifest();
   const buildId = manifest?.buildId ?? null;
   const site = useSiteData(buildId);
   const posts = usePostsIndex(buildId);
@@ -52,16 +51,6 @@ export default function Home() {
   usePageScroll(p => setAlpha(navAlpha(p.scrollTop)));
 
   // A1：首屏数据渲染完成打点（首个列表数据到达即视为可交互）
-  const paintedRef = useRef(false);
-  useEffect(() => {
-    if (posts && !paintedRef.current) {
-      paintedRef.current = true;
-      perfLog(
-        `首页首屏数据渲染完成（缓存命中: ${cacheHit ?? "?"}，文章 ${posts.length} 篇）`
-      );
-    }
-  }, [posts, cacheHit]);
-
   /** FEATURED / RECENT 分流 = margin index.astro（featured 置前，其余按时间序） */
   const { featured, recent } = useMemo(() => {
     const byTime = (a: PostMeta, b: PostMeta) =>

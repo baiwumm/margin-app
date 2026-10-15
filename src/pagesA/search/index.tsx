@@ -27,7 +27,7 @@ import {
   hydrateSearchHistory,
   subscribeSearchHistory,
  SEARCH_HISTORY_KEY } from "@/utils/searchHistory";
-import { highlightSegments, queryTokens, searchAll } from "@/utils/search";
+import { queryTokens, searchAll } from "@/utils/search";
 import { readCache } from "@/services/cache";
 import type {
   PostMeta,

@@ -5,7 +5,7 @@
  * 惰性水合（详情页/mine 首次用到才读存储，不占冷启动预算）；容量 200 条防
  * 失控（超出丢最旧）；写盘失败静默（会话内仍生效，同 prefs 口径）。
  */
-import { readCache, writeCache } from "@/services/cache";
+import { writeCache } from "@/services/cache";
 
 export const FAVORITES_KEY = "favorites";
 export const FAVORITES_MAX = 200;

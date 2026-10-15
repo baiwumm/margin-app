@@ -3,7 +3,7 @@
  * 落盘——LRU 保护的 prefs 同区键、永不淘汰）。容量 10 条、最新在前、去重、可清空。
  * 惰性水合：搜索页首次进入才读存储（不占冷启动预算），写盘失败静默（同 prefs 口径）。
  */
-import { readCache, writeCache } from "@/services/cache";
+import { writeCache } from "@/services/cache";
 
 export const SEARCH_HISTORY_KEY = "search-history";
 export const SEARCH_HISTORY_MAX = 10;
