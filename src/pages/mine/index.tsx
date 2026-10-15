@@ -36,6 +36,7 @@ import {
   disclaimerUrl,
   favoriteUrl,
   friendsUrl,
+  historyUrl,
   projectsUrl,
   statsUrl,
 } from "@/utils/routes";
@@ -156,6 +157,10 @@ export default function Mine() {
     }
     if (key === "favorites") {
       void Taro.navigateTo({ url: favoriteUrl() });
+      return;
+    }
+    if (key === "history") {
+      void Taro.navigateTo({ url: historyUrl() });
       return;
     }
     if (key === "archive") {

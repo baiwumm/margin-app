@@ -31,6 +31,11 @@ import {
   subscribeFavorites,
   toggleFavorite,
 } from "@/utils/favorites";
+import {
+  READ_HISTORY_KEY,
+  addReadHistory,
+  hydrateReadHistory,
+} from "@/utils/readHistory";
 import { useManifest } from "@/hooks/useManifest";
 import { useRootClass } from "@/hooks/useTheme";
 import { getPostDetail } from "@/services/api/collections";
@@ -72,6 +77,14 @@ export default function PostDetailPage() {
     void readCache(FAVORITES_KEY).then(hydrateFavorites);
     setFaved(slug ? isFavorite(slug) : false);
     return subscribeFavorites(() => setFaved(slug ? isFavorite(slug) : false));
+  }, [slug]);
+  // 阅读记录（步 9）：进入详情即自动记录（置顶去重，容量 50 滚动淘汰）
+  useEffect(() => {
+    if (!slug) return;
+    void readCache(READ_HISTORY_KEY).then(raw => {
+      hydrateReadHistory(raw);
+      addReadHistory(slug);
+    });
   }, [slug]);
   // 字号/行距偏好（M2 步 3 机制）：订阅即时生效，落到 root 的 .fs-*/.lead-* 类
   const [prefs, setPrefsState] = useState(getPrefs);

@@ -3,6 +3,7 @@ export const POST_DETAIL = "/pagesA/post/detail";
 export const GALLERY_DETAIL = "/pagesA/gallery-detail/index";
 export const PREFERENCE = "/pagesB/preference";
 export const FAVORITE = "/pagesB/favorite";
+export const HISTORY = "/pagesB/history";
 export const ARCHIVE = "/pagesA/archive/index";
 export const TAG_DETAIL = "/pagesA/tag-detail/index";
 export const FRIENDS = "/pagesA/friends/index";
@@ -64,4 +65,9 @@ export function searchUrl(): string {
 /** 我的收藏（M4 步 8；本地 store，端上特有——margin 站点无收藏） */
 export function favoriteUrl(): string {
   return FAVORITE;
+}
+
+/** 阅读记录（M4 步 9；本地 store，详情页自动记录） */
+export function historyUrl(): string {
+  return HISTORY;
 }

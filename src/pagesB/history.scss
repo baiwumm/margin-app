@@ -1,0 +1,36 @@
+/* 阅读记录（M4 步 9）：列表 = PostCard 逐项（readAt 倒序）；meta 行 =
+ * mono 计数 + 「清空」（accent，showModal 确认后一键清）；已删除文章静默
+ * 过滤（历史是自动行为，不像收藏需要用户确认才消失）。 */
+
+.hist {
+  padding: 0 var(--sp-page) calc(140rpx + env(safe-area-inset-bottom, 0px));
+}
+.hist-loading {
+  display: block;
+  margin-top: 64rpx;
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--c-fg-45);
+}
+.hist-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: var(--sp-2) 0 var(--sp-gap);
+}
+.hist-meta-text {
+  font-family: var(--font-mono);
+  font-size: var(--fs-cap);
+  letter-spacing: 0.06em;
+  color: var(--c-fg-45);
+}
+.hist-clear {
+  font-size: var(--fs-sm);
+  color: var(--c-accent);
+  padding: 4rpx 12rpx;
+}
+.hist-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-gap);
+}
