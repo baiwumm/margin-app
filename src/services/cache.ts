@@ -11,6 +11,8 @@ import { platform } from "./platform";
 
 export const KEY_MANIFEST = "manifest";
 export const KEY_PREFS = "prefs";
+/** prefs 结构版本戳（D75：siteFont 默认反转的一次性迁移），不参与淘汰 */
+export const KEY_PREFS_SCHEMA = "prefs:schema";
 export const KEY_SNAPSHOT = "snapshot";
 export const KEY_LRU = "api:lru";
 export const API_KEY_PREFIX = "api:";
@@ -48,6 +50,7 @@ function isProtectedKey(key: string): boolean {
   return (
     key === KEY_MANIFEST ||
     key === KEY_PREFS ||
+    key === KEY_PREFS_SCHEMA ||
     key === KEY_SNAPSHOT ||
     key === KEY_LRU
   );

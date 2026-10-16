@@ -1,12 +1,19 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { setPlatformAdapter } from "@/services/platform";
-import { resetMemoryCache, readCache } from "@/services/cache";
+import {
+  KEY_PREFS,
+  KEY_PREFS_SCHEMA,
+  resetMemoryCache,
+  readCache,
+} from "@/services/cache";
 import {
   DEFAULT_PREFS,
+  PREFS_SCHEMA,
   clampBodyRpx,
   getPrefs,
   hydratePrefs,
+  migrateLegacyPrefs,
   normalize,
   parsePrefs,
   prefsClass,
@@ -124,12 +131,48 @@ describe("运行时单例与落盘", () => {
     expect(seen).toEqual([40]); // 取消订阅后不再收通知
   });
 
-  it("siteFont：默认 false；缺省/非 true 值回落 false", () => {
-    expect(DEFAULT_PREFS.siteFont).toBe(false);
+  it("siteFont：默认 true；写坏值判 false；显式关可持续", () => {
+    expect(DEFAULT_PREFS.siteFont).toBe(true);
+    // 存储里没这字段（老版本写入）⇒ 回落新默认 true
+    expect(normalize({}).siteFont).toBe(true);
+    expect(normalize({ siteFont: undefined }).siteFont).toBe(true);
+    // 写坏的脏值仍一律判 false
+    expect(normalize({ siteFont: "yes" }).siteFont).toBe(false);
     setPrefs({ siteFont: true });
     expect(getPrefs().siteFont).toBe(true);
-    // 落盘文本Round-trip后应保持
+    // 落盘 round-trip 后显式关不被默认翻回来
     setPrefs({ siteFont: false });
-    expect(getPrefs().siteFont).toBe(false);
+    expect(parsePrefs(serializePrefs(getPrefs())).siteFont).toBe(false);
+  });
+});
+
+describe("一次性迁移（D75：siteFont 默认反转）", () => {
+  it("旧存储的 siteFont:false 被拉回新默认 true，其余字段不动", () => {
+    // 旧版任何一次偏好改动都会 serializePrefs 写全量字段 ⇒ 老盘上必有 false
+    const legacy = serializePrefs({
+      ...DEFAULT_PREFS,
+      theme: "dark",
+      bodyRpx: 36,
+      siteFont: false,
+    });
+    const migrated = parsePrefs(migrateLegacyPrefs(legacy));
+    expect(migrated.siteFont).toBe(true);
+    expect(migrated.theme).toBe("dark");
+    expect(migrated.bodyRpx).toBe(36);
+  });
+
+  it("脏存储/空存储迁移后不炸、回落新默认", () => {
+    expect(parsePrefs(migrateLegacyPrefs("{oops")).siteFont).toBe(true);
+    expect(parsePrefs(migrateLegacyPrefs(null)).siteFont).toBe(true);
+  });
+
+  it("迁移幂等：迁完再迁一次值不变", () => {
+    const once = migrateLegacyPrefs(serializePrefs({ ...DEFAULT_PREFS, siteFont: false }));
+    expect(parsePrefs(migrateLegacyPrefs(once))).toEqual(parsePrefs(once));
+  });
+
+  it("PREFS_SCHEMA 戳存在且与 prefs 键分开", () => {
+    expect(PREFS_SCHEMA).toBeGreaterThan(1);
+    expect(KEY_PREFS_SCHEMA).not.toBe(KEY_PREFS);
   });
 });

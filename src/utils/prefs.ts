@@ -21,7 +21,7 @@ export interface Prefs {
   readMode: boolean;
   /** 代码块换行（关 = 横向滚动，margin 原站默认） */
   codeWrap: boolean;
-  /** 站点字体（D4：开 = 等宽场景加载 Maple Mono CN ASCII 切片；默认系统栈） */
+  /** 站点字体（D4：开 = 等宽场景加载 Maple Mono CN ASCII 切片；默认开 —— D71） */
   siteFont: boolean;
 }
 
@@ -33,7 +33,7 @@ export const DEFAULT_PREFS: Prefs = {
   leading: 1.75,
   readMode: false,
   codeWrap: false,
-  siteFont: false,
+  siteFont: true,
 };
 
 export const BODY_RPX_MIN = 26;
@@ -72,7 +72,8 @@ export function normalize(raw: unknown): Prefs {
     leading: snapLeading(o.leading),
     readMode: o.readMode === true,
     codeWrap: o.codeWrap === true,
-    siteFont: o.siteFont === true,
+    // 默认开的布尔：字段缺失回落默认，写坏了才判 false（区别于上面两个默认关的）
+    siteFont: o.siteFont === undefined ? DEFAULT_PREFS.siteFont : o.siteFont === true,
   };
 }
 
@@ -87,6 +88,24 @@ export function parsePrefs(text: string | null | undefined): Prefs {
 
 export function serializePrefs(p: Prefs): string {
   return JSON.stringify(p);
+}
+
+/**
+ * prefs 结构版本戳（D75）：默认值反转时的一次性迁移用。戳与 prefs 分开存
+ * （cache 的 `prefs:schema` 键），不污染 Prefs 形状。
+ */
+export const PREFS_SCHEMA = 2;
+
+/**
+ * 一次性迁移（D75）：`siteFont` 默认 false → true 的反转。旧版 serializePrefs
+ * 写全量字段 ⇒ 老存储里的 `siteFont:false` 分不清是「用户手动关过」还是
+ * 「旧默认值落盘」，一律按新默认拉回。这是**有意的覆盖旧默认**语义，代价是
+ * 旧版手动关过的用户会被翻回来一次；靠 schema 戳保证只跑一次。
+ * 已打戳（或无存储可迁）时原样返回，用户显式关的值此后永久保留。
+ */
+export function migrateLegacyPrefs(text: string | null): string {
+  const p = parsePrefs(text);
+  return serializePrefs({ ...p, siteFont: DEFAULT_PREFS.siteFont });
 }
 
 /** 生效类名（root View 上挂，覆盖 page 继承来的 --fs-body / --lh-body） */
