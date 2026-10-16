@@ -7,7 +7,8 @@
  * 点击复制）。
  * 偏差记档：跑马灯外链官网端上不做（装饰性外链，D8）；评论区两处文案端上
  * 不做（D7）；光标 aurora / ring-spin hero 动效端上不做（D7 同族）。
- * 数据：stats 四计数走既有 getStats（cache-first）；文案与数值在
+ * 数据：stats 四计数走既有 getStats（cache-first）；avatar 走 useSiteData 的
+ * site.avatar（与 mine 页同源同兜底，站点换头像 URL 两端同步跟随）；文案与数值在
  * utils/aboutData.ts（纯数据，可单测）。
  */
 import { Image, Text, View } from "@tarojs/components";
@@ -25,6 +26,7 @@ import {
   type AccentKey,
 } from "@/config/accent";
 import { useManifest } from "@/hooks/useManifest";
+import { useSiteData } from "@/hooks/useCollection";
 import { useRootClass, useTheme } from "@/hooks/useTheme";
 import { getStats } from "@/services/api/collections";
 import type { Stats } from "@/types/api";
@@ -180,6 +182,7 @@ export default function About() {
   useEffect(() => subscribeAccent(setAccentState), []);
   const { manifest } = useManifest();
   const buildId = manifest?.buildId ?? null;
+  const site = useSiteData(buildId);
   const [stats, setStats] = useState<Stats | null>(null);
   const [alpha, setAlpha] = useState(0);
   usePageScroll(p => setAlpha(navAlpha(p.scrollTop)));
@@ -221,7 +224,7 @@ export default function About() {
             <View className='about-avatar-ring'>
               <Image
                 className='about-avatar'
-                src='https://www.baiwumm.com/avatar.png'
+                src={site?.avatar || 'https://www.baiwumm.com/avatar.png'}
                 mode='aspectFill'
               />
             </View>

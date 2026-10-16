@@ -343,6 +343,8 @@ margin-app/
 | `friends.astro` | `pagesA/friends` + `pagesB/contact` | applicationText 同构模板卡（D70） |
 | 页脚备案号 | about / mine 页脚 | 机制对应、号码各归各：站点挂网站备案号（-2）/ 端上挂小程序备案号（-4X）（§8/§9） |
 
+**头像同源（对齐核对的连带修正，2026-10-15）**：端上 mine 与 about 两处头像原为「同文件不同取法」（mine 走 `site.avatar`、about 硬编码 URL），已统一为 `site?.avatar || 远程兜底`——site.json 下发 `https://www.baiwumm.com/avatar.png`（与站点 AboutLayout 的 `/avatar.png` 同文件）⇒ 站点替换头像文件两端同步跟随；`avatar.png` 响应头 `max-age=0, must-revalidate` + ETag ⇒ 替换即生效无长缓存风险；运行时复验 about 页 5/5（头像在位 / src 正确 / 名字 / 备案号 / console 零 error）。
+
 **端上特有（6 项）**：`pagesB/stats` 数据看板（D65）、`pagesB/favorite` 收藏（D68）、`pagesB/history` 阅读记录（D69）、`pagesB/contact` 联系站长（D70）、`pagesB/preference` 偏好（M2 步 3）、`pages/mine` 信息架构（端上导航中心 + 备案号落点）。
 
 **站点特有（不适用端上，5 项）**：`404.astro`（端上失效路由走页内空态）、`rss.xml.ts`（阅读器订阅）、`og.png.ts`（端上分享卡走微信默认页面截图，D37）、`robots.txt.ts`、`comment-titles.json.ts` + `api/`（api 是端上数据源本身，不算站点功能）。
