@@ -7,10 +7,9 @@ export default defineAppConfig({
     "pages/mine/index",
   ],
   darkmode: true, // 跟随系统暗色（WXSS @media prefers-color-scheme 生效开关）
-  // 按需注入（步 9b，D50 排期）：启动只注入当前页依赖的自定义组件与页面代码，
-  // 未访问页面/未声明组件不注入（官方「代码注入优化」，基础库 ≥2.11.1，我们要求 ≥2.30）。
-  // ⚠️ 与自定义 tabBar（D19）+ 分包预加载的兼容性未验 ⇒ automator 探针验过才留。
-  lazyCodeLoading: "none",
+  // lazyCodeLoading 已移除：requiredComponents 与自定义 tabBar + 分包预加载不兼容
+  // （体验版报 wx://not-found），且官方仅支持 requiredComponents/requiredSubPackages
+  // 两个值，无"none"可设 ⇒ 走微信默认的全量注入，与移除前行为一致。
   // 分包 A = 内容与浏览类页面、分包 B = 个人与设置类页面（均按 requirements §6.2）。
   // 详情页分享 path 一旦发布即固化，故按 §6.2 规划落分包而非主包（M4 还有 8 个二级页
   // 要进分包，主包预算 ≤1.5MB）。
