@@ -15,7 +15,7 @@ interface ApiEnvelope<T> {
 }
 ```
 
-- **全量不分页**：所有列表端点一次给全量，`ApiEnvelope` 不含 `page / hasNext / total`。74 篇量级上取消分页；将来超 400 KB 硬线再引入 `?cursor=`，届时按新编号补记。端上 `usePagination` 因此是**纯端上切片**（页码从 1 起，`hasNext = 已渲染 < 全量`）。
+- **全量不分页**：所有列表端点一次给全量，`ApiEnvelope` 不含 `page / hasNext / total`。74 篇量级上取消分页；将来超 400 KB 硬线再引入 `?cursor=`，届时按新编号补记。端上列表分页因此是**纯端上切片**（页码从 1 起，`hasNext = 已渲染 < 全量`）。
 - **assetBase**：`https://www.baiwumm.com`（**无尾斜杠**）。裸域所有路径 301 → www，任何请求不得依赖 301；JSON 里 `path` 类字段仍是站点相对路径。
 - **URL 断言（构建内硬规则）**：产物 JSON 中任何 URL 不得出现 `//_astro/`、不得出现 `https://baiwumm.com/`。
 - **体积硬线**：单请求 ≤ 400 KB（gzip 前）；首页所需 JSON 合计 ≤ 120 KB（gzip 后）。
@@ -39,7 +39,7 @@ interface ApiEnvelope<T> {
 | `GET /api/v1/projects.json` | 项目列表（stars/forks 构建期已刷新） | < 8 KB（实测 1.8KB） |
 | `GET /api/v1/stats.json` | 数据看板（热力图按 `pubDatetime` 聚合） | < 16 KB（实测 3.3KB） |
 | `GET /api/v1/search/titles.json` | 检索第一层：标题/标签/摘要/小标题 + 拼音 | ≤ 48 KB（实测 46.3KB） |
-| `GET /api/v1/search/terms.json` | 检索第二层：全文倒排，输入 ≥2 字懒加载（bigram） | ≤ 400 KB（实测 376KB；正文只索引前 28 段，§6 授权的收缩手段） |
+| `GET /api/v1/search/terms.json` | 检索第二层：全文倒排，输入 ≥2 字懒加载（bigram） | ≤ 400 KB（实测 376–379KB，两批次口径均低于硬线；正文只索引前 28 段，§6 授权的收缩手段） |
 
 ## 3. 类型定义
 
@@ -268,11 +268,11 @@ interface TermIndex {
 | 版本标识 | buildId = git short sha + 内容 hash；**内容 hash 是主键**（浅克隆只影响可读性）；热力图按 `pubDatetime` 聚合，零 git 依赖 |
 | 服务端缓存 | ① 图片 `/_astro/*`：`max-age=31536000, immutable`（已上线生产，只加这一组）；② JSON `/api/v1/**`：维持 `max-age=0, must-revalidate` + 已有 ETag（304 只回头部），**不加长缓存**（路径不含 hash，强缓存会让新版发布后端上读到旧版） |
 | 端上启动 | ① 读本地缓存渲染（0 等待）② 后台 GET manifest（If-None-Match）③ 304 结束；200 且 buildId 变 → 后台刷新 + 清旧版本缓存 |
-| 存储键 | `api:<name>:<buildId>`、`manifest`、`prefs`（跨版本保留） |
+| 存储键 | `api:<name>:<buildId>`、`manifest`、`prefs`（跨版本保留）；另有 `snapshot` / `api:lru` / `prefs:schema` / `manifest:etag` 及本地 store 键（`favorites` / `read-history` / `search-history`），全量以 `services/cache.ts` 常量为准 |
 | 正文缓存 | 总预算 **4 MB** 按字节 LRU，超出淘汰最旧；单篇 >1 MB 只留内存不缓存；**离线快照与 prefs 不参与淘汰**（快照是备案万一失效的唯一兜底） |
 | 存储上限 | 以 `wx.setStorage` 单 key ≈1 MB / 总配额 ≈10 MB 为设计边界；真机实测 10240 KB，代码读 `wx.getStorageInfo` 不写死常量 |
 | 水位守卫 | 冷启动读 `getStorageInfo`：已用 >70% 提前触发 LRU 淘汰；>90% 禁用预取 + 偏好设置给清理入口 |
-| 预取 / 省流 | 可见首屏预取前 3 篇正文，WiFi 放宽 6 篇；省流模式 = 列表与正文都用 `thumb` + 不预取 |
+| 预取 / 省流 | **规划项未实现**（端上已实现的是 site/index 预热与水位停预取）：可见首屏预取前 3 篇正文，WiFi 放宽 6 篇；省流模式 = 列表与正文都用 `thumb` + 不预取 |
 
 ## 8. M0 冻结验收记录（已全部通过，2026-09-29 生产验收完成）
 

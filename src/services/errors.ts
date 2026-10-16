@@ -1,5 +1,5 @@
 /**
- * 错误归一（requirements §5.9）：业务层只接触 LocalError，不接触 HTTP 细节。
+ * 错误归一（requirements §5.8「统一响应」）：业务层只接触 LocalError，不接触 HTTP 细节。
  * 网络失败 / 无缓存 → LocalError；有缓存 → 读缓存（api-contract §7 启动流程）。
  */
 export enum LocalErrorKind {

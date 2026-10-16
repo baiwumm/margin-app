@@ -1,6 +1,7 @@
 # Margin 小程序 · 调研事实与依据
 
 > 本文是「依据层」：记录结论所基于的实测事实与来源。现行口径看 requirements.md 与各专项文件。旧版本文档（含完整论证过程）见 git 历史。
+> ⚠️ 本文是**调研时点的快照**：与现行口径冲突时，以 requirements.md / design.md / compliance.md 的现行表述与 decisions.md 后续编号为准（例：F13 记的首页 RECENT「卡双列」已被 D66 改为单列）。
 
 ## 1. 内容源 margin：决定数据层形态的 8 个事实（F1–F8）
 

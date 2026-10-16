@@ -1,9 +1,9 @@
 /**
  * M1-b 资产管线（design.md §10 步骤 4）：构建期用 sharp 预渲染装饰资产。
  * sharp 不新增依赖：优先取 margin 仓库 node_modules（D1 唯一事实源仓库），
- * 可用 SHARP_PATH 环境变量覆盖。用法：
- *   node scripts/gen-assets.mjs [noise|tabbar|logo|aurora|all]
- * 输出落 src/assets/（deco/ tabbar/ logo/ aurora/）。
+ * 可用 SHARP_PATH 环境变量覆盖（margin 仓库路径可用 MARGIN_REPO 覆盖）。用法：
+ *   node scripts/gen-assets.mjs [noise|tabbar|navicons|logo|aurora|about|all]
+ * 输出落 src/assets/（deco/ tabbar/ logo/ aurora/ about/）。
  */
 import { createRequire } from "node:module";
 import { existsSync, mkdirSync, readFileSync } from "node:fs";

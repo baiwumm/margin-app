@@ -21,7 +21,7 @@ export interface Prefs {
   readMode: boolean;
   /** 代码块换行（关 = 横向滚动，margin 原站默认） */
   codeWrap: boolean;
-  /** 站点字体（D4：开 = 等宽场景加载 Maple Mono CN ASCII 切片；默认开 —— D71） */
+  /** 站点字体（D4：开 = 等宽场景加载 Maple Mono CN ASCII 切片；默认开 —— D75） */
   siteFont: boolean;
 }
 

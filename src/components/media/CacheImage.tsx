@@ -15,7 +15,7 @@ type ImageMode = ComponentProps<typeof Image>["mode"];
 
 interface CacheImageProps {
   asset: AssetRef;
-  /** 显示档位覆盖（省流模式列表用 thumb） */
+  /** 显示档位覆盖：thumb / md（缺省）/ src */
   variant?: "thumb" | "md" | "src";
   mode?: ImageMode;
   className?: string;

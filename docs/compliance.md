@@ -100,7 +100,7 @@ margin 站点页脚已展示 ICP 与公安备案（`SITE.beian` 驱动、链接�
   ① *声明层* = 后台指引。没勾上时调用直接返回 `api scope is not declared in the privacy agreement`。
   ② *用户层* = `scope.writePhotosAlbum` 的系统弹窗，首次调用一定会弹，**automator 点不到原生弹窗**（实测：指引配好后 `saveImageToPhotosAlbum` 挂 30s 无回调）。
   判据组合（`mp-probe-work/code-step9/dl-only.mjs`）：`downloadFile` 200 + 有 tempFilePath ✓、`requirePrivacyAuthorize` **9ms 返回 ok**（⇒ 声明层已通，不再报 not declared）✓、`getSetting().authSetting` 里**没有** `scope.writePhotosAlbum` ⇒ 用户层尚未点过「允许」⇒ 剩下的挂起是弹窗等待人工，不是缺陷。
-- 附带结论：`saveImageToPhotosAlbum` 只吃**本地路径**，远程图必须先 `downloadFile`（www 已在 downloadFile 白名单，D9）；测试图取 `abb988gt` 的 `/_astro/*.webp` 实测 200 可下（webp 能否落相册仍待真机，端上优先给 jpg/png 档）。
+- 附带结论：`saveImageToPhotosAlbum` 只吃**本地路径**，远程图必须先 `downloadFile`（www 已在 downloadFile 白名单，D9）；测试图取 `abb988gt` 的 `/_astro/*.webp` 实测 200 可下（webp 落相册已由 D42 真机闭环——存图走长按系统菜单链路；档位由契约 AssetRef 决定，无 jpg/png 档选择逻辑）。
 
 ### 10.2 提审前逐项核对报告（2026-10-15，D72 / M5 步 1）
 
@@ -174,7 +174,7 @@ margin 站点页脚已展示 ICP 与公安备案（`SITE.beian` 驱动、链接�
 | 2 | 第二条「核实后会第一时间署名、替换或下架」 | 保留（提审加分项，负担小） | 保留 / 删掉 / 改弱 |
 | 3 | 第六条「不提供新闻采编、出版发布与评论服务」 | 移到「关于」页（这句是给审核员看的，别混进给用户的声明） | 留正文 / 移关于页 |
 
-站点侧配套：margin 加 `/disclaimer` 页（同文案两端对齐），待审完一起做。
+站点侧配套：margin 加 `/disclaimer` 页（同文案两端对齐）——✅ **已上线并复验销账（2026-10-15，D74）**，两端功能对齐无剩余缺口。
 
 ## 12. 上线前 checklist
 

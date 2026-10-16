@@ -1,7 +1,7 @@
 # 项目级 pnpm 配置
 # trustPolicy: 用户全局设为 no-downgrade（pnpm 12.6 供应链信任检查），会对
 # vite/semver 等历史「代发」版本一律拦截，阻塞 Taro 工程依赖安装。
-# 本项目按 pnpm 默认值 off（记录进 docs 决策 D48）；不影响其它项目。
+# 本项目按 pnpm 默认值 off（记录进 docs 决策 D76）；不影响其它项目。
 trustPolicy: off
 
 # weapp-tailwindcss 相关包发布较新，豁免 minimumReleaseAge 延迟

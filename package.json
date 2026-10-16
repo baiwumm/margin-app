@@ -12,6 +12,7 @@
     "build:weapp": "taro build --type weapp",
     "dev:weapp": "npm run build:weapp -- --watch",
     "test": "vitest run",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint src/ config/ test/ --fix && eslint src/ config/ test/",
     "taro": "taro"
   },

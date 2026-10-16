@@ -3,10 +3,13 @@
 | 项 | 内容 |
 | --- | --- |
 | 项目代号 | margin-app |
-| 文档版本 | **v1.0**（2026-09-29，文档组重建）：UI 唯一基准 = **margin 博客原设计**（转向决策 D1，uni-halo/demo 基准作废）；M0 完成部署、M1-a 基建完成真机验收全绿，UI 层按新基准重做中（M1-b） |
-| 内容源 | `E:\personal-project\margin`（Astro 7 纯静态博客，线上 https://www.baiwumm.com/） |
+| 文档版本 | **v1.1**（2026-10-16，勘误对齐现状）；v1.0（2026-09-29，文档组重建）：UI 唯一基准 = **margin 博客原设计**（转向决策 D1，uni-halo/demo 基准作废） |
+| 项目状态 | M0–M4 已完结并冻结；M5 提审与发布进行中（D71–D75），里程碑明细见 §9 |
+| 内容源 | margin 博客仓库（Astro 7 纯静态博客，线上 https://www.baiwumm.com/）。**本机实际路径 `F:\projects\margin`**；历史文档写的 `E:\personal-project\margin` 在本机不存在 |
 | 视觉基准 | **margin 原设计**：源码为唯一事实（`src/styles/global.css` 令牌 + 页面/组件样式），线上站移动端（≤640px 断点）样式为端上排版参考；无独立设计稿 |
 | 配套文件 | [api-contract.md](api-contract.md) · [design.md](design.md) · [compliance.md](compliance.md) · [decisions.md](decisions.md) · [research.md](research.md) |
+
+> 注：文中引用的 `mp-probe-work/code-step9/…` 探针脚本与证据文件属仓库外工作区，未随仓归档，仅作过程记录。
 
 ## 0. 一句话
 
@@ -17,7 +20,7 @@
 ### 1.1 背景
 
 - `margin` 是纯静态站：Astro SSG，内容为本地 Markdown/MDX（`src/data/blog|galleries|moments`），部署在 Cloudflare Workers Static Assets，**无任何运行时后端**。
-- 内容规模：文章 **74** 篇、画廊 **3** 个（75 图）、瞬间 **9** 条（16 图）、标签 **62** 个（blog+galleries 口径）。
+- 内容规模（动态口径，端上零硬编码计数、全部走 stats/manifest 读取，D66）：2026-10-16 线上实测文章 **76** 篇、画廊 **3** 个（75 图）、瞬间 **9** 条（16 图）、标签 **62** 个（blog+galleries 口径）。
 - 站点自带成熟设计体系：终端/等宽气质（全站 Maple Mono CN）、细边框极简卡片、双主题、五色 accent 轮换、aurora/网格/噪点装饰层——**这就是小程序要对齐的全部**。
 - uni-halo 曾作结构与视觉参考（至 2026-09-29），现**全面转向 margin 原设计**，不再作为任何基准（D1）。
 - 站内搜索是 Pagefind（WASM 分片），小程序不可复用，检索自建（§5.5）。
@@ -36,7 +39,7 @@
 
 - ❌ 不做多用户/注册登录、后台管理端（内容仍在 margin 的 Markdown 里写）。
 - ❌ 不把博客 HTML 搬进小程序（Block AST 方案，§5.3）。
-- ❌ 一期不做评论/点赞云同步（降级为本地，二期视审核情况再定）。
+- ❌ 不做评论/点赞云同步（收藏/阅读记录维持本地；云开发已被 D73 整体砍掉——无长期免费方案，非「二期再定」）。
 - ❌ 不做端上无法成立的 margin 功能（快捷键/TTS/电台/giscus 等，清单见 design.md §9，D6/D7）。
 
 ## 2. 范围
@@ -64,7 +67,7 @@ graph TB
 
   subgraph C["静态托管层"]
     C1[("CDN（已备案域名）<br/>/api/v1/*.json<br/>/_astro/*.webp<br/>/posts/*/index.png")]
-    C2[("微信云开发 CloudBase（二期）<br/>云数据库 / 云存储 / 云函数")]
+    C2[("微信云开发 CloudBase<br/>已整体砍掉（D73）")]
   end
 
   subgraph D["Margin 小程序（Taro + React + TS）"]
@@ -95,7 +98,7 @@ graph TB
 
 ### 3.3 边界原则
 
-> **内容（读）走静态 CDN，用户数据（写）走云开发。** 两条链路互不依赖——二期不上云开发，一期功能也完整可用。
+> **内容（读）走静态 CDN，用户数据（写）一期全部本地**（收藏/阅读记录/偏好），无任何服务端写入——云开发已整体砍掉（D73），两条链路互不依赖。
 
 ## 4. 技术选型
 
@@ -107,16 +110,16 @@ graph TB
 | 语言 | TypeScript 5+（strict） | 数据契约需要类型约束 |
 | UI 运行时 | **React 18.3.1（已定案）** | 19 运行时验证失败（内部 API 改名 × Taro reconciler 未跟上），关闭待 Taro 升级后再验 |
 | 构建 | **webpack5 + babel**（Vite 因 pnpm trustPolicy 与 peer 冲突回退，迁移另验） | 工程可行优先 |
-| 状态管理 | Zustand + storage 持久化中间件 | 体积极小 |
-| 数据请求 | 自研轻量 request（拦截器 + SWR 缓存 + 重试） | 已实现，22 单测 |
+| 状态管理 | 自研单例 store（`utils/prefs.ts` / `favorites.ts` / `readHistory.ts`，模块级订阅 + storage 持久化） | 零依赖；不参与正文 LRU 淘汰面 |
+| 数据请求 | 自研轻量 request（拦截器 + SWR 缓存 + 重试 + 并发去重） | `src/services/request.ts`，测试见 `test/request.test.ts` |
 | 样式 | CSS 变量令牌层 + **Tailwind v4 + weapp-tailwindcss v5** | 令牌层负责主题/accent 切换 |
 | 基础组件 | 自研为主 | 视觉高度定制，组件库收益为负 |
 | 富文本正文 | 自研 Block AST 渲染器（不引 mp-html） | §5.3 |
 | 代码高亮 | 构建期 Shiki 预高亮 → 端上按 token 上色（margin 双主题色） | 端上零解析 |
 | 图片 | Taro `<Image>` + 自研 `CacheImage`（三态 + 占位色 + 懒加载） | 已实现 |
-| 图表 | 自研视图网格（贡献日历）/canvas 轻量绘制 | stats 数据已就绪 |
-| 站点字体 | 系统栈默认 + `wx.loadFontFace` 异步 Maple Mono 子集（偏好项，D4） | 不打包、不阻塞首屏 |
-| 云能力（二期） | 微信云开发 CloudBase | 免备案域名、天然 openid；方案与成本分析见 §4.3（M5 步 2，待用户拍板） |
+| 图表 | 自研视图网格（贡献日历） | stats 数据已就绪；无 canvas 用法 |
+| 站点字体 | 偏好项「站点字体」**默认开启（D75）**：`wx.loadFontFace` 异步加载站点已 served 的 Maple Mono CN ASCII 切片（≈34KB），未加载时自动穿透系统栈 | 不打包、不阻塞首屏；中文永远随系统（D4 红线），重进生效（D63） |
+| 云能力 | ~~微信云开发 CloudBase~~ **已整体砍掉（D73）** | 无长期免费方案（免费环境上线后第 15 天到期须转付费）；发布瞬间走 margin 站点既有链路；留档分析见 §4.3 |
 | 包管理 | pnpm | 与 margin 一致 |
 
 ### 4.2 明确不采用
@@ -246,10 +249,10 @@ graph TB
 | buildId | git short sha（可读标签）+ 内容 hash（**主键**）；热力图按 `pubDatetime` 聚合 |
 | 服务端缓存 | 图片 `/_astro/*` immutable；JSON 维持 must-revalidate + ETag（304） |
 | 启动流程 | ① 读缓存渲染（0 等待）② 后台 GET manifest（If-None-Match）③ 304 结束 / 200 且 buildId 变 → 后台刷新 + 清旧 |
-| 存储键 | `api:<name>:<buildId>` / `manifest` / `prefs` |
+| 存储键 | `api:<name>:<buildId>` / `manifest` / `prefs`（跨版本保留）；另有 `snapshot` / `api:lru` / `prefs:schema` / `manifest:etag` 与本地 store 键（`favorites` / `read-history` / `search-history`），全量清单以 `services/cache.ts` 常量为准 |
 | 正文缓存 | 4 MB 按字节 LRU；单篇 >1MB 只留内存；**快照与 prefs 不参与淘汰** |
 | 水位守卫 | `getStorageInfo`：>70% 触发淘汰、>90% 停预取（真机实测配额 10MB） |
-| 预取 / 省流 | 首屏预取 3 篇（WiFi 6 篇）；省流 = 全用 thumb + 不预取 |
+| 预取 / 省流 | **规划项，未实现**（M0 时期设计留档）：首屏预取 3 篇（WiFi 6 篇）；省流 = 全用 thumb + 不预取。已实现的是 `warmFirstScreen`（site/index 预热）与 >90% 水位停预取 |
 
 ### 5.8 端上数据层
 
@@ -257,14 +260,17 @@ graph TB
 src/services/
 ├── request.ts        # 统一请求：baseURL 收敛、超时、重试、错误归一、并发去重
 ├── api/              # manifest(版本比对唯一入口) / collections(site/posts/galleries/moments/tags)
-└── cache.ts          # storage 读写 + buildId 失效 + LRU + 体积统计
+├── cache.ts          # storage 读写 + buildId 失效 + LRU + 体积统计
+├── errors.ts         # LocalError 枚举：业务层只接触归一错误
+├── platform.ts       # 平台适配契约（services 不 import Taro 的边界）
+└── taro-adapter.ts   # 上述契约的 Taro 实现（仅此文件 import Taro）
 ```
 
 | 关注点 | 设计 |
 | --- | --- |
 | 统一响应 | 只认 HTTP 状态 + `ApiEnvelope`；4xx/5xx/超时/解析失败/schemaVersion 不认识 → 归一为 `LocalError` 枚举 |
 | 并发去重 | 同资源飞行中请求共享同一 Promise |
-| 降级 | 网络失败 → 缓存；无缓存 → 内置最小 site 兜底 + 空态 + 重试；**上次成功全量快照写 storage 且不随 buildId 清空** |
+| 降级 | 网络失败 → 缓存；无缓存 → 空态 + 重试（无内置 site 兜底对象）；**上次成功全量快照写 storage 且不随 buildId 清空** |
 | 域名 | `assetBase` 与 API baseURL 同取 `manifest.assetBase`，零硬编码 |
 | 错误上报 | 仅本地记录 + 微信自带数据，不接第三方埋点 |
 
@@ -274,23 +280,31 @@ src/services/
 
 ```
 margin-app/
-├── config/                      # Taro 编译配置
+├── AGENTS.md / README.md
+├── config/                      # Taro 编译配置（index / dev / prod）
 ├── docs/                        # 本文档组
+├── scripts/                     # gen-assets.mjs（构建期装饰资产生成）
+├── test/                        # Vitest 单测；golden/ 为金标准语料（fixtures/ 已 gitignore）
 ├── src/
 │   ├── app.ts / app.config.ts / app.scss
-│   ├── assets/                  # logo、tabBar 图标、装饰贴片（噪点/光球）、兜底图
+│   ├── assets/                  # 构建产物，由 scripts/gen-assets.mjs 生成，勿手改
 │   ├── components/
-│   │   ├── base/                # NavBar SectionTitle TerminalBadge Card Tag Empty Skeleton SafeArea
-│   │   ├── block/               # Block 渲染器：Paragraph Heading Image Code Quote List Table
-│   │   │                        #             LinkCard Music Video Divider Unknown
-│   │   ├── media/               # CacheImage ImageGrid VideoPlayer AudioCard
-│   │   └── business/            # PostCard TagCard GalleryCard MomentCard StatsCalendar
-│   ├── hooks/                   # useCollection useManifest useTheme(主题+accent) usePagination …
+│   │   ├── NavBar/              # NavBar + SubNavBar（让开微信胶囊的几何，D29）
+│   │   ├── Post/                # PostHeader / PostToc（详情页头部与目录）
+│   │   ├── block/               # BlockRenderer 分发（p/h/quote/list/table 为内联 case）+
+│   │   │                        #   BlockImage / CodeBlock / InlineText / LinkCardBlock / MusicBlock
+│   │   ├── deco/                # AuroraHero / TerminalBadge / SectionTitle / BackToTop / PageBackdrop
+│   │   ├── media/               # CacheImage（三态+占位色+长按菜单）/ MomentVideo
+│   │   └── business/            # PostCard（共享卡，可选搜索高亮）
+│   ├── config/                  # site.ts（备案号等构建期常量）/ accent.ts
+│   ├── custom-tab-bar/          # 自定义 tabBar（D19：内联 style，WXSS 只留几何）
+│   ├── hooks/                   # useCollection / useManifest / useTheme（主题+accent）
+│   ├── pages/                   # 主包五 tab（§6.2）
+│   ├── pagesA/ + pagesB/        # 分包 A=内容与浏览、B=个人与设置（§6.2）
 │   ├── services/                # §5.8
-│   ├── styles/                  # tokens.css（margin 令牌 + accent 五套）、Tailwind 入口
+│   ├── styles/                  # tokens.css（margin 令牌 + accent 五套）+ 全局 scss
 │   ├── types/                   # 与 /api/v1 契约对齐（api-contract.md）
-│   ├── utils/                   # 日期、格式化、检索、存储、节流
-│   └── pages/                   # §6.2
+│   └── utils/                   # 日期 / 检索 / 偏好与本地 store / 纯函数（均有单测）
 └── project.config.json
 ```
 
@@ -306,9 +320,9 @@ margin-app/
 | 瞬间 | `pages/moment/index` | `/moments` | moments/index（端上聚合月份轴） |
 | 我的 | `pages/mine/index` | `/about` 元素 + 端上特有 | site + stats + 本地收藏/记录 |
 
-**分包 A（`pagesA`，内容与浏览）**：文章详情 `post`、搜索 `search`（双层索引）、归档 `archive`（对应 `/archives`）、标签详情 `tag-detail`（对应 `/tags/<tag>`）、画廊详情 `gallery-detail`（对应 `/galleries/<slug>`）、~~图片浏览 `photo-view`~~（**已作废，D51**：大图走 `Taro.previewImage`，不自造灯箱）、友链 `friends`（对应 `/friends`）、项目 `projects`（对应 `/projects`）、关于 `about` + 免责声明 `disclaimer`。
+**分包 A（`pagesA`，内容与浏览）**：文章详情 `post`、搜索 `search`（双层索引）、归档 `archive`（对应 `/archives`）、标签详情 `tag-detail`（对应 `/tags/<tag>`）、画廊详情 `gallery-detail`（对应 `/galleries/<slug>`）、~~图片浏览 `photo-view`~~（**已作废，D51**：大图走 `Taro.previewImage`，不自造灯箱）、友链 `friends`（对应 `/friends`）、项目 `projects`（对应 `/projects`）。
 
-**分包 B（`pagesB`，个人与设置）**：偏好设置 `preference`（**站点字体 D4 / accent D5**、主题、首页布局、字号/行距、代码换行、省流）、我的收藏 `favorite`（本地）、阅读记录 `history`（本地）、数据看板 `stats`（对应 margin 贡献日历/统计）、联系博主 `contact`（复制到剪贴板）。
+**分包 B（`pagesB`，个人与设置）**：偏好设置 `preference`（**站点字体 D4/D75 / accent D5**、主题、字号/行距、阅读模式、代码换行）、我的收藏 `favorite`（本地）、阅读记录 `history`（本地）、数据看板 `stats`（对应 margin 贡献日历/统计）、联系站长 `contact`（复制到剪贴板）、关于 `about` + 免责声明 `disclaimer`（D64 落分包 B）。
 
 ### 6.3 margin → 端上映射要点
 
@@ -324,7 +338,7 @@ margin-app/
 
 #### margin ↔ 端上功能对齐核对（2026-10-15，M5 提审前，offpeak-9521c2ad）
 
-核对方法：站点 `E:\personal-project\margin` `src/pages` 全量（13 个页面 + comment-titles.json.ts / api / og.png.ts / rss.xml.ts / robots.txt.ts 辅助端点）× 端上 19 页（`src/app.config.ts`）× decisions.md 刻意不做清单。只列事实与依据；缺口不自行拍板。
+核对方法：站点 margin 仓库（本机 `F:\projects\margin`）`src/pages` 全量（13 个页面 + comment-titles.json.ts / api / og.png.ts / rss.xml.ts / robots.txt.ts 辅助端点）× 端上 19 页（`src/app.config.ts`）× decisions.md 刻意不做清单。只列事实与依据；缺口不自行拍板。
 
 **已对齐（12 项）**：
 
@@ -359,14 +373,14 @@ margin-app/
 
 | 组件 | 职责 | 复杂度 |
 | --- | --- | --- |
-| BlockRenderer | AST → 组件树分发，unknown 兜底 | 高 |
-| CodeBlock | 按 token 上色（margin shiki 双主题）、行号、语言角标、复制、换行/滚动切换 | 高 |
-| CacheImage | 三态 + avgColor 占位 + 懒加载 + 预览 | 中（已实现） |
-| AuroraHero / TerminalBadge / SectionTitle | margin 标志性 hero、终端徽章、大写小节标题 + 横线 | 低 |
-| ImageGrid / MonthPicker / TabBar | 网格、月份选择、custom-tab-bar（D19 机制） | 中 |
-| StatsCalendar | 贡献日历视图网格 | 低 |
-| Skeleton / Empty | 骨架屏、空态/错误态 | 低 |
-| usePagination | 纯端上切片 | 中（已实现） |
+| BlockRenderer（`components/block/`） | AST → 组件树分发，unknown 兜底；含 CodeBlock（token 上色 + 超长分片 + 复制）、LinkCard/Music/Video 引用卡、BlockImage | 高 |
+| CacheImage / MomentVideo（`components/media/`） | 三态 + avgColor 占位 + 长按系统菜单存图 / 瞬间自托管 mp4 内嵌播放 | 中 |
+| NavBar / SubNavBar（`components/NavBar/`） | 自定义导航 + 详情页导航（D29 让开微信胶囊） | 中 |
+| AuroraHero / TerminalBadge / SectionTitle / BackToTop（`components/deco/`） | margin 标志性 hero、终端徽章、大写小节标题 + 横线、返回顶部 | 低 |
+| PostCard（`components/business/`） | 共享文章卡（home / 标签详情 / 搜索 / 收藏 / 历史复用，可选高亮） | 中 |
+| custom-tab-bar（`src/custom-tab-bar/`） | D19 机制：内联 style，WXSS 只留几何 | 中 |
+
+> 空态 / 骨架 / 贡献日历网格 / 瞬间月份导航为页面内联实现，无独立组件；列表分页 = 纯端上切片（全量不分页口径，api-contract §1），无 usePagination。
 
 ## 7. 视觉与交互
 
@@ -385,11 +399,13 @@ margin-app/
 | --- | --- | --- |
 | **M0 契约与导出管线** | 冻结 schema + 13 端点 + toBlocks + toAssetRef + bigram 索引 + `_headers` | ✅ **完成并生产验收（2026-09-29，D17）** |
 | **M1-a 基建 + 真机验收** | Taro 工程 / Tailwind v4+weapp-tw / request+cache+manifest（22 单测）/ Block 渲染器基础块 / 五页骨架 / custom-tab-bar | ✅ **完成 + A1 真机全绿（D18）**：TTI ≈880ms、缓存命中 <500ms、切 tab 滚动保留、存储实测 10MB 配额 |
-| **M1-b UI 按 margin 基准重做（✅ 完结）** | tokens 全量换 margin 令牌（含 accent 五套）；五页视图层重写；tabBar/图标/NavBar 换 margin 皮；装饰层（网格/噪点/aurora/glow）；字体 loadFontFace 管线 | ✅ **代码侧完成（2026-09-29，D25）+ 打样模拟器侧通过（2026-10-06，D27）+ 真机复核通过（2026-10-06，D28）**：§10 十一步走完（步骤 10 字体子集按批示跳过）；打样 6 项 = 1/2/4/6 模拟器 PASS、3 数值 PASS（对比度口径 A：装饰性小件 ≥3，保 margin 原值）、5 豁免；真机 = accent 即点即效 PASS、切 tab 滚动保留 PASS、缓存命中首屏 70ms + 存储 56/10240KB PASS，低版本降级观感与冷启动 TTI **按批示豁免**（依据见 D28）；附带修复真机挂项两处（tabBar 遮挡安全区、贡献日历稀疏数据渲染）。**→ 视觉基线已宣告并冻结，M1-b 完结，进 M2** |
-| **M2 文章详情** | Block 全量块 + TOC + 进度 + 字号/行距/主题 + 代码块（margin shiki 双主题）+ 图片预览 + 上下篇 + 分享 + 阅读模式（偏好开关） | ✅ **完成并真机复核（2026-10-08，D42）**：步 1+2 详情页、步 3/3b 偏好（含阅读模式）、步 4 正文排版、步 5 代码配色（margin `aab843b` 已部署，端上 924 token 双主题实测分色正确）、步 6 TOC/进度/返回顶部、步 8 linkcard/video 引用卡 + music 黑胶播放卡 **已落**；**步 7 代码侧已落（D39：点击 previewImage + 长按系统菜单存图，隐私指引他已配好并实测生效），只剩人手验三条判据**；未做项 = 无（M2 只剩步 10 的观感半与卡图拍板）。**步 9 已完结**（D35：合并 + 分片 + 单测 31→51、运行时判据 A–F 全绿、A/B 已对照）；**步 10 已落两个单元**（D37：分享通路 + 10 篇结构抽样），只剩截图观感半。本轮两处返工：TOC 折角由 unicode 字符改 CSS 画法（`b8d15ec`）、music 块补 `name/artist/cover`（D33，margin `e3ca922` + 封面档收口 `80863c1` **均已部署已验**：线上三块 = 2 块带真歌名/封面（网易那张已从 6.25MB 原图收口成 194KB 的 300 档）、1 块无效 id 三字段缺席走降级；端上重编译窗口内量到 `music-card=3 / music-cover=2`，与线上一致，顺带证明 `evictStaleBuildIds` 换掉了旧 build 的正文缓存）。**站点自身遗留**：`/posts/m6qk2v8x/` 的 HTML 仍引原图 URL（cf HIT + `.md` 未改 ⇒ Astro content cache 复用旧编译产物），端上不受影响，要动 `.md` 或清 Pages 构建缓存再部署才会变小。**这三项随后由用户截图复核判 PASS**（盘心真封面出图 = 平台 CDN 远程图在 `<Image>` 上直接放行、不需进域名白名单；文字三行「网易云音乐 / 千千阙歌 / 陈慧娴」；进度 `0:03 / 5:02` + 「站内播放」；TOC 折角一并看过）⇒ **步 8 完结（含 music 元数据与封面 300 档收口）**。验收②「1000 行代码不卡」= **模拟器侧判据全绿并判定通过**（D35 同日追加：首帧 120 行 / 占位 18304px vs 880 行实测 18301.25px 差 2.75px / 滚到片尾自动追加 8 片补齐 1000 行 / 文档总高与块后标题顶边只漂 -3px / A/B 首帧「量到第一行」2453ms → 151ms；「不卡」的手感与真机仍未过人眼 ⇒ 需要时 `probe2.mjs --keep` 把合成页留下）；① 10 篇抽样 = **结构面通过**（10 篇 × 15 类选择器逐类相等，含 music/video/table/unknown 全覆盖；口径见 D37：`.link-card` 按选择器聚合、代码行按首帧 `Σ min(行数,120)` + 占位片单列），观感面（端上截图 vs 站点移动视口并排）待人眼；③ 分享通路运行时六条判据全 ✓，**卡图这一版走微信默认页面截图**（OG 图 1200×630 在 5:4 / 1:1 两个显示位会被切成残图，实测只保留 65.7% / 52.5% 宽）。**运行时口径注意**：本轮「所有选择器返 null、渲染层全空」的真凶已定死 = 分包 shared chunk 换 hash 后 IDE 拿旧引用编译（报 `ENOENT …/sub-common/<旧hash>.wxss`），`cli auto` 重跑强制真重编译即恢复，不是代码回归；另 D34 那条矛盾已判定 = **(a)**：transform 内 rpx 一直生效 ⇒ **D20⑥ 作废**，三处动画位移恢复设计值（`b7df558`，实测振幅对到 41.6/20.8 档，见 D36）。**表格缺陷改到第三版才收口（D38→D41）**：v1 flex 不可收缩 + View 不滚 ⇒ 溢出那截永久看不见；v2 `display:table + border-collapse` 模拟器全绿但**真机翻车**（边框消失、首列塌成一字宽）；v3 = flex 等分列（`flex:1 1 0` + `min-width:0` + `-1rpx` 压双线），只依赖真机已验证的原语，实测跨行对齐、越界格 0、列宽等分 25%（站点是按内容 15/24/31/30，CDP 量过）。**教训入档：表格类 CSS 属「模拟器绿 ≠ 真机绿」高危项，v3 仍需你真机复验两条（格线回来、首列不再一字宽）。****M2 收尾 A/B 已落（D40）**：`codeWrap` 接通（幽灵开关自此有消费者）+ 占位算法改判「实测平均行高为主、em 兜底」（不换行回归漂移 -3px → 0，换行模式实测行高 4 档已验）；「10 块 × 100 行」整页形态量测后判**不修**（超语料最重篇 3.3 倍，页级延迟渲染要动 TOC/进度条度量通路；退路 = `CODE_CHUNK_ROWS` 降到 60–80，一行常量）。**步 7 代码侧已落且隐私通路实测通过（`requirePrivacyAuthorize` 秒回 ok、`scope.writePhotosAlbum` 已授权）⇒ 只剩人手三条判据。下次开工点 = 步 10 收尾**：① 10 篇的端上/站点并排截图（判验收① 的观感面）② 品牌分享卡要不要做（canvas 把 OG 居中垫成 1:1 方图，一张图同时喂 5:4 与 1:1 两个显示位 —— 待他看过默认截图卡再定，不预先投入）；步 7 仍等他勾相册权限 ⇒ **M2 全部交付**：真机复核五项全过（表格 v3 样式、步 7 三条交互、10 篇并排图、分享卡图、代码换行），三条验收逐条判通过 —— ① 10 篇抽样与站点一致（结构面 10/10 全类逐等 + 观感面人眼无差异）、② 1000 行代码不卡（判据 A–F 全绿、A/B 首帧 2453ms → 151ms、真机手感过）、③ 分享卡图正确（默认页截图，canvas 方图候选撤销）。**M2 冻结，下一站 M3（图库与瞬间）。** **冻结后真机复看又出三条缺陷，同日全部修掉（D45）**：正文图没铺满（真因 = CacheImage 内层 `<Image>` 无任何 CSS 命中 ⇒ 落回默认 320×240，顺带修掉画廊 M1-b 以来的隐性左上角错裁）、代码块上下内边距丢失（真因 = `<scroll-view>` 的 padding 在 webview 渲染模式不生效）、进度条一跳一跳（真因 = 双重量化压成 101 档 + 每次滚动重 diff 整棵正文，即 D44 那六条 `render:stutter`）；两条端上原语已钉成规则（scroll-view 不写 padding；CacheImage 内层尺寸由组件按 mode 自己负责）。 |
-| **M3 图库与瞬间** | 画廊列表/详情（图片浏览独立页作废 → `previewImage`，D51）；瞬间年月导航/卡片/图组/视频块（**音乐块按语料 0/9 判不做**，D51） | ① 75+16 图全可浏览；② 月份切换计数正确；③ 大图手势顺畅。**开工前置（D43→D48 已清）**：真机冷启动基线已到手 = **发布口径 appLaunch 1648ms、点图标→首页 FCP ≈1.90s（全新安装最坏情况）**、详情页「数据到达→可渲」85ms +「可渲→首屏落地」106ms（`render:stutter` 已判死不作判据，见 D48）；**仍缺一条「缓存已热的冷启动」日常口径**（这次是存储 0/10240KB 的首装最坏情况；取法 = 杀微信进程再重进，**不能划掉小程序** —— 开发版被划掉会连带清存储，D50）。M3 的图库/瞬间都是重图列表，这版基线就是后面判断「加没加量」的参照。**排进 M3 的两个性能单元（D50 定，用户 2026-10-09 批准排期）**：① **首屏两段串行** —— site/index 两个请求在 manifest 回来后才发出（三轮读数反推起点一致），把它们与 manifest 并发可省 **0.23–0.69s**，动的是 `services/**` 与缓存键时序 ⇒ 独立单元 + 缓存三态回归；② **`LazyCodeLoading: false`** —— `app.config.ts` 未设 `lazyCodeLoading`，可试 `requiredComponents`，但它与自定义 tabBar（D19）+ 分包预加载的兼容性未验 ⇒ **先探针再改**。**步序定版（D51，用户批准）**：1 抽 `utils/momentMonths.ts` + `countsByMonth` 补单测 → 2 月份格小字计数 + 图格换 `CacheImage` → 3 瞬间图预览 + `>3 → 2 张 +「+N」` + 视频降级卡 → 4 `routes.ts` 加 `GALLERY_DETAIL` + `app.config.ts` 加页与 **preloadRule 补图库 tab** → 5 新页 `pagesA/gallery-detail/index` → 6 详情页预览 + 长按存图 → 7 图库卡改点卡进详情 → 8 M3 三条验收取证 → 9 上面那两个性能单元。**语料实量（决定范围的依据）**：画廊 3 个 = 9+19+47 = 75 图且 `photoCount` 与 `photos.length` 逐等；瞬间 9 条 = 16 图，图数分布 `{0:1,1:4,2:1,3:2,4:1}`，带 `music` 0 条、带 `video` 1 条，月份分布跨两个半年窗口。**进度（2026-10-09 收）：步 1–7 已落（`1d81447`→`a6d095b`，加缺陷修复 `e9b087d`），单测 55 → 74；真机验收已过三条（逐月计数 / 4 图那条走「2 张 + +2」/ 整组 previewImage 可翻完），④ video 卡在 2026-08 那条 `atyjcue6`（默认落在 2026-09 ⇒ 不切月看不到）待复看；画廊侧 5–8（进详情不白屏 / 9·19·47 方格 / 整组预览 / 暗色）未验。未做：步 8 结构面探针、步 9 两个性能单元，以及新排的一条「瞬间自托管 mp4 内嵌播放」（D52 拍板：先按降级引用卡收口，内嵌播放排到步 9 之后当独立单元）。**进度（2026-10-09 步 8 收，D53）**：步 8 结构面取证已过 —— 探针 `mp-probe-work/code-step9/m3-structure.mjs`（buildId `c13e348-5b2c964a1dfe`，证据 `evidence/m3-structure.json`）：画廊 3 个 = jinshawan 9 / epidemic 19 / changsha 47（两列方图 5/10/24 行）且 `index.photoCount` 与 `detail.photos.length` 逐等、合计 75；瞬间 9 条 = 16 图、分布 `{0:1,1:4,2:1,3:2,4:1}` 与语料量逐等；**92 个 src 档 HEAD 全 200**（75 图 + 16 图 + 视频 mp4 `https://www.baiwumm.com/video/atyjcue6.mp4`，`content-type: video/mp4`）⇒ 验收①结构面通过。逐月计数实算与期望逐项一致（2026-09:1 / 08:3 / 05:1 / 04:2 / 2025-07:1 / 06:1），月份轴边界 2025-01…2027-07、6 个有数据的月全部可达、默认选中 2026-09、列表按 pubDatetime 倒序 ⇒ 验收②结构面通过。③ 大图手势仍是真机人眼项。未做：步 9 两个性能单元 + D52 内嵌播放单元；真机复看清单（④ video 卡、画廊 5–8、缓存已热冷启动基线）不变。**进度（2026-10-09 步 9a 收，D54）**：首屏 site/index 与 manifest 并发已落（`7162f56`）—— request 层 30s 成功备忘 + collections 层 `warmFirstScreen` 预热 + 首页 mount 触发；冷启动首屏账从「manifest RTT + max(site,index)」变 max(三者)，D50 量到的 0.23–0.69s 白等消失；缓存三态回归（无缓存 / 命中 / buildId 变更驱逐）单测覆盖，单测 74 → 82 全绿，主包 481→482KB（stash 回 HEAD 同量法对照）。运行时收益待真机/预览版复量（`cli auto` 需他点头，会打断他那侧真机调试；连上先按 D43 判僵尸实例）。**进度（2026-10-09 步 9b 收，D55）**：`lazyCodeLoading: "requiredComponents"` 已落（`85fcdc7`）—— automator 探针 20/20 全绿（五 tab 渲染 + tabBar 在位与选中态位移、两个分包页注入与 47/7 数据渲染、console 干净）；量法留档：tabBar 不在页面 selector 作用域，首轮 0 命中是量法误判（改截图像素判据后全绿）；收益未量测（模拟器无 appLaunch、evaluateScript 不进 getEntries ⇒ 按 D43 不编数），留真机 A/B。未做：D52 内嵌播放单元；真机复看清单（④ video 卡、画廊 5–8、缓存已热冷启动基线、9a/9b 收益复量）不变。**进度（2026-10-09 D52 收，D56）**：瞬间自托管 mp4 原生 `<video>` 内嵌播放已落（`4cc7e25`）—— automator 探针 12/12 全绿（**www.baiwumm.com 的 mp4 免额外白名单配置**、play/停播、离开页面停播、双主题截图，主包 481→484KB）；顺带修一个真缺陷：`autoPauseIfNavigate` 不发 `onPause` ⇒ playing 态归位改直接写（探针三轮复测两轮说谎）。**M3 代码侧（步 1–9 + D52）全部落定，无代码项未做**。真机复看清单：④ video 卡改看内嵌播放卡（播放/停播手感、暗色控件观感）、画廊 5–8、缓存已热冷启动基线（D50 日常口径：杀微信进程再重进）、9a/9b 收益复量。**进度（2026-10-09 真机复看收，D57）**：用户逐条复看「都没问题」—— 内嵌播放卡浅/暗播放态（00:02/00:05，原生控件在位）、画廊 tab 9/19/47 角标 + hero 75 张统计；缓存已热冷启动日常口径到手（`manifest 缓存命中`、存储 79/10240KB、首页渲染 +104ms、FCP@107ms、appLaunch 153ms=温态形态、`preloadSubpackages success`）；**9a 并发在真机读数直接可见**（三 GET 起点相差 ≤10ms，D50 的串行链实破）；9b 生效行在手。**⇒ M3 三条验收 + D52 + 两个性能单元 + 真机复看全部收口，M3 完结，进 M4**。遗留非阻断：首装形态 9a 冷路径收益可选补测、9b A/B 按 D55 继续不量、用户截图归档可选。**收尾（2026-10-10，D58）**：债务四件套清零 —— 全量 tsc 58→0；返回顶部 margin 64rpx 上滑恢复（探针实测 -33px 正中期望，D31/D36 遗留关闭）；站点字体落地（复用站点已 served 的 Maple Mono CN ASCII 切片 ≈34KB，偏好开关 + boot 加载 + 关时自动穿透系统栈，开/关像素两态分验；**打样第 5 项解负、留真机人眼**）；announcement Q 关闭（源侧恒 null ⇒ 不渲染即正确）。仅存非代码账：D21 打点探针拆除留 M5（硬闸）、margin 仓库剩一件（m6qk2v8x HTML 已于 2026-10-10 重建销账：margin `910e01d`，线上 cover 300 档、HEAD 6109KB→190KB；全量子集将来再议）、备案变更审核中。 |
-| **M4 检索、归档与个人中心（✅ 完结并冻结 2026-10-15，D59–D70）** | 搜索（双层+拼音+高亮+历史）、归档、标签详情、友链、项目、关于（**备案号展示**）、数据看板、收藏、阅读记录、联系（复制剪贴板） | ① 一层 <40KB 即时、二层 ≤400KB、拼音首字母命中；② 偏好全生效持久化；③ 主包 ≤1.5MB；④ 备案号可见可复制。**步序定版（D59）+ 进度（2026-10-10）**：十步 = 归档 → 标签详情 → 友链 → 项目 → 关于+免责 → 数据看板 → 搜索 → 收藏 → 历史 → 联系。步 1 归档已落（`f7bcb73`，本地时区分组 + 首页 CTA 接真）；步 2 标签详情已落（`a9dc5c1`，共享 PostCard + 共现推荐）；步 3+4 友链/项目已落（`d94e76b`，点卡复制，mine 加入口）；步 5–10 未开始；单测 94→113；主包 485KB、pagesA 77KB。**反馈修复（D62，`6e92836`+`dfc8aeb`）**：D60 日期口径统一本地（home/详情与站点对齐）；友链卡溢出加固（minmax(0,1fr)+break-all+自裁，待真机复看）；mine 补「归档」入口行。**反馈修复二（D63，2026-10-14）**：友链卡对齐 margin 原版改**单列**（圆头像 72rpx + mono 名称/域名同行，组头补圆点 +「N 个」计数）；站点字体真机无变化 → 加 `[siteFont]` 成功/失败日志取证，**真机验证收口：重开小程序后生效**（平台「global 对已渲染页不保证生效」，重进即好，不改代码）；友链单列真机 PASS；**小程序变更备案已通过（2026-10-14）**，改名限制解除。**步 5 已落（D64，2026-10-14）**：关于页（pagesB，margin AboutLayout/about.mdx 同构八块 + SiteStats 四格走既有 getStats + 十年之约纯函数 6 单测）+ 免责声明页（compliance §11 初稿按倾向落地：#1 不写死邮箱、#2 保留、#3 迁关于页尾部；编号连续化）+ mine「关于」行 + mine/关于页脚备案号点击复制。**同日收口：验收④ PASS（真实备案号「粤ICP备2023007649号-4X」已入 `config/site.ts`）、免责文案用户过目通过（硬闸关闭）、两页真机复看通过 + hero 改 margin 同款容器（光球/描边/圆角镜像 AuroraHero 原值）与名字降 72rpx；站点字体口径扩展（D64④）：`--font-body` 前置 Maple 家族名，偏好开 + 重进后全 app 拉丁/数字变装，中文随系统为硬边界（design §5 已重写）**；单测 113→119，主包 603KB 档（about 图标 42 枚入主包）。**步 6 已落（D65，2026-10-14）**：数据看板 `pagesB/stats`（站点贡献日历拉 GitHub 需 token ⇒ 端上改用博客三源：stats 热力图全量版 ~148 列横滚 / posts 按月节奏柱 / tags Top10 / 总览六格 / 数字小结；纯函数 `statsData.ts` 7 单测；mine 加入口行）；单测 119→126。**步 7 已落（D67，2026-10-14 闲时任务）**：搜索四子步——数据层（getSearchTitles/getSearchTerms + warmSearchTitles 首页后台预热，terms ≥2 字懒加载走 prefetch 水位纪律）/ 纯函数（bigram 切词、双层匹配合并打分、高亮分段，29 单测含 6 例真语料基准：5 次双层查询合计 0.9ms）/ 搜索页 `pagesA/search`（终端提示符输入行 + 历史 chips 惰性水合 + 拼音/正文命中标识 + PostCard 可选 highlight prop 缺省渲染不变）/ NavBar 搜索键接真；契约实证：docId = titles.docs 数组下标（索引含正文 body）、拼音构建期烘好端上零 pinyin-pro；单测 136→165，主包 535KB（红线 35.7%）、pagesA 88KB、搜索页 JS 6KB。**步 7 验证收口（2026-10-15）**：automator E2E 探针 **17/17 全过**（预热落缓存 / 即输即搜 / 高亮渲染 / 正文召回 11 条与真语料断言一致 / 无结果空态 / 历史 chips 记录回填 / NavBar 接真 / console 零 error，截图证据 mp-probe-work/evidence/step7-*.png）+ 用户验收通过。**步 8 已落（D68，2026-10-15）**：收藏——本地 store `utils/favorites.ts`（prefs 同款，9 单测）+ 详情页 SubNavBar ★ 开关（action 槽可选 prop）+ `pagesB/favorite` 收藏页（PostCard 复用 / 失效文章降级行 / 移除 / 空态）+ mine 接真；automator E2E **17/17**（收藏→列表→回详情态同步→移除空态→mine 行，截图 step8-*.png）；单测 165→174，主包 535KB。**步 8 用户验收通过（2026-10-15）**。**步 9 已落（D69，2026-10-15）**：阅读记录——本地 store `utils/readHistory.ts`（favorites 同款，8 单测；详情页进入即自动记录、容量 50 滚动淘汰、一键清空）+ `pagesB/history`（PostCard 复用 readAt 倒序 / 已删除文章静默过滤 / 清空 showModal 确认）+ mine 接真；automator E2E **11/11**（读两篇倒序渲染/清空弹层截图/未确认不清/mine 行/console 零 error，截图 step9-*.png）；单测 174→182。**步 9 用户验收通过（2026-10-15）**。**步 10 已落（D70，2026-10-15）**：联系站长 `pagesB/contact`（联系行 邮箱/GitHub 点击复制 + 友链申请模板卡 applicationText 同构一键复制，数据全走 site.json + currentBase 零硬编码，`contact.ts` 纯函数 4 单测）+ mine 接真；automator E2E **8/8 含剪贴板内容断言**；单测 182→186。**步 10 用户验收通过（2026-10-15）⇒ M4 四条验收逐条达成：① 检索（D67）② 偏好持久化（M2）③ 主包 535KB ≤1.5MB ④ 备案号可见可复制（D64）——M4 十步全部完结并冻结（2026-10-15）。M4 收尾遗留全部清零：无代码账；两条非代码账随行至 M5（D21 探针拆除 = 提审前硬闸；首页 announcement 字段保留不渲染 = 站点源侧恒 null）。下一里程碑 = M5 云能力与发布（云开发：点赞/收藏同步、评论+msgSecCheck、订阅消息、发布瞬间；提审），**待用户指令启动**。** |
-| **M5 提审与发布（进行中 2026-10-15，D71–D73）** | 原云开发 UGC（点赞/收藏同步、评论、订阅消息、小程序内发布瞬间）**已整体砍掉（D73）**；M5 收敛为：提审材料与实测 → 提审上线 | ① 审核通过（原验收②内容安全自检/③云数据 openid 隔离随 UGC 砍掉判 N/A：全站只读，风险消失）。**进度**：步 1 隐私声明核对 ✅ 完结（D72：剪贴板声明补配销账，§12 #2–#5 四项全关）；步 2 云开发方案与成本确认 → **D73 拍板砍掉**（无长期免费方案：官方规则 = 免费环境发布后第 15 天到期须转付费 ¥19.9/月；替代路径三条全否——自建境内 serverless 违背减少运维、境外免费 tier 撞合法域名 ICP 墙、第三方撞 token 泄露 + msgSecCheck 服务端刚需）；发布瞬间功能保留（margin 站点既有链路，端上只读，零成本）。**步序**：① 隐私核对 ✅ → ② 云开发砍掉（D73）→ ③ 提审材料与实测（账号操作：类目与服务范围声明复核、体验版实测、提审）→ ④ 上线（§12 #1「取消暂停服务」= 上线时用户操作，用户明确全部开发完成后再执行）。**提审前验证 A+B（2026-10-15 闲时 offpeak-9521c2ad）**：① automator 全页面冒烟 **19/19 页、72/72 断言全过、console 零 error**——5 tab 数据全渲染、detail 67 块、gallery-detail 9 格逐等、archive 21 月组、tag-detail(Nest.js) 13 卡、friends 41 卡、projects 7 卡、search 即输即搜 11 中、contact 2 行 + 模板卡、favorite/history 空态/有项两态、about 备案号行在位（证据 `mp-probe-work/code-step9/evidence/m5-smoke-evidence.json` + 19 张截图）；一条 `routeDone with a webviewId 11 is not found` 仅首跑出现、复跑零出现 ⇒ 定性 IDE 层导航竞态一次性噪音（未备案四条之外的新候选，留观不修）。② 体验版构建本地自洽性 **ALL PASS**（step11-artifacts 四项：页面声明→.js 落点 / usingComponents 闭环 / sub-common 闭环 / 无 [perf 残留）；体积：主包 533KB（基线 535KB，红线 1.5MB）/ pagesA 91KB / pagesB 121KB（`evidence/m5-build-check.txt`）；**体验版上传 = 用户账号操作，本任务未做**。**C 对齐核对（同批）**：margin 站点 ↔ 端上逐项核对落 §6.3——已对齐 12 / 端上特有 6 / 站点特有 5 / 刻意不做 5（各注明 D 依据）；缺口 1 项（站点 `/disclaimer` 页）**已补齐并上线销账（D74）**：margin `583d1b4`+`751a46d`（建页 + 页脚盾牌图标入口），线上复验全过 ⇒ 两端功能对齐无剩余缺口。 |
+| **M1-b UI 按 margin 基准重做** | tokens 全量换 margin 令牌（含 accent 五套）；五页视图层重写；tabBar/图标/NavBar 换 margin 皮；装饰层（网格/噪点/aurora/glow）；字体 loadFontFace 管线 | ✅ **完结并冻结（D25 代码侧 + D27 模拟器打样 + D28 真机复核，2026-09-29/10-06）**：打样 6 项 = 1/2/4/6 PASS、3 按拍板口径 A PASS（装饰性小件 ≥3，保 margin 原值，D27）、5 豁免（D58 站点字体落地后解负）；附带修复 tabBar 安全区遮挡与贡献日历稀疏渲染。视觉基线自此冻结 |
+| **M2 文章详情** | Block 全量块 + TOC + 进度 + 偏好 + 代码块（token 上色 + 超长分片）+ 图片预览/长按系统菜单存图 + 上下篇 + 分享 + 阅读模式 | ✅ **完结并冻结（2026-10-08，D42；收尾 D45–D47）**：三条验收全过 —— ① 10 篇抽样与站点一致（结构面 10/10 全类逐等 + 观感面人眼）② 1000 行代码不卡（分片判据 A–F 全绿，A/B 首帧 2453→151ms，D35/D40）③ 分享卡走微信默认截图（D37）；表格三版收敛到 flex 等分列（D38–D41）；端上原语规则沉淀见 AGENTS.md 与 decisions 对应 D 行 |
+| **M3 图库与瞬间** | 画廊列表/详情 + 瞬间月份导航/图组/video 块（音乐块按语料 0/9 不做、大图走 previewImage，photo-view 作废，D51） | ✅ **完结（2026-10-10，D51–D58）**：验收①②结构面（D53）+ ③ 真机（D57）全过；自托管 mp4 内嵌播放（D52/D56）；性能单元 = 首屏三请求并发（D54）+ lazyCodeLoading（D55，**后移除见 D77**）；收尾债务清零（D58） |
+| **M4 检索、归档与个人中心** | 搜索（双层+拼音+高亮+历史）、归档、标签详情、友链、项目、关于+免责（备案号）、数据看板、收藏、阅读记录、联系 | ✅ **完结并冻结（2026-10-15，D59–D70）**：四验收全过 —— ① 检索一层 <40KB 即时 / 二层 ≤400KB / 拼音命中（D67）② 偏好全生效持久化 ③ 主包 535KB ≤1.5MB ④ 备案号可见可复制（D64）；十步全部用户验收通过 |
+| **M5 提审与发布（进行中，D71–D77）** | 原云开发 UGC（点赞/收藏同步、评论、订阅消息、小程序内发布瞬间）**已整体砍掉（D73）**；M5 收敛为：提审材料与实测 → 提审上线 | ① 审核通过（原验收②内容安全自检/③云数据 openid 隔离随 UGC 砍掉判 N/A：全站只读，风险消失）。**进度**：步 1 隐私声明核对 ✅ 完结（D72：剪贴板声明补配销账，§12 #2–#5 四项全关）；步 2 云开发方案与成本确认 → **D73 拍板砍掉**（无长期免费方案：官方规则 = 免费环境发布后第 15 天到期须转付费 ¥19.9/月；替代路径三条全否——自建境内 serverless 违背减少运维、境外免费 tier 撞合法域名 ICP 墙、第三方撞 token 泄露 + msgSecCheck 服务端刚需）；发布瞬间功能保留（margin 站点既有链路，端上只读，零成本）。**步序**：① 隐私核对 ✅ → ② 云开发砍掉（D73）→ ③ 提审材料与实测（账号操作：类目与服务范围声明复核、体验版实测、提审）→ ④ 上线（§12 #1「取消暂停服务」= 上线时用户操作，用户明确全部开发完成后再执行）。**提审前验证 A+B（2026-10-15 闲时 offpeak-9521c2ad）**：① automator 全页面冒烟 **19/19 页、72/72 断言全过、console 零 error**——5 tab 数据全渲染、detail 67 块、gallery-detail 9 格逐等、archive 21 月组、tag-detail(Nest.js) 13 卡、friends 41 卡、projects 7 卡、search 即输即搜 11 中、contact 2 行 + 模板卡、favorite/history 空态/有项两态、about 备案号行在位（证据 `mp-probe-work/code-step9/evidence/m5-smoke-evidence.json` + 19 张截图）；一条 `routeDone with a webviewId 11 is not found` 仅首跑出现、复跑零出现 ⇒ 定性 IDE 层导航竞态一次性噪音（未备案四条之外的新候选，留观不修）。② 体验版构建本地自洽性 **ALL PASS**（step11-artifacts 四项：页面声明→.js 落点 / usingComponents 闭环 / sub-common 闭环 / 无 [perf 残留）；体积：主包 533KB（基线 535KB，红线 1.5MB）/ pagesA 91KB / pagesB 121KB（`evidence/m5-build-check.txt`）；**体验版上传 = 用户账号操作，本任务未做**。**C 对齐核对（同批）**：margin 站点 ↔ 端上逐项核对落 §6.3——已对齐 12 / 端上特有 6 / 站点特有 5 / 刻意不做 5（各注明 D 依据）；缺口 1 项（站点 `/disclaimer` 页）**已补齐并上线销账（D74）**：margin `583d1b4`+`751a46d`（建页 + 页脚盾牌图标入口），线上复验全过 ⇒ 两端功能对齐无剩余缺口。 |
+
+> M0–M4 里程碑行已瘦身为状态行（v1.2）；瘦掉的完整过程叙事以 **git 历史中本文件 v1.1 的 §9 行**与 **decisions.md 对应 D 行**为准，本表不复制论证。
 
 **验证策略**：本地只跑 `astro check` + 单测 + dev 冒烟（margin 本地完整 build 会随机卡死）；合并前信号 = 分支构建 check-run（构建内断言，违规即失败）；合并后 = 生产域（www）复核。
 
@@ -416,7 +432,7 @@ margin-app/
 | R1 | 境外托管与备案的张力 | P2 接受 | 快照兜底 + `_astro` 长缓存（compliance §7） |
 | R2 | 个人主体硬限制 | P0 约束 | compliance §3 |
 | R3 | 内容结构漂移缺块 | P1 | unknown 兜底 + 告警 + schemaVersion |
-| R4 | 音乐/视频块端上不可播 | P1 | 卡片 + 复制链接 / 封面跳转 / 自托管媒体（D6 同理不新增服务） |
+| R4 | 外链音乐/视频块端上不可播（自托管 mp4 已可内嵌播放，D56） | P1 | 引用卡 + 复制链接 / 封面跳转（D6 同理不新增服务） |
 | R5 | 超长文章单文件过大 | P2 | 单篇实测中位 12KB、最大 42.6KB；仍超再分块 |
 | R6 | 字体子集加载失败/慢 | P2 | 系统栈兜底 + 静默回落（D4）；不阻塞首屏 |
 | R7 | 大 blur/装饰层安卓性能 | P2 | 光球预渲染 PNG / 降档（design.md §6） |
@@ -432,9 +448,12 @@ margin-app/
 | **api-contract.md** | 13 端点 + 全部类型 + Block AST + 图片档位 + 检索索引 + 缓存规则；**M0 冻结对象** | 数据层开发每天 |
 | **design.md** | margin 令牌 / 五屏结构 / 字体 / 装饰层 / CSS 硬约束 / 打样清单 / 不做清单 | UI 开发每天 |
 | **compliance.md** | 备案 / 域名 / 个人主体限制 / 接入商核查留档 / 免责声明 / 上线 checklist | 备案事务与发布前 |
-| **decisions.md** | D1–D52 一行结论（2026-09-29 重建，历史论证见 git 历史） | 查口径 |
+| **decisions.md** | D1 起一行结论，表尾追加不回改（2026-09-29 重建，论证见 git 历史） | 查口径 |
 | **research.md** | 内容源事实 / margin 设计体系事实 / M0 实测证据 / 方法论 | 追溯依据 |
+| **toolchain-quirks.md** | 本机/IDE 工具链怪癖速查（症状 → 判据 → D 编号） | automator / 排查 / 量测前 |
 
 ## 13. 变更记录
 
 - **v1.0（2026-09-29）**：文档组整体重建。起因 = UI 方向转向（D1：放弃 uni-halo 基准，全量对齐 margin 博客原设计），旧版（requirements v1.0–v3.6、决策旧编号 D1–D55、archive 快照、demo/）删除，git 历史可考古。重建时把仍然有效的历史结论浓缩为 decisions.md D8–D22，契约与合规事实原样承接。
+- **v1.1（2026-10-16）**：勘误对齐现状——内容源本机路径（`F:\projects\margin`）、状态管理实现（自研单例 store，非 Zustand）、云开发砍掉口径统一（D73）、站点字体默认开启（D75）、分包归属（about/disclaimer 在 pagesB，D64）、目录结构与组件清单对齐 `src/` 实际（移除未实现的 usePagination / base 等组件名）、补记漏记决策 D76（trustPolicy）/D77（lazyCodeLoading 移除）、标注未实现的规划项（正文预取/省流/下拉刷新/内置 site 兜底）、内容规模改动态口径。
+- **v1.2（2026-10-17）**：§9 里程碑行瘦身为状态行（过程叙事以 git 历史与 decisions.md 为准）；新增 `docs/toolchain-quirks.md`（工具链怪癖速查）与 GitHub Actions 四闸门 CI；`package.json` 增加 `typecheck` script。

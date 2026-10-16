@@ -5,7 +5,7 @@
 
 ## 1. 设计语言总纲
 
-- **终端/等宽气质**：全站 Maple Mono CN（§5）；等宽计数器 `[6/74]`、终端提示符徽章 `~ /ready-to-go $`、ping 圆点、`$`/`~` 符号点缀。
+- **终端/等宽气质**：全站 Maple Mono CN（§5）；等宽计数器 `[6/n]`、终端提示符徽章 `~ /ready-to-go $`、ping 圆点、`$`/`~` 符号点缀。
 - **极简细边框卡片**：1px 半透明描边 + 低饱和 tint 底 + `rounded-2xl`；**无玻璃拟态**、不依赖 `backdrop-filter`（安卓友好）；hover 抬升在端上映射为**按压态**。
 - **装饰层**：accent 网格底纹（3.5% 不透明度）+ 颗粒噪点 + aurora 光球 + glow 渐变标题（§6 实现规范）。
 - **双主题 + 五色 accent 轮换**（D5 偏好项）：margin 有真实暗色稿，暗色为一等公民。
@@ -45,7 +45,8 @@
    purple #7c3aed / #a78bfa
    orange #ea580c / #fb923c
    rose   #dc2626 / #f87171
-   切换 = 根节点 data-accent 变量组；featured/gallery 语义色随 accent 轮转
+   切换 = root 挂 `.accent-<key>` 类名组（默认 blue 免挂，D23——不用 data-accent
+   属性选择器，WXSS 属性选择器支持无保证）；featured/gallery 语义色随 accent 轮转
    （margin 源码有完整轮转表，端上按表落值，不做运行时计算） */
 ```
 
@@ -61,7 +62,7 @@
 
 | 屏 | 结构（自上而下） |
 | --- | --- |
-| **首页** | ① 终端徽章（ping 圆点 + `~` accent + `/ready-to-go` + 半透明 `$`）② glow 渐变大标题「Margin」 ③ 描述行（fg 75%）④ 作者 + 社交行（虚线下划线链接）⑤ **FEATURED** 小节（大写 accent 标题 ★ + 横线）= featured 琥珀 tint 卡 ⑥ **RECENT** 小节（横线 + `[n/74]` 等宽计数）= 纯文字卡列表（单列，D66 对齐 margin `f78b4cd`）⑦ 「查看全部文章」outline CTA（→ 归档）⑧ 底部留白。**hero 整体居中**（徽章/标题/描述/作者行/社交行，D66 对齐 margin `8ee7572`；站点 hero 里的 IntroAudio 播放器端上没有，D6/D7）。无 banner 图、无搜索框（搜索在顶栏放大镜，M4 页）；文章卡无图（站点 `showCoverImages:false` 本然一致） |
+| **首页** | ① 终端徽章（ping 圆点 + `~` accent + `/ready-to-go` + 半透明 `$`）② glow 渐变大标题「Margin」 ③ 描述行（fg 75%）④ 作者 + 社交行（虚线下划线链接）⑤ **FEATURED** 小节（大写 accent 标题 ★ + 横线）= featured 琥珀 tint 卡 ⑥ **RECENT** 小节（横线 + `[n/total]` 等宽计数，总数走 stats 动态读取，D66）= 纯文字卡列表（单列，D66 对齐 margin `f78b4cd`）⑦ 「查看全部文章」outline CTA（→ 归档）⑧ 底部留白。**hero 整体居中**（徽章/标题/描述/作者行/社交行，D66 对齐 margin `8ee7572`；站点 hero 里的 IntroAudio 播放器端上没有，D6/D7）。无 banner 图、无搜索框（搜索在顶栏放大镜，M4 页）；文章卡无图（站点 `showCoverImages:false` 本然一致） |
 | **标签** | aurora hero 容器（`~ ls -la $` 徽章 + glow 标题「Tags」+ 斜体描述 + 统计 hero-badge ×2）+ tag 卡双列网格（`surface-2` 底 + fg 6% 描边 + rounded-2xl：标签名 + 「N 篇」；按压 = accent 30% 描边 + accent 4% 底） |
 | **图库** | aurora hero（同构，标题「Galleries」）+ 画廊卡双列（cover `aspect-video` + 底部名称/描述浮层；gallery 紫罗兰 tint 描边）+ 筛选胶囊（全部 + 画廊名 + 照片数） |
 | **瞬间** | aurora hero（标题「Moments」）+ 月份导航（端上组件：细边框容器 + 左右箭头 + 月份格，选中 = accent 底）+ 瞬间卡（日期 + featured ★ + 正文 + 1/2/3 列图网格 + tag pill；margin 卡规格） |
@@ -75,12 +76,12 @@
 | --- | --- |
 | 列表入场 | 逐项错峰上浮（`delay = index × 50ms`，封顶 300ms） |
 | 按压态 | margin hover 抬升/描边accent → 端上 pressed：`border-color: accent 30%` + `bg: accent 4%`（卡片）；`opacity 0.7`（按钮/行） |
-| 下拉刷新 / 上拉加载 | 页面级 `enablePullDownRefresh`；`onReachBottom` 触发切片加载，无更多 toast |
-| 图片预览 | `Taro.previewImage({ current, urls, indicator: 'number', loop: true })` |
-| 长按图片 | 转发 / 保存到相册（需隐私指引 + `openSetting` 容错） |
+| 下拉刷新 / 上拉加载 | 页面级 `enablePullDownRefresh`；`onReachBottom` 触发切片加载，无更多 toast（**规划项，当前各页未启用**） |
+| 图片预览 | `Taro.previewImage({ current, urls })`（weapp 无 indicator/loop 参数），取 `src` 最大档（D39/D51） |
+| 长按图片 | 系统菜单（`show-menu-by-longpress`）：转发 / 保存图片 / 收藏，权限与兜底由微信负责（D39；隐私指引仍需声明「相册仅写入」） |
 | 主题 | 跟随系统 + 偏好覆盖；margin 双主题令牌原值 |
 | accent | 偏好页五色圆点选择器（同 margin accent-dots 形态），即点即换 |
-| 分享 | `onShareAppMessage` 用 OG 图（`/posts/<slug>/index.png`）；朋友圈同图 |
+| 分享 | **不传 imageUrl**，走微信默认页面截图（OG 1200×630 在 5:4 / 1:1 显示位会被裁成残图，D37 真机验收通过） |
 | 返回顶部 | 滚动超一屏出现，margin BackToTopButton 形态（细边框圆钮 + accent 箭头） |
 | 空态 | 区分「未输入」与「无结果」；margin EmptyState 文案风格 |
 | 导航 | 顶栏滚动态：bg → `surface` + 发丝线；标题居中 |
@@ -96,7 +97,7 @@
 | 元素 | margin 源码 | 端上实现 |
 | --- | --- | --- |
 | 网格底纹 | 两方向 `linear-gradient` 50px 格，accent 3.5% + 径向 mask 渐隐 | WXSS 原样（rgba 逗号写法）；`-webkit-mask-image` 不支持机型降级为均匀 3% |
-| 颗粒噪点 | SVG feTurbulence data-URI 200px 平铺 | **预渲染 200px PNG tile（几 KB）打包**平铺 + 低透明度；WXSS 对 SVG data-URI 支持不稳，不赌 |
+| 颗粒噪点 | SVG feTurbulence data-URI 200px 平铺 | **预渲染 64px PNG tile（≈2KB，小 tile 平铺无观感差异，D24）打包**平铺 + 低透明度；WXSS 对 SVG data-URI 支持不稳，不赌 |
 | aurora 光球 | 三个 radial-gradient 圆球 `blur(60px)` + 位移动画 | **预渲染模糊 PNG**（构建期 sharp 生成，每主题一套或中性色）+ transform 位移动画；禁大半径运行时 `filter: blur`（安卓掉帧） |
 | 光标光晕 | 鼠标跟随 800px 径向渐变 | **删除**（触屏无对应物，D7） |
 | glow 标题 | 135° 渐变 text + drop-shadow | `-webkit-background-clip: text` + 透明字（iOS/安卓新内核可用）；降级 = 纯 `--c-fg` |
@@ -120,11 +121,13 @@
 
 ## 8. 打样清单（M1-b 视觉基线，6 项全过才进 M2）
 
+> **状态：✅ 已执行完毕**（模拟器 2026-10-06 D27 + 真机复核 2026-10-06 D28）；第 3 项对比度按拍板**口径 A：装饰性小件 ≥3，保 margin 原值**判 PASS（D27）；第 5 项站点字体在 D58 落地后可验（D75 起默认开启）。本清单保留作历史记录。
+
 | # | 打样项 | 通过判据 |
 | --- | --- | --- |
 | 1 | 浅色令牌 | 与 margin 线上站（DevTools 移动视口）逐屏对照，四类色无明显偏差 |
 | 2 | 暗色令牌 | margin 暗色稿对照；featured/gallery 语义色随主题正确轮转 |
-| 3 | accent 五套 | 偏好切换即点即生效；五套 × 明暗十组对比度抽查 ≥4.5:1 |
+| 3 | accent 五套 | 偏好切换即点即生效；五套 × 明暗十组对比度 ≥3:1（口径 A，D27） |
 | 4 | tabBar margin 皮 | 细边框 + 线性图标 + accent 选中；明暗三态；内联样式无变量依赖 |
 | 5 | 字体换装 | 偏好开启后 Maple Mono 生效；断网/失败静默回落系统栈；TTI 无回退 |
 | 6 | 装饰层降级 | 无 mask / 无 background-clip:text 机型：网格均匀化、glow 标题纯色，可读无破相 |
@@ -135,16 +138,16 @@
 | --- | --- | --- |
 | 快捷键 / 命令面板 / ShortcutsPanel | 抛弃 | D7 |
 | TTS 朗读（Web Speech） | 抛弃（二期可评估同声传译插件） | D7 |
-| giscus 评论 | 抛弃（个人主体无 web-view；二期云开发另议） | D7/D8 |
+| giscus 评论 | 抛弃（个人主体无 web-view；云开发已整体砍掉 D73） | D7/D8/D73 |
 | LOFI 电台播放器 | 删除（境外流进不了合法域名白名单） | D6 |
 | 编辑本文 / RSS 订阅跳转 | 改「复制链接」 | D8 外链口径 |
 | 光标光晕 / 鼠标跟随 aurora | 删除（触屏无对应物；卡片内 aurora 改按压态显形） | D7 |
 | Pagefind 搜索 UI | 换端上双层检索页（M4），皮按 margin 搜索样式 | §6.2 |
 | 沉浸阅读模式（`r` 键） | 转偏好开关 | M2 |
-| 瞬间发布入口 / 点赞云同步 | 一期隐藏/本地；二期 | D8 |
+| 瞬间发布入口 / 点赞云同步 | 点赞/评论/云同步**永久砍掉（D73，全站只读）**；瞬间发布走 margin 站点既有链路，端上只读 | D8/D73 |
 | 标签彩色块（旧 D45 色板视觉） | 不用（margin 标签卡 = 细边框 + accent 交互）；契约三色字段保留不消费 | D14 |
 
-## 10. M1-b 执行清单（照此顺序执行；每步含验收）
+## 10. M1-b 执行清单（✅ 已完结：代码侧 D25、打样 D27/D28；保留作历史记录）
 
 > 数据接线（services/hooks/useCollection/types/CacheImage/Block 渲染器机制）**全程不动**，只换视图层。所有样式数值以本文档与 margin 源码为准；两条铁律贯穿：**custom-tab-bar 内禁用 CSS 变量做关键视觉（内联 style，D19）**；**rgba 逗号写法、color-mix 预计算、@supports 裸声明（D20）**。
 
@@ -162,4 +165,4 @@
 | 10 | 字体管线 | 端上：`loadSiteFont()`（loadFontFace global:true，成功/失败各打点，失败静默）；margin 侧：常用字子集 woff2 → `public/fonts/` + `_headers` 仅对 `/fonts/*` 加 `Access-Control-Allow-Origin: *`（走 margin 仓库评审）；偏好开关 UI 可先落 M2 | 打样第 5 项过 |
 | 11 | 打样验证 | design.md §8 六项全过 → 视觉基线宣告；真机复核滚动保留/存储/TTI 无回退 | §8 表全绿 |
 
-**占位与待定**：首页 `announcement` 条在 margin 首页无对应物——暂不渲染，数据字段保留（Q 待用户决定是否做成 margin 风格终端徽章行）；技能跑马灯/MBTI 等关于页重装饰项属 M4「关于」页范围，不阻塞 M1-b；accent 浅色对比度口径 Q（green 3.14 / orange 3.23 / rose 4.38 < 4.5:1，margin 原值即如此，建议按 requirements §10「装饰性小件 ≥3」口径判）——待用户拍板，处置见 decisions D26。
+**占位与待定（均已关闭）**：首页 `announcement` 条 Q 已关闭——margin 导出层恒 null（源侧 D20/D32 决定），端上不渲染即正确行为（D58）；accent 浅色对比度口径 Q 已拍板 = **口径 A（装饰性小件 ≥3，保 margin 原值，D27）**；关于页重装饰项已随 M4 步 5 落地（D64）。
