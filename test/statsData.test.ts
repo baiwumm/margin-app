@@ -12,8 +12,11 @@ import {
 const key = (y: number, m: number, d: number) =>
   `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 
-/** 测试锚定日期（2026-10-14 周三）——fullHeatmap 的 now 注入，防真实时钟漂移 */
-const NOW = new Date("2026-10-14T00:00:00+08:00");
+/** 测试锚定日期 = 本地墙钟 2026-10-14（周三）零点 —— 用本地分量构造，
+ *  任何运行时区下 fullHeatmap 的「今天」都是 10-14。别改回 ISO instant
+ *  （"…T00:00:00+08:00"）：CI（UTC）与本机（UTC+8）各自按本地日历取
+ *  「今天」，instant 锚点会漂移一天（CI 首跑翻车教训，2026-10-17）。 */
+const NOW = new Date(2026, 9, 14);
 
 describe("fullHeatmap（全时段热力图网格）", () => {
   it("空输入 → 空网格", () => {
@@ -105,22 +108,39 @@ describe("fullHeatmap（全时段热力图网格）", () => {
 });
 
 describe("monthlyPosts / postsByYear（发文节奏）", () => {
-  it("按月聚合 + 按年铺 12 格", () => {
+  it("按月聚合 + 按年铺 12 格（月中时刻 ⇒ ±1 天时区偏移不出月，断言时区无关）", () => {
     const posts = [
       { pubDatetime: "2026-01-05T10:00:00+08:00" },
       { pubDatetime: "2026-01-20T10:00:00+08:00" },
       { pubDatetime: "2026-03-11T10:00:00+08:00" },
-      { pubDatetime: "2025-12-31T16:00:00Z" }, // UTC 午夜档 → 本地 2026-01-01
     ];
     const byMonth = monthlyPosts(posts);
-    // 独立期望：2026-01 共 3 篇（含午夜档那篇）、2026-03 一篇
-    expect(byMonth.get("2026-01")).toBe(3);
+    expect(byMonth.get("2026-01")).toBe(2);
     expect(byMonth.get("2026-03")).toBe(1);
     const years = postsByYear(byMonth);
     expect(years.map(y => y.year)).toEqual([2026]);
-    expect(years[0].months[0]).toBe(3); // 1 月
+    expect(years[0].months[0]).toBe(2); // 1 月
     expect(years[0].months[2]).toBe(1); // 3 月
     expect(years[0].months[11]).toBe(0); // 12 月补 0
+  });
+
+  it("午夜档（UTC 16:00 = 东八次日零点）按设备本地口径归次日（D60）", ctx => {
+    // monthlyPosts 的口径 = 设备本地（D62），午夜档语义只能在已知时区下断言：
+    // 运行时钉 UTC+8；环境改不动 TZ（Node <21 的 Windows 等）则跳过本条，
+    // 其余断言全部不依赖时区。
+    const orig = process.env.TZ;
+    try {
+      process.env.TZ = "Asia/Shanghai";
+      const pinned =
+        Intl.DateTimeFormat().resolvedOptions().timeZone === "Asia/Shanghai";
+      if (!pinned) return ctx.skip();
+      const byMonth = monthlyPosts([{ pubDatetime: "2025-12-31T16:00:00Z" }]);
+      expect(byMonth.get("2026-01")).toBe(1);
+      expect(byMonth.has("2025-12")).toBe(false);
+    } finally {
+      if (orig === undefined) delete process.env.TZ;
+      else process.env.TZ = orig;
+    }
   });
 });
 
