@@ -2,6 +2,14 @@
 
 [Margin 博客](https://www.baiwumm.com/)（白雾茫茫丶的个人技术站点）的微信小程序阅读端。Taro 4 + React + TypeScript，内容源为 margin 站点构建期导出的静态 JSON（`/api/v1/**`，13 端点），端上零后端、全只读。
 
+## 扫码体验
+
+小程序已发布上线，微信扫码即可访问：
+
+| 微信小程序 | 微信公众号 |
+| --- | --- |
+| ![微信小程序码](docs/images/miniprogram-qr.jpg) | ![微信公众号二维码](docs/images/official-account-qr.jpg) |
+
 ## 功能
 
 - **五个 tab**：首页 / 标签 / 图库 / 瞬间 / 我的（自定义 tabBar，切换保留滚动位置）
