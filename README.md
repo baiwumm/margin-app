@@ -2,6 +2,8 @@
 
 [Margin 博客](https://www.baiwumm.com/)（白雾茫茫丶的个人技术站点）的微信小程序阅读端。Taro 4 + React + TypeScript，内容源为 margin 站点构建期导出的静态 JSON（`/api/v1/**`，13 端点），端上零后端、全只读。
 
+> 版本口径：小程序 2.x 与站点 v1.x 两轴独立演进；接口兼容以站点 API v1 契约为准（`schemaVersion: 1`，冻结，只允许加性可选字段）。
+
 [![CI](https://github.com/baiwumm/margin-app/actions/workflows/ci.yml/badge.svg)](https://github.com/baiwumm/margin-app/actions/workflows/ci.yml)
 ![License](https://img.shields.io/badge/license-MIT-1f9d63)
 ![Taro](https://img.shields.io/badge/Taro-4.2-193b8a)

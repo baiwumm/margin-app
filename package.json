@@ -14,6 +14,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/ config/ test/ --fix && eslint src/ config/ test/",
+    "release": "release-it",
     "taro": "taro"
   },
   "browserslist": [
@@ -40,6 +41,7 @@
     "@babel/preset-react": "^8.0.1",
     "@babel/preset-typescript": "^8.0.1",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
+    "@release-it/conventional-changelog": "^11.0.1",
     "@tarojs/cli": "4.2.1",
     "@tarojs/webpack5-runner": "4.2.1",
     "@types/node": "^20.12.7",
@@ -54,6 +56,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "postcss": "^8.4.38",
     "react-refresh": "^0.14.0",
+    "release-it": "^20.2.1",
     "tailwindcss": "4.3.3",
     "typescript": "^5.4.5",
     "vitest": "^1.5.0",

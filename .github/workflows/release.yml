@@ -1,0 +1,105 @@
+name: Release
+
+# ── 发版流程（一键远程发版，workflow_dispatch，请在 main 上触发）──────────────
+# CI 先跑 lint / typecheck / test / build 四闸门预检，任一失败即中止、不产生任何
+# 提交；通过后由 release-it 一次性完成 版本号 → CHANGELOG.md → Release 提交 →
+# tag → GitHub Release（直接发布，非草稿），发布说明由 conventional-changelog
+# 按提交记录自动按类型分组生成。
+#
+# 发版不等于上线：微信小程序的 上传 → 提审 → 发布 是平台强制的人工闸门，
+# Release 完成后的人工两步——
+#   1. DevTools 上传（版本号照抄 package.json / Release 的版本号）；
+#   2. MP 后台提审 → 审核通过后点「发布」。
+#
+# 触发方式（二选一）：
+#   · GitHub Actions 页面 → Release → Run workflow：选 patch / minor / major，
+#     或直接填自定义版本号；
+#   · gh workflow run release.yml -f bump=minor（自定义版本号用 -f version=v2.1.0）。
+#
+# 设计取舍：
+#   · 版本真源是根 package.json（release-it bump），tag 由它生成，天然不存在
+#     「tag 与 package.json 版本不一致」问题，因此无需 tag 校验步骤；
+#   · tag 带 v 前缀（.release-it.json 的 git.tagName 显式锁定），与 margin 仓同款
+#     release-it 配置（同版本依赖，双语 CHANGELOG 小节逐字一致）；
+#   · 发布说明不人工编辑：按 Conventional Commits 自动分组（见 .release-it.json）；
+#   · 刻意不做 miniprogram-ci 自动上传体验版：GitHub 托管 runner IP 动态，上传
+#     私钥的 IP 白名单只能关闭，安全代价大于单人低频发版的收益（D73「减少运维」
+#     同口径，D79 记档）；
+#   · 由 GITHUB_TOKEN 推送的提交与 tag 不会连带触发其他 workflow；
+#   · 权限仅 contents: write，最小化授权。
+#
+# 本地仍可 `pnpm release`（需本地 GITHUB_TOKEN），与 CI 共用 .release-it.json，行为一致。
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 版本类型
+        type: choice
+        required: true
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
+      version:
+        description: 自定义版本号（选填，填写后覆盖版本类型，如 v2.1.0）
+        type: string
+        required: false
+
+permissions:
+  contents: write # release-it 需要推送 Release 提交与 tag，并创建 GitHub Release
+
+concurrency:
+  group: release # 同一时刻只允许一个发版流程排队
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Lint & Typecheck & Test & Build & Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # release-it 需要完整 tag 历史来计算上一版本与 CHANGELOG 区间
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v6 # 版本取自 package.json 的 packageManager 字段
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24 # 与 ci.yml 对齐
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build:weapp
+
+      - name: Configure git author
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BUMP: ${{ inputs.bump }}
+          CUSTOM_VERSION: ${{ inputs.version }}
+        run: |
+          INCREMENT="${CUSTOM_VERSION:-$BUMP}"
+          INCREMENT="${INCREMENT#v}" # 容忍 v 前缀写法，release-it 接受纯版本号
+          echo "发版增量：${INCREMENT}"
+          # 不用 `pnpm release -- ...`：pnpm 会把 -- 原样透传给脚本，release-it 会误当成版本参数
+          pnpm exec release-it "$INCREMENT" --ci
