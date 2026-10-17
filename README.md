@@ -58,3 +58,7 @@ pnpm build:weapp    # 生产构建
 ## 相关仓库
 
 - [margin](https://github.com/baiwumm/margin) —— 站点本体（Astro SSG + Cloudflare），内容、设计与 API 契约的唯一事实源
+
+## 许可证
+
+[MIT](LICENSE) © baiwumm
