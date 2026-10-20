@@ -56,11 +56,11 @@ const TABS = [
  * 与 tokens.css 预计算值一致——本组件内不可用 var，故按主题落死 */
 const BAR = {
   light: {
-    backgroundColor: "#ecefe7", // --c-surface
+    backgroundColor: "#efefed", // --c-surface
     borderTop: "1rpx solid rgba(124, 173, 255, 0.2)", // --c-border-20
   },
   dark: {
-    backgroundColor: "#171a21",
+    backgroundColor: "#121212",
     borderTop: "1rpx solid rgba(34, 100, 227, 0.2)",
   },
 } as const;

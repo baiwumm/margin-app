@@ -11,33 +11,33 @@
 
 page,
 .theme-light {
-  --c-bg: #f2f5ec;
-  --c-fg: #353538;
-  --c-fg-mid: rgba(53, 53, 56, 0.6);
-  --c-fg-75: rgba(53, 53, 56, 0.75);
-  --c-fg-55: rgba(53, 53, 56, 0.55);
-  --c-fg-50: rgba(53, 53, 56, 0.5);
-  --c-fg-45: rgba(53, 53, 56, 0.45);
-  --c-fg-16: rgba(53, 53, 56, 0.16); /* 热力图空格（margin gh-level-0 = fg 16% + bg） */
-  --c-fg-6: rgba(53, 53, 56, 0.06);
-  --c-fg-5: rgba(53, 53, 56, 0.05);
-  --c-fg-4: rgba(53, 53, 56, 0.04);
-  --c-muted: #bbc789;
-  --c-muted-10: rgba(187, 199, 137, 0.1);
-  --c-muted-12: rgba(187, 199, 137, 0.12);
-  --c-muted-15: rgba(187, 199, 137, 0.15);
-  --c-muted-20: rgba(187, 199, 137, 0.2);
-  --c-muted-25: rgba(187, 199, 137, 0.25);
+  --c-bg: #f5f5f3;
+  --c-fg: #303036;
+  --c-fg-mid: rgba(48, 48, 54, 0.6);
+  --c-fg-75: rgba(48, 48, 54, 0.75);
+  --c-fg-55: rgba(48, 48, 54, 0.55);
+  --c-fg-50: rgba(48, 48, 54, 0.5);
+  --c-fg-45: rgba(48, 48, 54, 0.45);
+  --c-fg-16: rgba(48, 48, 54, 0.16); /* 热力图空格（margin gh-level-0 = fg 16% + bg） */
+  --c-fg-6: rgba(48, 48, 54, 0.06);
+  --c-fg-5: rgba(48, 48, 54, 0.05);
+  --c-fg-4: rgba(48, 48, 54, 0.04);
+  --c-muted: #e4e4e1;
+  --c-muted-10: rgba(228, 228, 225, 0.1);
+  --c-muted-12: rgba(228, 228, 225, 0.12);
+  --c-muted-15: rgba(228, 228, 225, 0.15);
+  --c-muted-20: rgba(228, 228, 225, 0.2);
+  --c-muted-25: rgba(228, 228, 225, 0.25);
   --c-border: #7cadff;
   --c-border-20: rgba(124, 173, 255, 0.2);
   --c-border-25: rgba(124, 173, 255, 0.25);
   --c-border-30: rgba(124, 173, 255, 0.3);
   --c-border-35: rgba(124, 173, 255, 0.35);
   --c-border-40: rgba(124, 173, 255, 0.4);
-  --c-surface: #ecefe7;
-  --c-surface-2: #eef1e8;
+  --c-surface: #efefed;
+  --c-surface-2: #f1f1ef;
   --c-accent: #1158d1;
-  --c-accent-mix: #234785; /* glow 渐变中点（accent 50% fg，sRGB 预算） */
+  --c-accent-mix: #214484; /* glow 渐变中点（accent 50% fg，sRGB 预算） */
   --c-accent-4: rgba(17, 88, 209, 0.04);
   --c-accent-8: rgba(17, 88, 209, 0.08);
   --c-accent-10: rgba(17, 88, 209, 0.1);
@@ -69,7 +69,7 @@ page,
 /* 跟随系统暗色（app.config darkmode:true）；.theme-dark = 偏好强制（M2 接线） */
 @media (prefers-color-scheme: dark) {
   page {
-  --c-bg: #10131a;
+  --c-bg: #0b0b0b;
   --c-fg: #f6f7f8;
   --c-fg-mid: rgba(246, 247, 248, 0.6);
   --c-fg-75: rgba(246, 247, 248, 0.75);
@@ -80,20 +80,20 @@ page,
   --c-fg-6: rgba(246, 247, 248, 0.06);
   --c-fg-5: rgba(246, 247, 248, 0.05);
   --c-fg-4: rgba(246, 247, 248, 0.04);
-  --c-muted: #212f3f;
-  --c-muted-10: rgba(33, 47, 63, 0.1);
-  --c-muted-12: rgba(33, 47, 63, 0.12);
-  --c-muted-15: rgba(33, 47, 63, 0.15);
-  --c-muted-20: rgba(33, 47, 63, 0.2);
-  --c-muted-25: rgba(33, 47, 63, 0.25);
+  --c-muted: #1a1d22;
+  --c-muted-10: rgba(26, 29, 34, 0.1);
+  --c-muted-12: rgba(26, 29, 34, 0.12);
+  --c-muted-15: rgba(26, 29, 34, 0.15);
+  --c-muted-20: rgba(26, 29, 34, 0.2);
+  --c-muted-25: rgba(26, 29, 34, 0.25);
   --c-border: #2264e3;
   --c-border-20: rgba(34, 100, 227, 0.2);
   --c-border-25: rgba(34, 100, 227, 0.25);
   --c-border-30: rgba(34, 100, 227, 0.3);
   --c-border-35: rgba(34, 100, 227, 0.35);
   --c-border-40: rgba(34, 100, 227, 0.4);
-  --c-surface: #171a21;
-  --c-surface-2: #15181e;
+  --c-surface: #121212;
+  --c-surface-2: #101010;
   --c-accent: #008fec;
   --c-accent-mix: #7bc3f2; /* glow 渐变中点（accent 50% fg，sRGB 预算） */
   --c-accent-4: rgba(0, 143, 236, 0.04);
@@ -126,7 +126,7 @@ page,
 }
 
 .theme-dark {
-  --c-bg: #10131a;
+  --c-bg: #0b0b0b;
   --c-fg: #f6f7f8;
   --c-fg-mid: rgba(246, 247, 248, 0.6);
   --c-fg-75: rgba(246, 247, 248, 0.75);
@@ -137,20 +137,20 @@ page,
   --c-fg-6: rgba(246, 247, 248, 0.06);
   --c-fg-5: rgba(246, 247, 248, 0.05);
   --c-fg-4: rgba(246, 247, 248, 0.04);
-  --c-muted: #212f3f;
-  --c-muted-10: rgba(33, 47, 63, 0.1);
-  --c-muted-12: rgba(33, 47, 63, 0.12);
-  --c-muted-15: rgba(33, 47, 63, 0.15);
-  --c-muted-20: rgba(33, 47, 63, 0.2);
-  --c-muted-25: rgba(33, 47, 63, 0.25);
+  --c-muted: #1a1d22;
+  --c-muted-10: rgba(26, 29, 34, 0.1);
+  --c-muted-12: rgba(26, 29, 34, 0.12);
+  --c-muted-15: rgba(26, 29, 34, 0.15);
+  --c-muted-20: rgba(26, 29, 34, 0.2);
+  --c-muted-25: rgba(26, 29, 34, 0.25);
   --c-border: #2264e3;
   --c-border-20: rgba(34, 100, 227, 0.2);
   --c-border-25: rgba(34, 100, 227, 0.25);
   --c-border-30: rgba(34, 100, 227, 0.3);
   --c-border-35: rgba(34, 100, 227, 0.35);
   --c-border-40: rgba(34, 100, 227, 0.4);
-  --c-surface: #171a21;
-  --c-surface-2: #15181e;
+  --c-surface: #121212;
+  --c-surface-2: #101010;
   --c-accent: #008fec;
   --c-accent-mix: #7bc3f2; /* glow 渐变中点（accent 50% fg，sRGB 预算） */
   --c-accent-4: rgba(0, 143, 236, 0.04);
@@ -184,7 +184,7 @@ page,
 /* accent green（light）#1f9d63 / #34d399 */
 .accent-green {
   --c-accent: #1f9d63;
-  --c-accent-mix: #2a694e; /* glow 渐变中点（accent 50% fg，sRGB 预算） */
+  --c-accent-mix: #28674d; /* glow 渐变中点（accent 50% fg，sRGB 预算） */
   --c-accent-4: rgba(31, 157, 99, 0.04);
   --c-accent-8: rgba(31, 157, 99, 0.08);
   --c-accent-10: rgba(31, 157, 99, 0.1);
@@ -216,7 +216,7 @@ page,
 /* accent purple（light）#7c3aed / #a78bfa */
 .accent-purple {
   --c-accent: #7c3aed;
-  --c-accent-mix: #593893; /* glow 渐变中点（accent 50% fg，sRGB 预算） */
+  --c-accent-mix: #563592; /* glow 渐变中点（accent 50% fg，sRGB 预算） */
   --c-accent-4: rgba(124, 58, 237, 0.04);
   --c-accent-8: rgba(124, 58, 237, 0.08);
   --c-accent-10: rgba(124, 58, 237, 0.1);
@@ -248,7 +248,7 @@ page,
 /* accent orange（light）#ea580c / #fb923c */
 .accent-orange {
   --c-accent: #ea580c;
-  --c-accent-mix: #904722; /* glow 渐变中点（accent 50% fg，sRGB 预算） */
+  --c-accent-mix: #8d4421; /* glow 渐变中点（accent 50% fg，sRGB 预算） */
   --c-accent-4: rgba(234, 88, 12, 0.04);
   --c-accent-8: rgba(234, 88, 12, 0.08);
   --c-accent-10: rgba(234, 88, 12, 0.1);
@@ -280,7 +280,7 @@ page,
 /* accent rose（light）#dc2626 / #f87171 */
 .accent-rose {
   --c-accent: #dc2626;
-  --c-accent-mix: #892e2f; /* glow 渐变中点（accent 50% fg，sRGB 预算） */
+  --c-accent-mix: #862b2e; /* glow 渐变中点（accent 50% fg，sRGB 预算） */
   --c-accent-4: rgba(220, 38, 38, 0.04);
   --c-accent-8: rgba(220, 38, 38, 0.08);
   --c-accent-10: rgba(220, 38, 38, 0.1);

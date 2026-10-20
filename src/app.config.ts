@@ -49,7 +49,7 @@ export default defineAppConfig({
   },
   window: {
     backgroundTextStyle: "light",
-    navigationBarBackgroundColor: "#F2F5EC", // margin --background 浅色原值
+    navigationBarBackgroundColor: "#F5F5F3", // margin --background 浅色原值
     navigationBarTitleText: "Margin",
     navigationBarTextStyle: "black",
     navigationStyle: "custom", // design.md §3：全部页面自定义导航
@@ -59,9 +59,9 @@ export default defineAppConfig({
   // 色值 = margin 令牌（fg / accent blue / bg）
   tabBar: {
     custom: true,
-    color: "#353538",
+    color: "#303036",
     selectedColor: "#1158d1",
-    backgroundColor: "#f2f5ec",
+    backgroundColor: "#f5f5f3",
     borderStyle: "white",
     list: [
       { pagePath: "pages/home/index", text: "首页" },

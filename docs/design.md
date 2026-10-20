@@ -16,28 +16,28 @@
 
 ```css
 /* ── 浅色（margin :root / [data-theme=light]）── */
---c-bg: #f2f5ec;            /* 页面底 */
---c-fg: #353538;            /* 正文 */
---c-fg-mid: rgba(53, 53, 56, 0.6);     /* muted-foreground = fg 60% */
+--c-bg: #f5f5f3;            /* 页面底 */
+--c-fg: #303036;            /* 正文 */
+--c-fg-mid: rgba(48, 48, 54, 0.6);     /* muted-foreground = fg 60% */
 --c-accent: #1158d1;        /* accent（blue 套） */
---c-muted: #bbc789;         /* 滚动条/弱强调 */
+--c-muted: #e4e4e1;         /* 滚动条/弱强调 */
 --c-border: #7cadff;        /* 描边基色（一律低透明度使用） */
 --c-featured: #b56007;      /* 精选语义色（琥珀） */
 --c-gallery: #6d28d9;       /* 画廊语义色（紫罗兰） */
---c-surface: #ecefe7;       /* 卡面 = fg 3% 混 bg（预计算） */
---c-surface-2: #eef1e8;     /* 次级卡面 = fg 2% 混 bg（预计算） */
+--c-surface: #efefed;       /* 卡面 = fg 3% 混 bg（预计算） */
+--c-surface-2: #f1f1ef;     /* 次级卡面 = fg 2% 混 bg（预计算） */
 
 /* ── 暗色（margin [data-theme=dark]）── */
---c-bg: #10131a;
+--c-bg: #0b0b0b;
 --c-fg: #f6f7f8;
 --c-fg-mid: rgba(246, 247, 248, 0.6);
 --c-accent: #008fec;
---c-muted: #212f3f;
+--c-muted: #1a1d22;
 --c-border: #2264e3;
 --c-featured: #f59e0b;
 --c-gallery: #a855f7;
---c-surface: #171a21;       /* fg 3% 混 bg（预计算） */
---c-surface-2: #15181e;
+--c-surface: #121212;       /* fg 3% 混 bg（预计算） */
+--c-surface-2: #101010;
 
 /* ── accent 五套（D5 偏好项，浅色值 / 暗色值）──
    blue   #1158d1 / #008fec   （默认）
@@ -153,7 +153,7 @@
 
 | 步 | 内容 | 要点 | 验收 |
 | --- | --- | --- | --- |
-| 1 | `src/styles/tokens.css` 全量重写 | §2 令牌表落死（主令牌 = margin 原值；预计算值 `--c-surface #ecefe7/#171a21`、`--c-surface-2 #eef1e8/#15181e`、`--c-fg-mid`）；**accent 五套变量组**（`[data-accent="green"]` 等覆盖 `--c-accent/--c-featured/--c-gallery`，轮转表抄 margin global.css `html[data-accent=…]` 块）；暗色 media 块 + `.theme-dark` 类同步 | 四类色（bg/fg/accent/语义）与 margin 线上站一致；tsc/build 过 |
+| 1 | `src/styles/tokens.css` 全量重写 | §2 令牌表落死（主令牌 = margin 原值；预计算值，2026-10-20 已随站点终端风更新为 `--c-surface #efefed/#121212`、`--c-surface-2 #f1f1ef/#101010`，见 §2）；**accent 五套变量组**（`[data-accent="green"]` 等覆盖 `--c-accent/--c-featured/--c-gallery`，轮转表抄 margin global.css `html[data-accent=…]` 块）；暗色 media 块 + `.theme-dark` 类同步 | 四类色（bg/fg/accent/语义）与 margin 线上站一致；tsc/build 过 |
 | 2 | `src/app.scss` 共享件换皮 | `page` 底色/字体栈换 margin；`.section-head` 重做为 §3 的「大写 accent 小节标题 + 横线 + 可选 `[n/m]` 计数」；删除柠檬绿垫块 `::after`；`.empty` 文案改 margin 风格；`rise-in` 动画保留 | 首页小节标题形态 = margin FEATURED/RECENT |
 | 3 | `src/app.config.ts` | `window.navigationBarBackgroundColor` → `#F2F5EC`；tabBar 原生兜底字段（不渲染但要有）：color `#353538`/selectedColor `#1158d1`/backgroundColor `#f2f5ec` | DevTools 无告警 |
 | 4 | 资产管线 | sharp 脚本（可用 margin 仓库 `node_modules/sharp` 经 NODE_PATH 运行，或 devDependency）：① tabbar 图标 5 枚 × {normal fg 55% / active fg 100%} × 明暗 = 20 PNG（81px，字形取 margin `src/assets/icons/Icon*.svg` 同族线性风，home/moment/user 三个缺的字形按同风格补画：24×24、stroke 2、round cap）；② logo `mark.svg`→PNG（accent 蓝 + fg 两版）与 `margin.svg` 字标→PNG（fg 两版）；③ 噪点 tile 200px PNG（feTurbulence 同款参数预渲染）；④ aurora 光球模糊 PNG（radial 渐变预模糊，中性色可两主题共用） | PNG 落 `src/assets/`；单枚 ≤2KB |
