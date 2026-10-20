@@ -175,7 +175,7 @@
 }
 
 /* ── 代码块外壳（.astro-code = border + shiki 背景；行号/角标/复制条为端上形态）
-      token 配色由 M2 步 5 接 manifest codeColors，当前为单色 ───────────────── */
+     Mac 窗口风格标题栏：红黄绿灯 + 语言 + 文件名 + 复制，与站点 .code-window 同语言 ── */
 .code-block {
   margin: 1.5em 0;
   border: 1rpx solid var(--c-border-20);
@@ -183,21 +183,43 @@
   background-color: var(--c-surface-2);
   overflow: hidden;
 }
+/* 栏高 = 站点 36px × 2；左缩进对齐站点 18px 起排灯 */
 .code-block-head {
   display: flex;
   align-items: center;
   gap: 16rpx;
-  padding: 16rpx 24rpx;
+  height: 72rpx;
+  padding: 0 24rpx 0 36rpx;
   border-bottom: 1rpx solid var(--c-border-20);
   background-color: var(--c-surface);
   font-family: var(--font-mono);
   font-size: var(--fs-cap);
   color: var(--c-fg-mid);
 }
+/* 红黄绿灯：真实元素 + border-radius（不用渐变硬边，边缘抗锯齿干净；色值同站点） */
+.traffic-lights {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex-shrink: 0;
+}
+.tl-dot {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+}
+.tl-dot-red {
+  background-color: #ff5f57;
+}
+.tl-dot-yellow {
+  background-color: #febc2e;
+}
+.tl-dot-green {
+  background-color: #28c840;
+}
 .code-block-lang {
-  color: var(--c-accent);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  flex-shrink: 0;
+  color: var(--c-fg-mid);
 }
 .code-block-file {
   flex: 1;
@@ -211,9 +233,10 @@
   flex-shrink: 0;
   margin-left: auto;
   padding: 4rpx 20rpx;
-  border: 1rpx solid var(--c-accent-30);
+  border: 1rpx solid var(--c-muted);
   border-radius: var(--r-full);
-  color: var(--c-accent);
+  background-color: var(--c-muted);
+  color: var(--c-fg);
 }
 .code-block-body {
   width: 100%;

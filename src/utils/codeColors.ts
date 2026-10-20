@@ -20,11 +20,12 @@ export function readCodeColors(manifest: Manifest | null | undefined): CodeColor
 /**
  * Shiki 代码块底色/默认字色，取线上 `<pre class="astro-code ...">` 的
  * `--shiki-light-bg / --shiki-dark-bg / --shiki-light / --shiki-dark` 实测原值
- * （主题对 = github-light / github-dark，markdown.ts:57）。
+ * （主题对 = one-light / one-dark-pro，margin astro.config shikiConfig；底色为站点
+ * typography.css 覆盖后的实测值：浅色白卡、暗色 #121212）。
  */
 export const SHIKI_SURFACE = {
-  light: { bg: "#ffffff", fg: "#24292e" },
-  dark: { bg: "#24292e", fg: "#e1e4e8" },
+  light: { bg: "#ffffff", fg: "#383a42" },
+  dark: { bg: "#121212", fg: "#abb2bf" },
 } as const;
 
 /** 索引 → 当前主题下的 CSS 颜色；单边缺失（空串）时返回 undefined 走默认字色 */

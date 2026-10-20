@@ -160,6 +160,11 @@ export function CodeBlock({ block }: { block: Extract<Block, { t: "code" }> }) {
   return (
     <View className={`code-block ${wrap ? "code-block-wrap" : ""}`}>
       <View className='code-block-head'>
+        <View className='traffic-lights'>
+          <View className='tl-dot tl-dot-red' />
+          <View className='tl-dot tl-dot-yellow' />
+          <View className='tl-dot tl-dot-green' />
+        </View>
         <View className='code-block-lang'>{block.lang ?? "text"}</View>
         {block.file ? (
           <View className='code-block-file'>{block.file}</View>
