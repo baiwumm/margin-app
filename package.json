@@ -1,7 +1,7 @@
 {
   "name": "margin-app",
   "packageManager": "pnpm@12.6.0",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "description": "Margin 博客小程序（Taro 4 + React + TS，内容源 margin 静态导出 API）",
   "templateInfo": {
